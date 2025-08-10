@@ -45,4 +45,13 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.lottie)
+    implementation(libs.circleimageview)
+
+    // Retrofit for networking
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    // Glide for loading images from a URL
+    implementation(libs.glide)
 }
