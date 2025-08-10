@@ -2,7 +2,7 @@ package com.rst.recipeappopsc6312
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-
+//
 @Parcelize
 data class RegistrationData(
     var country: String? = null,
