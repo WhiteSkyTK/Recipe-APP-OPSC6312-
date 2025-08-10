@@ -8,7 +8,7 @@
     android:background="@android:color/white"
     tools:context=".CuisineSelectionActivity">
 
-    <!-- Back Arrow and Progress Bar (similar to previous screen) -->
+    <!-- Back Arrow and Progress Bar  -->
     <ImageView
         android:id="@+id/imageViewBack"
         android:layout_width="wrap_content"
@@ -59,23 +59,34 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textViewTitle" />
 
+    <!-- Select All Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonSelectAll"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select All"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="@id/recyclerViewCuisines"
+        app:layout_constraintTop_toBottomOf="@id/textViewSubtitle"/>
+
     <!-- Grid of Cuisines -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewCuisines"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="3"
-        app:layout_constraintTop_toBottomOf="@id/textViewSubtitle"
+        app:layout_constraintTop_toBottomOf="@id/buttonSelectAll"
         app:layout_constraintBottom_toTopOf="@id/buttonContinue"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_cuisine" />
 
-    <!-- Buttons -->
+    <!-- Bottom Buttons -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonContinue"
         android:layout_width="0dp"

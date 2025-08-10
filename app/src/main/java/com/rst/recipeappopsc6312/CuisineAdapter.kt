@@ -18,12 +18,16 @@ class CuisineAdapter(private val cuisineList: List<Cuisine>) :
             itemView.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    val cuisine = cuisineList[position]
-                    cuisine.isSelected = !cuisine.isSelected
-                    itemView.isSelected = cuisine.isSelected
+                    toggleSelection(position)
                 }
             }
         }
+    }
+
+    private fun toggleSelection(position: Int) {
+        val cuisine = cuisineList[position]
+        cuisine.isSelected = !cuisine.isSelected
+        notifyItemChanged(position)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CuisineViewHolder {
@@ -42,5 +46,12 @@ class CuisineAdapter(private val cuisineList: List<Cuisine>) :
 
     fun getSelectedCuisines(): List<Cuisine> {
         return cuisineList.filter { it.isSelected }
+    }
+
+    fun selectAll(select: Boolean) {
+        for (cuisine in cuisineList) {
+            cuisine.isSelected = select
+        }
+        notifyDataSetChanged()
     }
 }
