@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="16dp"
+    android:background="@drawable/country_item_background"
+    android:layout_marginBottom="12dp">
+
+    <!-- Country Flag -->
+    <ImageView
+        android:id="@+id/imageViewFlag"
+        android:layout_width="40dp"
+        android:layout_height="30dp"
+        android:scaleType="centerCrop"
+        tools:src="@tools:sample/avatars" />
+
+    <!-- Country Code -->
+    <TextView
+        android:id="@+id/textViewCountryCode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        tools:text="ZA" />
+
+    <!-- Country Name -->
+    <TextView
+        android:id="@+id/textViewCountryName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:textSize="16sp"
+        tools:text="South Africa" />
+
+</LinearLayout>
