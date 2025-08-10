@@ -17,7 +17,9 @@ android {
             keyPassword = project.property("RELEASE_KEY_PASSWORD") as String
         }
     }
-
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         applicationId = "com.rst.recipeappopsc6312"
         minSdk = 24
@@ -31,8 +33,6 @@ android {
         buildConfigField("String", "SUPABASE_URL", "\"${project.property("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${project.property("SUPABASE_ANON_KEY")}\"")
     }
-
-
     buildTypes {
         release {
             isMinifyEnabled = true
