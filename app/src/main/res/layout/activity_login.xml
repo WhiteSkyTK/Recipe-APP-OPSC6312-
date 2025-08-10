@@ -46,7 +46,7 @@
     <!-- Email Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayoutEmail"
-        style="@style/Widget.MaterialComponents.TextInputLayout.StandardBox"
+        style="@style/Widget.App.TextInputLayout.Underlined"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
@@ -65,7 +65,7 @@
     <!-- Password Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayoutPassword"
-        style="@style/Widget.MaterialComponents.TextInputLayout.StandardBox"
+        style="@style/Widget.App.TextInputLayout.Underlined"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"

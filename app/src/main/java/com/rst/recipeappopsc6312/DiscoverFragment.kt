@@ -11,34 +11,31 @@ import androidx.recyclerview.widget.RecyclerView
 class DiscoverFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
-    // You will create a RecipeAdapter similar to your other adapters
-    // private lateinit var recipeAdapter: RecipeAdapter
-    private var recipeList = ArrayList<Recipe>() // You'll need a Recipe data class
+    private lateinit var recipeAdapter: RecipeAdapter
+    private var recipeList = ArrayList<Recipe>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_discover, container, false)
-
         recyclerView = view.findViewById(R.id.recyclerViewDiscover)
 
-        // In a real app, you would fetch this data from your backend (Supabase)
+        // In a real app, you would fetch this data from Supabase
         prepareDummyData()
 
-        // recipeAdapter = RecipeAdapter(recipeList)
+        recipeAdapter = RecipeAdapter(recipeList)
         recyclerView.layoutManager = GridLayoutManager(context, 2)
-        // recyclerView.adapter = recipeAdapter
+        recyclerView.adapter = recipeAdapter
 
         return view
     }
 
     private fun prepareDummyData() {
-        // Placeholder data for testing the layout
-        // You'll need to create a 'Recipe' data class and add your own images
-        // recipeList.add(Recipe("Blueberry muffins", R.drawable.muffins, "40 Min"))
-        // recipeList.add(Recipe("Blackberry fool", R.drawable.fool, "20 Min"))
-        // ... and so on
+        // Placeholder data for testing. Replace image URLs with real ones.
+        recipeList.add(Recipe("1", "Blueberry muffins", "https://images.unsplash.com/photo-1593443320739-73f44974a104", 40, true))
+        recipeList.add(Recipe("2", "Blackberry fool", "https://images.unsplash.com/photo-1626201343755-75e1a72970a4", 20))
+        recipeList.add(Recipe("3", "Frozen yoghurt cake", "https://images.unsplash.com/photo-1563805042-762955212533", 15))
+        recipeList.add(Recipe("4", "Limoncello fro-yo", "https://images.unsplash.com/photo-1567206563064-6f60f40a2b57", 10, true))
     }
 }

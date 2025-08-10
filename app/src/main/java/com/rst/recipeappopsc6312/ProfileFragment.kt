@@ -9,6 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.materialswitch.MaterialSwitch
+import de.hdodenhof.circleimageview.BuildConfig
 
 class ProfileFragment : Fragment() {
 
