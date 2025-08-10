@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- Permission to access the internet for API calls and image uploads -->
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
-    <!-- Permission to read images from shared storage (for modern Android versions) -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-
-    <!-- Fallback for older Android versions -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Permission to read images from shared storage (for modern Android versions) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> <!-- Fallback for older Android versions -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" /> <!-- Permission to access the camera for scanning -->
+    <uses-permission android:name="android.permission.CAMERA" /> <!-- Permission to record audio for voice input -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="true"
@@ -21,6 +23,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.RecipeAPPOPSC6312">
+        <activity
+            android:name=".RecipeDetailActivity"
+            android:exported="false" />
         <activity
             android:name=".CreateAccountActivity"
             android:exported="false" />
@@ -56,12 +61,13 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false"></activity>
     </application>
+
 </manifest>
