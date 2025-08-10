@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:layout_marginHorizontal="32dp"
-        android:text="Do you have any dietary preferences? 🤝"
+        android:text="Any dietary preferences? 🥗"
         android:textColor="@android:color/black"
         android:textSize="28sp"
         android:textStyle="bold"
