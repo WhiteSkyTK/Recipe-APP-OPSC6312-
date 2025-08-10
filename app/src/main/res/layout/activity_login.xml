@@ -82,16 +82,6 @@
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Remember Me Checkbox -->
-    <CheckBox
-        android:id="@+id/checkBoxRememberMe"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Remember me"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayoutPassword" />
-
     <!-- Forgot Password Link -->
     <TextView
         android:id="@+id/textViewForgotPassword"
@@ -99,9 +89,9 @@
         android:layout_height="wrap_content"
         android:text="Forgot Password"
         android:textColor="?attr/colorPrimary"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/checkBoxRememberMe"
-        app:layout_constraintTop_toTopOf="@id/checkBoxRememberMe" />
+        app:layout_constraintTop_toBottomOf="@id/textInputLayoutPassword" />
 
     <!-- Login Button -->
     <com.google.android.material.button.MaterialButton
