@@ -39,4 +39,8 @@ class DietAdapter(private val dietList: List<Diet>) :
     }
 
     override fun getItemCount(): Int = dietList.size
+
+    fun getSelectedDiets(): List<Diet> {
+        return dietList.filter { it.isSelected }
+    }
 }
