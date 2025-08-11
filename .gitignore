@@ -13,3 +13,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+gradle.properties
+/.properties
+# Keystore file
+*.jks
+
+# Local properties with secrets
+gradle.properties
