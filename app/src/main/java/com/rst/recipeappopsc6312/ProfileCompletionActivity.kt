@@ -1,19 +1,26 @@
 package com.rst.recipeappopsc6312
 
+import android.Manifest
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import de.hdodenhof.circleimageview.CircleImageView
+import java.io.File
 import java.util.Calendar
 
 class ProfileCompletionActivity : AppCompatActivity() {
@@ -27,12 +34,28 @@ class ProfileCompletionActivity : AppCompatActivity() {
 
     private lateinit var registrationData: RegistrationData
     private var profileImageUri: Uri? = null
+    private var tempImageUri: Uri? = null
 
     // ActivityResultLauncher for picking an image from the gallery
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            profileImageUri = tempImageUri
+            profileImageView.setImageURI(profileImageUri)
+        }
+    }
+
+    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             profileImageUri = it
             profileImageView.setImageURI(it)
+        }
+    }
+
+    private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            openCamera()
+        } else {
+            Toast.makeText(this, "Camera permission is required to take a photo.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -67,8 +90,7 @@ class ProfileCompletionActivity : AppCompatActivity() {
         backButton.setOnClickListener { finish() }
 
         profileImageView.setOnClickListener {
-            // Launch the image picker
-            pickImageLauncher.launch("image/*")
+            showImagePickerDialog()
         }
 
         dobLayout.setEndIconOnClickListener {
@@ -80,31 +102,66 @@ class ProfileCompletionActivity : AppCompatActivity() {
 
         continueButton.setOnClickListener {
             if (validateInput()) {
-                // Save data to our object
-                registrationData.fullName = fullNameEditText.text.toString()
-                registrationData.phoneNumber = phoneEditText.text.toString()
-                registrationData.gender = genderAutoComplete.text.toString()
-                registrationData.dateOfBirth = dobEditText.text.toString()
-                // The profileImageUri can be used later for uploading
+                registrationData.fullName = fullNameEditText.text.toString().trim()
+                registrationData.phoneNumber = phoneEditText.text.toString().trim()
+                registrationData.gender = genderAutoComplete.text.toString().takeIf { it.isNotBlank() }
+                registrationData.dateOfBirth = dobEditText.text.toString().takeIf { it.isNotBlank() }
 
                 navigateToNextScreen()
             }
         }
     }
 
+
+    private fun showImagePickerDialog() {
+        val options = arrayOf("Take Photo", "Choose from Gallery", "Remove Photo")
+        AlertDialog.Builder(this)
+            .setTitle("Set Profile Picture")
+            .setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> checkCameraPermissionAndOpen()
+                    1 -> galleryLauncher.launch("image/*")
+                    2 -> {
+                        profileImageUri = null
+                        profileImageView.setImageResource(R.drawable.ic_profile_placeholder)
+                    }
+                }
+            }
+            .show()
+    }
+
+    private fun checkCameraPermissionAndOpen() {
+        when {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
+                openCamera()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
+                // You can show a dialog here explaining why you need the permission
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+            else -> {
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        }
+    }
+
+    private fun openCamera() {
+        val file = File(filesDir, "temp_image.jpg")
+        tempImageUri = FileProvider.getUriForFile(this, "${applicationContext.packageName}.provider", file)
+
+        tempImageUri?.let { uri ->
+            cameraLauncher.launch(uri)
+        }
+    }
     private fun showDatePickerDialog() {
         val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-        DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
-            val selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-            dobEditText.setText(selectedDate)
-        }, year, month, day).show()
+        DatePickerDialog(this, { _, year, month, day ->
+            dobEditText.setText("$day/${month + 1}/$year")
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
     }
 
     private fun validateInput(): Boolean {
+        // Only Full Name and Phone Number are now required
         if (fullNameEditText.text.isNullOrBlank()) {
             fullNameEditText.error = "Full name cannot be empty"
             return false
@@ -113,15 +170,6 @@ class ProfileCompletionActivity : AppCompatActivity() {
             phoneEditText.error = "Phone number cannot be empty"
             return false
         }
-        if (genderAutoComplete.text.isNullOrBlank()) {
-            Toast.makeText(this, "Please select a gender", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        if (dobEditText.text.isNullOrBlank()) {
-            Toast.makeText(this, "Please select your date of birth", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        // Note: We don't require a profile picture, it's optional.
         return true
     }
 

@@ -17,6 +17,6 @@ gradle.properties
 /.properties
 # Keystore file
 *.jks
-
+/gradle.properties
 # Local properties with secrets
 gradle.properties
