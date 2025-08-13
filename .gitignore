@@ -20,3 +20,5 @@ gradle.properties
 /gradle.properties
 # Local properties with secrets
 gradle.properties
+# Google Services file (contains API keys)
+/app/google-services.json
