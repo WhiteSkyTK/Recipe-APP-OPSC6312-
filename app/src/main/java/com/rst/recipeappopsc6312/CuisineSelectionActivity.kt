@@ -3,6 +3,7 @@ package com.rst.recipeappopsc6312
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -26,6 +27,7 @@ class CuisineSelectionActivity : AppCompatActivity() {
         val continueButton = findViewById<Button>(R.id.buttonContinue)
         val skipButton = findViewById<Button>(R.id.buttonSkip)
         val selectAllButton = findViewById<Button>(R.id.buttonSelectAll)
+        val backButton = findViewById<ImageView>(R.id.imageViewBack)
         recyclerView = findViewById(R.id.recyclerViewCuisines)
 
         prepareCuisineData()
@@ -35,6 +37,9 @@ class CuisineSelectionActivity : AppCompatActivity() {
         recyclerView.adapter = cuisineAdapter
 
         // --- Button Logic ---
+        backButton.setOnClickListener {
+            finish() // This will close the current activity and go back to CountrySelectionActivity
+        }
 
         continueButton.setOnClickListener {
             val selectedCuisines = cuisineAdapter.getSelectedCuisines()

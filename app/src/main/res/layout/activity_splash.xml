@@ -12,9 +12,11 @@
     <!-- Your App Logo -->
     <ImageView
         android:id="@+id/imageViewLogo"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:src="@drawable/logo"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintWidth_percent="0.4"
         app:layout_constraintBottom_toTopOf="@+id/textViewAppName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,22 +33,24 @@
         android:textSize="34sp"
         android:fontFamily="@font/islandmoments_regular"
         app:layout_constraintBottom_toTopOf="@+id/lottieAnimationView"
-        app:layout_constraintEnd_toEndOf="@+id/imageViewLogo"
-        app:layout_constraintStart_toStartOf="@+id/imageViewLogo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewLogo" />
 
     <!-- Lottie Animation for the loading girl -->
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lottieAnimationView"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginTop="24dp"
         app:lottie_rawRes="@raw/thinking_girl_animation"
         app:lottie_autoPlay="true"
         app:lottie_loop="true"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintWidth_percent="0.3"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/textViewAppName"
-        app:layout_constraintStart_toStartOf="@+id/textViewAppName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewAppName" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

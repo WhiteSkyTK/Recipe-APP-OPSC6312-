@@ -14,6 +14,10 @@
         <item name="boxBackgroundColor">@android:color/transparent</item>
     </style>
 
+    <style name="PopupAnimation">
+        <item name="android:windowEnterAnimation">@anim/bubble_in</item>
+    </style>
+
     <style name="OtpEditTextStyle" parent="Widget.AppCompat.EditText">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>

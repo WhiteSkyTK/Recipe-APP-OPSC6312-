@@ -8,6 +8,7 @@
     android:id="@+id/welcome"
     android:background="#E0EBED"
     android:padding="32dp"
+    android:fitsSystemWindows="true"
     tools:context=".WelcomeActivity">
 
     <!-- Main Welcome Title -->

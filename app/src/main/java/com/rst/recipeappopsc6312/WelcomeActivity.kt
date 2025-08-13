@@ -11,14 +11,26 @@ import com.google.android.material.button.MaterialButton
 class WelcomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // This makes the app's layout draw behind the system bars (status, navigation)
-        // enableEdgeToEdge() // This is now handled by the setOnApplyWindowInsetsListener
         setContentView(R.layout.activity_welcome)
 
-        // This listener correctly handles the padding for the edge-to-edge display
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.welcome)) { v, insets ->
+        val welcomeLayout = findViewById<android.view.View>(R.id.welcome)
+
+        // --- CORRECTED PADDING LOGIC ---
+        // 1. Store the initial padding from your XML
+        val initialPaddingLeft = welcomeLayout.paddingLeft
+        val initialPaddingTop = welcomeLayout.paddingTop
+        val initialPaddingRight = welcomeLayout.paddingRight
+        val initialPaddingBottom = welcomeLayout.paddingBottom
+
+        // 2. Apply window insets ON TOP of the initial padding
+        ViewCompat.setOnApplyWindowInsetsListener(welcomeLayout) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            v.setPadding(
+                initialPaddingLeft + systemBars.left,
+                initialPaddingTop + systemBars.top,
+                initialPaddingRight + systemBars.right,
+                initialPaddingBottom + systemBars.bottom
+            )
             insets
         }
 

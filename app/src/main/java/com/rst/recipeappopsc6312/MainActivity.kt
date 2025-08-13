@@ -1,14 +1,19 @@
 package com.rst.recipeappopsc6312
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -16,101 +21,160 @@ import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
 
+    private var currentFragmentId = R.id.nav_home
+    private val TAG = "MainActivity"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val mainLayout = findViewById<View>(R.id.main_content_layout) // Add this ID to your root layout in XML
+
+        // This is the correct way to handle edge-to-edge
+        ViewCompat.setOnApplyWindowInsetsListener(mainLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0) // We handle bottom padding with the nav bar
+            insets
+        }
+
         // Find all the views
         val greetingTextView = findViewById<TextView>(R.id.textViewGreeting)
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-        val fab = findViewById<FloatingActionButton>(R.id.fab)
         val favoritesButton = findViewById<ImageView>(R.id.buttonFavorites)
         val notificationButton = findViewById<ImageView>(R.id.buttonNotifications)
+        val addRecipeButton = findViewById<ImageView>(R.id.buttonAddRecipe)
 
         // Set the dynamic greeting
-        greetingTextView.text = getGreeting()
+        setGreeting(greetingTextView)
 
         // Load the HomeFragment by default when the app starts
         if (savedInstanceState == null) {
-            loadFragment(HomeFragment())
-            bottomNav.selectedItemId = R.id.nav_home
+            loadFragment(HomeFragment(), R.id.nav_home)
         }
 
-        // --- Click Listeners ---
-
-        // Handle clicks on the bottom navigation items
         bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> loadFragment(HomeFragment())
-                R.id.nav_discover -> loadFragment(DiscoverFragment())
-                R.id.nav_cart -> loadFragment(ShoppingListFragment())
-                R.id.nav_profile -> loadFragment(ProfileFragment())
+            if (item.itemId == currentFragmentId) return@setOnItemSelectedListener false
+
+            val newFragment = when (item.itemId) {
+                R.id.nav_home -> HomeFragment()
+                R.id.nav_discover -> DiscoverFragment()
+                R.id.nav_scan -> ScanFragment() // Scan is now a regular fragment
+                R.id.nav_cart -> ShoppingListFragment()
+                R.id.nav_profile -> ProfileFragment()
+                else -> null
             }
-            // Prevent the placeholder from being visually selected
-            item.itemId != R.id.nav_placeholder
+
+            if (newFragment != null) {
+                loadFragment(newFragment, item.itemId)
+            }
+            true
         }
 
-        // Handle the click on the central FloatingActionButton (FAB)
-        fab.setOnClickListener {
-            loadFragment(ScanFragment())
-            // Deselect any item in the bottom nav to show the FAB is the active screen
-            bottomNav.selectedItemId = R.id.nav_placeholder
+        addRecipeButton.setOnClickListener {
+            loadFragment(AddRecipeFragment(), -2) // Use a unique ID for top nav
         }
 
-        // Handle the click on the top-right Favorites button
         favoritesButton.setOnClickListener {
-            // Here you would navigate to a new Activity or Fragment that shows a list of favorite recipes
-            Toast.makeText(this, "Favorites clicked!", Toast.LENGTH_SHORT).show()
+            showFavoritesPopup()
         }
 
         notificationButton.setOnClickListener {
-            // This is where you would call the function to show your notification popup
             showNotificationsPopup()
-            Toast.makeText(this, "Notifications clicked!", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun getGreeting(): String {
-        val calendar = Calendar.getInstance()
-        // In a real app, you would get the user's actual name from your database
-        val userName = "EBMTС"
-        val greeting = when (calendar.get(Calendar.HOUR_OF_DAY)) {
-            in 0..11 -> "☀️ Good Morning"
-            in 12..17 -> "🌤️ Good Afternoon"
-            else -> "🌙 Good Evening"
+    private fun setGreeting(greetingTextView: TextView) {
+        val user = FirebaseManager.auth.currentUser
+        if (user != null) {
+            // Fetch user's profile from Firestore
+            FirebaseManager.firestore.collection("users").document(user.uid).get()
+                .addOnSuccessListener { document ->
+                    val fullName = document.getString("full_name")?.uppercase() ?: "USER"
+                    val calendar = Calendar.getInstance()
+                    val greeting = when (calendar.get(Calendar.HOUR_OF_DAY)) {
+                        in 0..11 -> "☀️ Good Morning"
+                        in 12..17 -> "🌤️ Good Afternoon"
+                        else -> "🌙 Good Evening"
+                    }
+                    greetingTextView.text = "$greeting\n$fullName"
+                }
+                .addOnFailureListener {
+                    // Fallback if Firestore fails
+                    greetingTextView.text = "☀️ Good Morning\nUSER"
+                }
         }
-        return "$greeting\n$userName"
     }
 
-    internal fun loadFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .commit()
+    internal fun loadFragment(fragment: Fragment, newFragmentId: Int) {
+        val transaction = supportFragmentManager.beginTransaction()
+        val currentPosition = getFragmentPosition(currentFragmentId)
+        val newPosition = getFragmentPosition(newFragmentId)
+
+        // Determine animation based on source and destination
+        if (newFragmentId < 0) { // Coming from top nav
+            transaction.setCustomAnimations(R.anim.slide_in_top, 0)
+        } else if (newPosition > currentPosition) { // Moving right on bottom nav
+            transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left)
+        } else { // Moving left on bottom nav
+            transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right)
+        }
+
+        transaction.replace(R.id.fragment_container, fragment)
+        transaction.commit()
+        currentFragmentId = newFragmentId
     }
 
     private fun showNotificationsPopup() {
+        val recentNotifications = DummyData.getNotifications() // Get fake data
+        val notificationButton = findViewById<ImageView>(R.id.buttonNotifications)
+        showPopup(notificationButton, recentNotifications, NotificationsFragment())
+    }
+    private fun showFavoritesPopup() {
+        // In a real app, you would fetch only favorited recipes
+        val favoriteRecipes = DummyData.getRecommendedRecipes().filter { it.isFavorite }
+        val favoritesButton = findViewById<ImageView>(R.id.buttonFavorites)
+        showPopup(favoritesButton, favoriteRecipes, FavoritesFragment())
+    }
+
+    private fun <T> showPopup(anchor: View, items: List<T>, targetFragment: Fragment) {
         val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val popupView = inflater.inflate(R.layout.popup_notifications, null)
 
-        val popupWindow = PopupWindow(
-            popupView,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            true // Makes it dismissable
-        )
+        val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+        popupWindow.animationStyle = R.style.PopupAnimation // Apply bubble animation
 
-        // Setup the RecyclerView inside the popup
         val recyclerView = popupView.findViewById<RecyclerView>(R.id.recyclerViewPopupNotifications)
-        // ... setup adapter with only the 2 most recent notifications ...
+        val viewAll = popupView.findViewById<TextView>(R.id.textViewViewAll)
+        val noItemsTextView = popupView.findViewById<TextView>(R.id.textViewNoNotifications)
 
-        // Handle "View All" click
-        popupView.findViewById<TextView>(R.id.textViewViewAll).setOnClickListener {
-            loadFragment(NotificationsFragment())
+        if (items.isEmpty()) {
+            noItemsTextView.visibility = View.VISIBLE
+            recyclerView.visibility = View.GONE
+            viewAll.visibility = View.GONE
+            noItemsTextView.text = if (targetFragment is FavoritesFragment) "No favorites yet" else "No new notifications"
+        } else {
+            recyclerView.layoutManager = LinearLayoutManager(this)
+            // Here you would have a generic adapter or separate ones
+            // For now, we'll just log it.
+            Log.d(TAG, "Showing ${items.size} items in popup.")
+        }
+
+        viewAll.setOnClickListener {
+            loadFragment(targetFragment, -1)
             popupWindow.dismiss()
         }
 
-        // Show the popup anchored to the notification bell
-        val notificationButton = findViewById<ImageView>(R.id.buttonNotifications)
-        popupWindow.showAsDropDown(notificationButton)
+        popupWindow.showAsDropDown(anchor)
+    }
+
+    private fun getFragmentPosition(itemId: Int): Int {
+        return when (itemId) {
+            R.id.nav_home -> 0
+            R.id.nav_discover -> 1
+            R.id.nav_scan -> 2 // For the FAB/Scan
+            R.id.nav_cart -> 3
+            R.id.nav_profile -> 4
+            else -> -1
+        }
     }
 }

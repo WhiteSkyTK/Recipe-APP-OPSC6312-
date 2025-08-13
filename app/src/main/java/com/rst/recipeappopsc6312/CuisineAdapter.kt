@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 
 class CuisineAdapter(private val cuisineList: List<Cuisine>) :
     RecyclerView.Adapter<CuisineAdapter.CuisineViewHolder>() {
@@ -40,6 +41,11 @@ class CuisineAdapter(private val cuisineList: List<Cuisine>) :
         holder.image.setImageResource(cuisine.imageResId)
         holder.name.text = cuisine.name
         holder.itemView.isSelected = cuisine.isSelected
+
+        Glide.with(holder.itemView.context)
+            .load(cuisine.imageResId)
+            .override(100, 100) // Resize to 100x100 pixels
+            .into(holder.image)
     }
 
     override fun getItemCount(): Int = cuisineList.size

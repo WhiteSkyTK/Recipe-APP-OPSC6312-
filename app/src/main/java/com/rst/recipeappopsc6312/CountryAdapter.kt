@@ -25,14 +25,19 @@ class CountryAdapter(
 
         init {
             itemView.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    // Notify the activity of the click
-                    onCountryClicked(countryFilterList[position])
-                    // Update the selected position and refresh the UI
-                    notifyItemChanged(selectedPosition)
-                    selectedPosition = position
-                    notifyItemChanged(selectedPosition)
+                val newPosition = adapterPosition
+                if (newPosition != RecyclerView.NO_POSITION) {
+                    onCountryClicked(countryFilterList[newPosition])
+
+                    val oldPosition = selectedPosition // Store the old position
+                    selectedPosition = newPosition   // Set the new position
+
+                    // FIXED: Only notify the old position if it was valid
+                    if (oldPosition != RecyclerView.NO_POSITION) {
+                        notifyItemChanged(oldPosition)
+                    }
+                    // Notify the new position to select it
+                    notifyItemChanged(newPosition)
                 }
             }
         }

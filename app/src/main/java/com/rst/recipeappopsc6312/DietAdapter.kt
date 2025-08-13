@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 
 class DietAdapter(private val dietList: List<Diet>) :
     RecyclerView.Adapter<DietAdapter.DietViewHolder>() {
@@ -36,6 +37,11 @@ class DietAdapter(private val dietList: List<Diet>) :
         holder.image.setImageResource(diet.imageResId)
         holder.name.text = diet.name
         holder.itemView.isSelected = diet.isSelected
+
+        Glide.with(holder.itemView.context)
+            .load(diet.imageResId)
+            .override(100, 100) // Resize to 100x100 pixels
+            .into(holder.image)
     }
 
     override fun getItemCount(): Int = dietList.size

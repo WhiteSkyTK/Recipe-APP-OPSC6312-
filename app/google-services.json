@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "571440641953",
+    "project_id": "rst-harmony-kitchen",
+    "storage_bucket": "rst-harmony-kitchen.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:571440641953:android:fdf99c9821a2247a3b3de0",
+        "android_client_info": {
+          "package_name": "com.rst.recipeappopsc6312"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeFcgg6-amjoXV1H-fbWFkFm4NwFOAyCY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

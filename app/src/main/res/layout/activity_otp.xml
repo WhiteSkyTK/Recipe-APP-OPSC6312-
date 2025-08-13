@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:padding="32dp"
+    android:fitsSystemWindows="true"
     tools:context=".OtpActivity">
 
     <!-- Back Arrow -->

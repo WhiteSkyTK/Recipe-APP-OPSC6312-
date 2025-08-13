@@ -2,17 +2,29 @@ package com.rst.recipeappopsc6312
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.util.Patterns
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-
+import androidx.lifecycle.lifecycleScope
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.gotrue.providers.builtin.Email
+import io.github.jan.supabase.postgrest.query.Columns
+import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
 class LoginActivity : AppCompatActivity() {
+
+    private lateinit var progressBar: ProgressBar
+    private val TAG = "LoginActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,28 +39,24 @@ class LoginActivity : AppCompatActivity() {
         val forgotPasswordTextView = findViewById<TextView>(R.id.textViewForgotPassword)
         val googleSignInButton = findViewById<ImageButton>(R.id.buttonGoogleSignIn)
         val backButton = findViewById<ImageView>(R.id.imageViewBack)
+        progressBar = findViewById(R.id.progressBar)
 
         // --- Click Listeners ---
 
         backButton.setOnClickListener {
-            // Finishes the current activity, taking the user back to the previous one
-            finish()
+            // FIXED: Explicitly navigate back to WelcomeActivity and clear the history
+            val intent = Intent(this, WelcomeActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
         }
 
         loginButton.setOnClickListener {
-            val email = emailEditText.text.toString().trim()
+            val userInput = emailEditText.text.toString().trim()
             val password = passwordEditText.text.toString().trim()
 
-            // Perform validation before attempting to log in
-            if (validateInput(email, password, emailLayout, passwordLayout)) {
-                // --- Placeholder for your Supabase login logic ---
-                // Here, you would call Supabase to sign in with email and password.
-                // supabase.auth.signInWithPassword(email, password)
-                // In the success callback, you navigate to the main activity.
-                // In the failure callback, you show an error message.
-
-                Toast.makeText(this, "Logging in...", Toast.LENGTH_SHORT).show()
-                navigateToMainApp()
+            if (validateInput(userInput, password, emailLayout, passwordLayout)) {
+                progressBar.visibility = View.VISIBLE // Show loading animation
+                handleLogin(userInput, password)
             }
         }
 
@@ -63,24 +71,36 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun validateInput(email: String, password: String, emailLayout: TextInputLayout, passwordLayout: TextInputLayout): Boolean {
-        // Clear previous errors
-        emailLayout.error = null
-        passwordLayout.error = null
+    private fun handleLogin(email: String, password: String) {
+        Log.d(TAG, "handleLogin: Attempting to sign in user: $email")
+        progressBar.visibility = View.VISIBLE
+        FirebaseManager.auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                progressBar.visibility = View.GONE
+                if (task.isSuccessful) {
+                    Log.d(TAG, "Sign in successful for user: $email")
+                    // Optional but recommended: Pre-fetch user profile to warm up the cache
+                    // This ensures MainActivity and ProfileFragment load instantly.
+                    // fetchUserProfile()
+                    navigateToMainApp()
+                } else {
+                    Log.w(TAG, "Sign in failed for user: $email", task.exception)
+                    Toast.makeText(this, "Authentication failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
 
-        if (email.isEmpty()) {
-            emailLayout.error = "Email cannot be empty"
+    private fun validateInput(userInput: String, pass: String, userLayout: TextInputLayout, passLayout: TextInputLayout): Boolean {
+        userLayout.error = null
+        passLayout.error = null
+        if (userInput.isEmpty()) {
+            userLayout.error = "Email or Username cannot be empty"
             return false
         }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailLayout.error = "Please enter a valid email address"
+        if (pass.isEmpty()) {
+            passLayout.error = "Password cannot be empty"
             return false
         }
-        if (password.isEmpty()) {
-            passwordLayout.error = "Password cannot be empty"
-            return false
-        }
-        // You can add more password validation here (e.g., minimum length)
         return true
     }
 

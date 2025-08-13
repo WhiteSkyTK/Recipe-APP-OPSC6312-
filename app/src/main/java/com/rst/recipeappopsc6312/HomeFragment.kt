@@ -20,7 +20,7 @@ class HomeFragment : Fragment() {
 
         val seeAllCategories = view.findViewById<TextView>(R.id.textViewCategorySeeAll)
         seeAllCategories.setOnClickListener {
-            (activity as? MainActivity)?.loadFragment(CategoryFragment())
+            (activity as? MainActivity)?.loadFragment(CategoryFragment(), -1)
         }
 
         // --- Setup RecyclerViews with correct LayoutManagers ---

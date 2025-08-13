@@ -7,6 +7,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +25,7 @@ class CountrySelectionActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var searchEditText: EditText
     private lateinit var continueButton: Button
+    private lateinit var backButton: ImageView
     private lateinit var countryAdapter: CountryAdapter
     private var countryList: List<Country> = emptyList()
     private var selectedCountry: Country? = null
@@ -41,17 +43,22 @@ class CountrySelectionActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewCountries)
         searchEditText = findViewById(R.id.editTextSearch)
         continueButton = findViewById(R.id.buttonContinue)
+        backButton = findViewById(R.id.imageViewBack)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         setupContinueButton()
         loadCountries()
+
+        backButton.setOnClickListener {
+            finish() // This will close the current activity and go back to WelcomeActivity
+        }
     }
 
     private fun loadCountries() {
         val cachedCountries = getCountriesFromCache()
         if (cachedCountries.isNotEmpty()) {
             // If we have cached data, use it immediately
-            countryList = cachedCountries
+            countryList = sortCountries(cachedCountries)
             setupRecyclerViewAndSearch()
         } else {
             // Otherwise, fetch from the network
@@ -59,9 +66,30 @@ class CountrySelectionActivity : AppCompatActivity() {
         }
     }
 
+    private fun sortCountries(countries: List<Country>): List<Country> {
+        val mutableCountries = countries.toMutableList()
+        // Find South Africa in the list
+        val southAfrica = mutableCountries.find { it.nameInfo.common == "South Africa" }
+
+        // If found, remove it to be added back later
+        southAfrica?.let {
+            mutableCountries.remove(it)
+        }
+
+        // Sort the rest of the list alphabetically
+        mutableCountries.sortBy { it.nameInfo.common }
+
+        // Add South Africa back to the very beginning of the list
+        southAfrica?.let {
+            mutableCountries.add(0, it)
+        }
+
+        return mutableCountries
+    }
+
     private fun fetchCountriesFromApi() {
         val retrofit = Retrofit.Builder()
-            .baseUrl("[https://restcountries.com/](https://restcountries.com/)")
+            .baseUrl("https://restcountries.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         val service = retrofit.create(CountryApiService::class.java)

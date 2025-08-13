@@ -6,44 +6,37 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
+import android.util.Log
+import io.github.jan.supabase.gotrue.SessionStatus
+import io.github.jan.supabase.gotrue.auth
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class SplashActivity : AppCompatActivity() {
+    private val TAG = "SplashActivity"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Note: I've removed enableEdgeToEdge() as it's often simpler to manage
-        // themes directly and the original code would crash.
         setContentView(R.layout.activity_splash)
+        Log.d(TAG, "onCreate: Splash screen started.")
 
-        // --- Placeholder for Dark/Light Mode Logic ---
-        // You would check a saved preference here.
-        // For now, we'll just default to the system setting.
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-
-
-        // Use a Handler to delay the screen transition
         Handler(Looper.getMainLooper()).postDelayed({
-            // Check user login status
-            if (isUserLoggedIn()) {
-                // User is logged in, go to MainActivity
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
+            if (FirebaseManager.auth.currentUser != null) {
+                Log.d(TAG, "User is logged in. Navigating to MainActivity.")
+                navigateTo(MainActivity::class.java)
             } else {
-                // User is not logged in, go to WelcomeActivity
-                val intent = Intent(this, WelcomeActivity::class.java)
-                startActivity(intent)
+                Log.d(TAG, "User is not logged in. Navigating to WelcomeActivity.")
+                navigateTo(WelcomeActivity::class.java)
             }
-            // Finish the SplashActivity so the user can't go back to it
-            finish()
-        }, 3000) // 3000 milliseconds = 3 seconds
+        }, 2000)
     }
 
-    private fun isUserLoggedIn(): Boolean {
-        // --- Placeholder for your real authentication check ---
-        // In a real app, you would check your backend (Supabase, Firebase, etc.)
-        // or SharedPreferences to see if a valid user session exists.
-        // For testing, you can change this to 'true' or 'false'.
-        return false
+    private fun navigateTo(activityClass: Class<*>) {
+        val intent = Intent(this, activityClass)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }
