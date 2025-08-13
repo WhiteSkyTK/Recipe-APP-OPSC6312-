@@ -7,11 +7,13 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +24,8 @@ import com.google.android.material.textfield.TextInputLayout
 import de.hdodenhof.circleimageview.CircleImageView
 import java.io.File
 import java.util.Calendar
+import java.io.FileOutputStream
+
 
 class ProfileCompletionActivity : AppCompatActivity() {
 
@@ -46,8 +50,10 @@ class ProfileCompletionActivity : AppCompatActivity() {
 
     private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            profileImageUri = it
-            profileImageView.setImageURI(it)
+            // Save a local copy and get its path
+            val localImagePath = saveImageToInternalStorage(it)
+            profileImageUri = Uri.fromFile(File(localImagePath)) // Store the local file URI
+            profileImageView.setImageURI(profileImageUri)
         }
     }
 
@@ -63,6 +69,8 @@ class ProfileCompletionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile_completion)
 
+        enableEdgeToEdge()
+        //TODO: Add edge-to-edge support
         // Receive the data object from the previous screen
         registrationData = intent.getParcelableExtra("REGISTRATION_DATA") ?: RegistrationData()
 
@@ -176,10 +184,25 @@ class ProfileCompletionActivity : AppCompatActivity() {
     private fun navigateToNextScreen() {
         val intent = Intent(this, CreateAccountActivity::class.java)
         intent.putExtra("REGISTRATION_DATA", registrationData)
-        // You might also need to pass the image URI if you handle uploads on the final screen
-        profileImageUri?.let {
-            intent.putExtra("PROFILE_IMAGE_URI", it.toString())
+        // Pass the path of the locally saved image file
+        profileImageUri?.path?.let {
+            intent.putExtra("PROFILE_IMAGE_PATH", it)
         }
         startActivity(intent)
+    }
+
+    private fun saveImageToInternalStorage(uri: Uri): String? {
+        return try {
+            val inputStream = contentResolver.openInputStream(uri)
+            val file = File(filesDir, "profile_pic.jpg") // Always use the same name to overwrite
+            val outputStream = FileOutputStream(file)
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+            file.absolutePath
+        } catch (e: Exception) {
+            Log.e("ProfileCompletion", "Failed to save image locally", e)
+            null
+        }
     }
 }

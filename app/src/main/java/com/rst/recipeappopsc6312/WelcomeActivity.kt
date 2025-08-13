@@ -3,6 +3,7 @@ package com.rst.recipeappopsc6312
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -13,6 +14,7 @@ class WelcomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_welcome)
 
+        enableEdgeToEdge()
         val welcomeLayout = findViewById<android.view.View>(R.id.welcome)
 
         // --- CORRECTED PADDING LOGIC ---

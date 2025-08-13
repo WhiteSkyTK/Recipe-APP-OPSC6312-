@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -15,6 +16,8 @@ class ResetPasswordActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reset_password)
 
+        enableEdgeToEdge()
+        //TODO: Add edge-to-edge support
         // Find views
         val newPasswordLayout = findViewById<TextInputLayout>(R.id.textInputLayoutNewPassword)
         val newPasswordEditText = findViewById<TextInputEditText>(R.id.editTextNewPassword)

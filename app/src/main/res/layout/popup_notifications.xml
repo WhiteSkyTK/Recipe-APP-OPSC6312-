@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="300dp"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     app:cardCornerRadius="16dp"
     app:cardElevation="8dp">
 
@@ -13,13 +13,14 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textViewNoNotifications"
+            android:id="@+id/textViewNoItems"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No new notifications"
             android:gravity="center"
             android:padding="24dp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:text="No new notifications"
+            tools:visibility="visible" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewPopupNotifications"

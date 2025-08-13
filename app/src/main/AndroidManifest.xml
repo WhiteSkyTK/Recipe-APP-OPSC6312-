@@ -69,7 +69,18 @@
             android:name=".MainActivity"
             android:exported="false">
         </activity>
-
+        <activity
+            android:name=".PreferencesActivity"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".EditProfileActivity"
+            android:exported="false" >
+        </activity>
+        <activity
+            android:name=".AboutUsActivity"
+            android:exported="false" >
+        </activity>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

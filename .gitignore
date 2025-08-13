@@ -22,3 +22,4 @@ gradle.properties
 gradle.properties
 # Google Services file (contains API keys)
 /app/google-services.json
+/app/release-keystore

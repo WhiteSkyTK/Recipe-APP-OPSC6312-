@@ -67,7 +67,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="👤Account"
+                    android:text="👤 Account"
                     android:textStyle="bold"
                     android:textSize="16sp"/>
 
@@ -97,6 +97,7 @@
                     android:drawableStart="@drawable/ic_alert"
                     android:drawablePadding="16dp"
                     android:checked="true"
+                    android:enabled="false"
                     android:paddingVertical="12dp"/>
 
             </LinearLayout>
@@ -120,7 +121,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🛠️Support &amp; About"
+                    android:text="🛠️ Support &amp; About"
                     android:textStyle="bold"
                     android:textSize="16sp"/>
 

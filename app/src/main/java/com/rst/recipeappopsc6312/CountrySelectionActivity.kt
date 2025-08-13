@@ -5,10 +5,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -27,8 +30,11 @@ class CountrySelectionActivity : AppCompatActivity() {
     private lateinit var continueButton: Button
     private lateinit var backButton: ImageView
     private lateinit var countryAdapter: CountryAdapter
+    private lateinit var progressBar: ProgressBar
+    private lateinit var loadingBar: ProgressBar
     private var countryList: List<Country> = emptyList()
     private var selectedCountry: Country? = null
+    private var isEditMode = false
 
     // This will hold the registration data passed between screens
     private lateinit var registrationData: RegistrationData
@@ -37,6 +43,11 @@ class CountrySelectionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_country_selection)
 
+        enableEdgeToEdge()
+        //TODO: Add edge-to-edge support
+        // Check if we are in edit mode
+        isEditMode = intent.getBooleanExtra("IS_EDIT_MODE", false)
+
         // Initialize registrationData, creating a new object if one isn't passed
         registrationData = intent.getParcelableExtra("REGISTRATION_DATA") ?: RegistrationData()
 
@@ -44,7 +55,15 @@ class CountrySelectionActivity : AppCompatActivity() {
         searchEditText = findViewById(R.id.editTextSearch)
         continueButton = findViewById(R.id.buttonContinue)
         backButton = findViewById(R.id.imageViewBack)
+        progressBar = findViewById(R.id.progressBar)
+        loadingBar = findViewById(R.id.LoadingBar)
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        if (isEditMode) {
+            // If editing, hide the progress bar and change the button text
+            progressBar.visibility = View.GONE
+            continueButton.text = "Save Changes"
+        }
 
         setupContinueButton()
         loadCountries()
@@ -57,11 +76,11 @@ class CountrySelectionActivity : AppCompatActivity() {
     private fun loadCountries() {
         val cachedCountries = getCountriesFromCache()
         if (cachedCountries.isNotEmpty()) {
-            // If we have cached data, use it immediately
             countryList = sortCountries(cachedCountries)
             setupRecyclerViewAndSearch()
         } else {
-            // Otherwise, fetch from the network
+            // Show the loading animation before starting the network call
+            loadingBar.visibility = View.VISIBLE
             fetchCountriesFromApi()
         }
     }
@@ -97,9 +116,11 @@ class CountrySelectionActivity : AppCompatActivity() {
 
         call.enqueue(object : Callback<List<Country>> {
             override fun onResponse(call: Call<List<Country>>, response: Response<List<Country>>) {
+                loadingBar.visibility = View.GONE // Hide loading on success
                 if (response.isSuccessful) {
-                    countryList = response.body() ?: emptyList()
-                    saveCountriesToCache(countryList) // Save the new data
+                    val fetchedList = response.body() ?: emptyList()
+                    countryList = sortCountries(fetchedList)
+                    saveCountriesToCache(countryList)
                     setupRecyclerViewAndSearch()
                 } else {
                     Toast.makeText(this@CountrySelectionActivity, "Failed to load countries", Toast.LENGTH_SHORT).show()
@@ -107,6 +128,7 @@ class CountrySelectionActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<List<Country>>, t: Throwable) {
+                loadingBar.visibility = View.GONE // Hide loading on failure
                 Toast.makeText(this@CountrySelectionActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
@@ -130,20 +152,40 @@ class CountrySelectionActivity : AppCompatActivity() {
     }
 
     private fun setupContinueButton() {
-        continueButton.isEnabled = false // Disabled by default
+        continueButton.isEnabled = false
         continueButton.setOnClickListener {
             if (selectedCountry != null) {
-                // Update the registration data object
-                registrationData.country = selectedCountry!!.nameInfo.common
-
-                // Navigate to the next screen
-                val intent = Intent(this, CuisineSelectionActivity::class.java)
-                intent.putExtra("REGISTRATION_DATA", registrationData)
-                startActivity(intent)
+                if (isEditMode) {
+                    // If editing, save the new country to Firestore and close the screen
+                    updateUserCountry(selectedCountry!!.nameInfo.common)
+                } else {
+                    // If registering, update the data object and go to the next screen
+                    registrationData.country = selectedCountry!!.nameInfo.common
+                    val intent = Intent(this, CuisineSelectionActivity::class.java)
+                    intent.putExtra("REGISTRATION_DATA", registrationData)
+                    startActivity(intent)
+                }
             } else {
                 Toast.makeText(this, "Please select a country", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun updateUserCountry(newCountry: String) {
+        val userId = FirebaseManager.auth.currentUser?.uid ?: return
+
+        loadingBar.visibility = View.VISIBLE
+        FirebaseManager.firestore.collection("users").document(userId)
+            .update("country", newCountry)
+            .addOnSuccessListener {
+                loadingBar.visibility = View.GONE
+                Toast.makeText(this, "Country updated!", Toast.LENGTH_SHORT).show()
+                finish() // Go back to the preferences screen
+            }
+            .addOnFailureListener { e ->
+                loadingBar.visibility = View.GONE
+                Toast.makeText(this, "Failed to update country: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     // --- Caching Logic ---

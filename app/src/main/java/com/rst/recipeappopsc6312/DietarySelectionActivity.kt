@@ -2,9 +2,12 @@ package com.rst.recipeappopsc6312
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,11 +18,15 @@ class DietarySelectionActivity : AppCompatActivity() {
     private lateinit var dietAdapter: DietAdapter
     private var dietList = ArrayList<Diet>()
     private lateinit var registrationData: RegistrationData
+    private var isEditMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dietary_selection)
 
+        enableEdgeToEdge()
+        //TODO: Add edge-to-edge support
+        isEditMode = intent.getBooleanExtra("IS_EDIT_MODE", false)
         // Receive the data object from the previous screen
         registrationData = intent.getParcelableExtra("REGISTRATION_DATA") ?: RegistrationData()
 
@@ -27,13 +34,30 @@ class DietarySelectionActivity : AppCompatActivity() {
         val continueButton = findViewById<Button>(R.id.buttonContinue)
         val skipButton = findViewById<Button>(R.id.buttonSkip)
         val backButton = findViewById<ImageView>(R.id.imageViewBack)
+        val progressBar = findViewById<ProgressBar>(R.id.progressBar)
         recyclerView = findViewById(R.id.recyclerViewDiets)
+
+        if (isEditMode) {
+            progressBar.visibility = View.GONE
+            continueButton.text = "Save Changes"
+            skipButton.visibility = View.GONE
+        }
 
         // Set up the data and RecyclerView
         prepareDietData()
-        dietAdapter = DietAdapter(dietList)
+
+        // The adapter now handles its own clicks via a lambda
+        dietAdapter = DietAdapter { clickedDiet ->
+            val updatedList = dietList.map {
+                if (it.name == clickedDiet.name) it.copy(isSelected = !it.isSelected) else it
+            }
+            dietList = ArrayList(updatedList)
+            dietAdapter.submitList(dietList)
+        }
+
         recyclerView.layoutManager = GridLayoutManager(this, 2) // Using 2 columns as per your design
         recyclerView.adapter = dietAdapter
+        dietAdapter.submitList(dietList)
 
         // --- Button Logic ---
 
@@ -42,18 +66,21 @@ class DietarySelectionActivity : AppCompatActivity() {
         }
 
         continueButton.setOnClickListener {
-            val selectedDiets = dietAdapter.getSelectedDiets()
+            val selectedDiets = dietList.filter { it.isSelected }
             if (selectedDiets.isEmpty()) {
-                Toast.makeText(this, "Please select at least one preference or skip", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please select at least one preference", Toast.LENGTH_SHORT).show()
             } else {
-                // Save the selected data and navigate
-                registrationData.selectedDiets = selectedDiets.map { it.name }
-                navigateToNextScreen()
+                val selectedDietNames = selectedDiets.map { it.name }
+                if (isEditMode) {
+                    updateUserDiets(selectedDietNames)
+                } else {
+                    registrationData.selectedDiets = selectedDietNames
+                    navigateToNextScreen()
+                }
             }
         }
 
         skipButton.setOnClickListener {
-            // Set diets to an empty list and navigate
             registrationData.selectedDiets = emptyList()
             navigateToNextScreen()
         }
@@ -63,6 +90,19 @@ class DietarySelectionActivity : AppCompatActivity() {
         val intent = Intent(this, ProfileCompletionActivity::class.java)
         intent.putExtra("REGISTRATION_DATA", registrationData)
         startActivity(intent)
+    }
+
+    private fun updateUserDiets(diets: List<String>) {
+        val userId = FirebaseManager.auth.currentUser?.uid ?: return
+        FirebaseManager.firestore.collection("users").document(userId)
+            .update("selected_diets", diets)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Preferences updated!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Failed to update: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun prepareDietData() {

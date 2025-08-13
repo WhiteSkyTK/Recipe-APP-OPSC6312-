@@ -6,6 +6,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.firestore.memoryCacheSettings
 import com.google.firebase.firestore.persistentCacheSettings
+import com.google.firebase.firestore.firestoreSettings
+import com.google.firebase.storage.FirebaseStorage
 
 object FirebaseManager {
     private const val TAG = "FirebaseManager"
@@ -25,5 +27,10 @@ object FirebaseManager {
         db.firestoreSettings = settings
         Log.d(TAG, "Firestore offline persistence enabled.")
         db
+    }
+
+    val storage: FirebaseStorage by lazy {
+        Log.d(TAG, "Initializing Firebase Storage")
+        FirebaseStorage.getInstance()
     }
 }

@@ -5,30 +5,30 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
-class CuisineAdapter(private val cuisineList: List<Cuisine>) :
-    RecyclerView.Adapter<CuisineAdapter.CuisineViewHolder>() {
+class CuisineAdapter(private val onClick: (Cuisine) -> Unit) :
+    ListAdapter<Cuisine, CuisineAdapter.CuisineViewHolder>(CuisineDiffCallback) {
 
     inner class CuisineViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val image: ImageView = itemView.findViewById(R.id.imageViewCuisine)
-        val name: TextView = itemView.findViewById(R.id.textViewCuisineName)
+        private val image: ImageView = itemView.findViewById(R.id.imageViewCuisine)
+        private val name: TextView = itemView.findViewById(R.id.textViewCuisineName)
 
-        init {
+        fun bind(cuisine: Cuisine) {
+            name.text = cuisine.name
+            itemView.isSelected = cuisine.isSelected
+            Glide.with(itemView.context)
+                .load(cuisine.imageResId)
+                .override(100, 100)
+                .into(image)
+
             itemView.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    toggleSelection(position)
-                }
+                onClick(cuisine)
             }
         }
-    }
-
-    private fun toggleSelection(position: Int) {
-        val cuisine = cuisineList[position]
-        cuisine.isSelected = !cuisine.isSelected
-        notifyItemChanged(position)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CuisineViewHolder {
@@ -37,27 +37,17 @@ class CuisineAdapter(private val cuisineList: List<Cuisine>) :
     }
 
     override fun onBindViewHolder(holder: CuisineViewHolder, position: Int) {
-        val cuisine = cuisineList[position]
-        holder.image.setImageResource(cuisine.imageResId)
-        holder.name.text = cuisine.name
-        holder.itemView.isSelected = cuisine.isSelected
+        holder.bind(getItem(position))
+    }
+}
 
-        Glide.with(holder.itemView.context)
-            .load(cuisine.imageResId)
-            .override(100, 100) // Resize to 100x100 pixels
-            .into(holder.image)
+// This object tells the ListAdapter how to calculate changes efficiently.
+object CuisineDiffCallback : DiffUtil.ItemCallback<Cuisine>() {
+    override fun areItemsTheSame(oldItem: Cuisine, newItem: Cuisine): Boolean {
+        return oldItem.name == newItem.name // Use a unique ID if you have one
     }
 
-    override fun getItemCount(): Int = cuisineList.size
-
-    fun getSelectedCuisines(): List<Cuisine> {
-        return cuisineList.filter { it.isSelected }
-    }
-
-    fun selectAll(select: Boolean) {
-        for (cuisine in cuisineList) {
-            cuisine.isSelected = select
-        }
-        notifyDataSetChanged()
+    override fun areContentsTheSame(oldItem: Cuisine, newItem: Cuisine): Boolean {
+        return oldItem == newItem
     }
 }

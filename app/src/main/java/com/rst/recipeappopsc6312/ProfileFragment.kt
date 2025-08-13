@@ -1,6 +1,8 @@
 package com.rst.recipeappopsc6312
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,10 +10,14 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 import com.google.android.material.materialswitch.MaterialSwitch
 import de.hdodenhof.circleimageview.BuildConfig
+import de.hdodenhof.circleimageview.CircleImageView
 
 class ProfileFragment : Fragment() {
+
+    private val TAG = "ProfileFragment"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -20,6 +26,9 @@ class ProfileFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
         // Find all the views
+        val profileImageView = view.findViewById<CircleImageView>(R.id.profile_image)
+        val userNameTextView = view.findViewById<TextView>(R.id.textViewUserName)
+        val userEmailTextView = view.findViewById<TextView>(R.id.textViewUserEmail)
         val editProfileButton = view.findViewById<Button>(R.id.buttonEditProfile)
         val preferencesTextView = view.findViewById<TextView>(R.id.textViewPreferences)
         val languageTextView = view.findViewById<TextView>(R.id.textViewLanguage)
@@ -28,48 +37,93 @@ class ProfileFragment : Fragment() {
         val reportIssueTextView = view.findViewById<TextView>(R.id.textViewReportIssue)
         val versionTextView = view.findViewById<TextView>(R.id.textViewVersion)
 
-        // --- Load User Data ---
-        // In a real app, you would fetch the user's data from Supabase and populate the views
-        // For now, we'll use placeholders.
-        view.findViewById<TextView>(R.id.textViewUserName).text = "Tokollo (TK)"
-        view.findViewById<TextView>(R.id.textViewUserEmail).text = "tk@rstinnovations.com"
+        // --- Load User Data from Firebase ---
+        loadUserProfile(profileImageView, userNameTextView, userEmailTextView)
 
         // Set the app version text
-        versionTextView.text = "Version ${BuildConfig.VERSION_NAME}"
+        try {
+            val versionName = requireContext().packageManager
+                .getPackageInfo(requireContext().packageName, 0).versionName
+            versionTextView.text = "Version $versionName"
+        } catch (e: Exception) {
+            Log.e(TAG, "Couldn't get package info", e)
+            versionTextView.text = "Version 1.0"
+        }
 
         // --- Set Click Listeners ---
 
         editProfileButton.setOnClickListener {
-            // Navigate to an "Edit Profile" activity where the user can change their name, pic, etc.
-            Toast.makeText(context, "Edit Profile Clicked", Toast.LENGTH_SHORT).show()
+            // FIXED: Launch the new EditProfileActivity
+            val intent = Intent(activity, EditProfileActivity::class.java)
+            startActivity(intent)
         }
 
         preferencesTextView.setOnClickListener {
-            // Navigate to a screen where the user can re-do the cuisine/diet selection
-            Toast.makeText(context, "Preferences Clicked", Toast.LENGTH_SHORT).show()
-        }
-
-        languageTextView.setOnClickListener {
-            // Show a dialog to let the user select a language
-            Toast.makeText(context, "Language Clicked", Toast.LENGTH_SHORT).show()
-        }
-
-        notificationsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            // Save the user's notification preference to your backend
-            val status = if (isChecked) "enabled" else "disabled"
-            Toast.makeText(context, "Notifications $status", Toast.LENGTH_SHORT).show()
+            // FIXED: Launch the new PreferencesActivity
+            val intent = Intent(activity, PreferencesActivity::class.java)
+            startActivity(intent)
         }
 
         aboutUsTextView.setOnClickListener {
-            // Navigate to an "About Us" screen
-            Toast.makeText(context, "About Us Clicked", Toast.LENGTH_SHORT).show()
+            // FIXED: Launch the new AboutUsActivity
+            val intent = Intent(activity, AboutUsActivity::class.java)
+            startActivity(intent)
+        }
+
+        // --- Disabled Features ---
+        languageTextView.alpha = 0.5f // Make it look disabled
+        reportIssueTextView.alpha = 0.5f
+        notificationsSwitch.isEnabled = false
+
+        languageTextView.setOnClickListener {
+            //TODO
+            Toast.makeText(context, "Language selection is coming soon!", Toast.LENGTH_SHORT).show()
         }
 
         reportIssueTextView.setOnClickListener {
-            // Open an email client or a form to report an issue
-            Toast.makeText(context, "Report Issue Clicked", Toast.LENGTH_SHORT).show()
+            //TODO
+            Toast.makeText(context, "Issue reporting is coming soon!", Toast.LENGTH_SHORT).show()
+        }
+
+        notificationsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            // TODO: Save the user's notification preference to your backend or local storage
+            Toast.makeText(context, "Notification settings are coming soon!", Toast.LENGTH_SHORT).show()
         }
 
         return view
+    }
+
+    private fun loadUserProfile(imageView: CircleImageView, nameView: TextView, emailView: TextView) {
+        val user = FirebaseManager.auth.currentUser
+        if (user != null) {
+            emailView.text = user.email // Email is available directly from Auth
+
+            // Fetch the rest of the profile from Firestore
+            FirebaseManager.firestore.collection("users").document(user.uid).get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        Log.d(TAG, "User profile data found in Firestore.")
+                        val fullName = document.getString("full_name")
+                        val profileImageUrl = document.getString("profileImageUrl")
+
+                        nameView.text = fullName ?: "Your Name"
+
+                        // Use Glide to load the profile picture
+                        if (profileImageUrl != null) {
+                            Glide.with(this)
+                                .load(profileImageUrl)
+                                .placeholder(R.drawable.ic_profile_placeholder)
+                                .into(imageView)
+                        }
+                    } else {
+                        Log.d(TAG, "No profile document found in Firestore.")
+                        nameView.text = "Your Name"
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.e(TAG, "Error getting user profile from Firestore.", exception)
+                    nameView.text = "Your Name"
+                }
+        }
     }
 }

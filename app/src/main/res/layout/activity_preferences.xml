@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context=".PreferencesActivity"
+    android:id="@+id/preferences_layout">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Top Bar with Back Button and Title -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/imageViewBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_arrow_back"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚙️ Preferences"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_centerInParent="true"/>
+        </RelativeLayout>
+
+        <!-- Personal Preferences Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E0E0E0">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="👤 Personal"
+                    android:textStyle="bold"
+                    android:textSize="16sp"/>
+                <TextView
+                    android:id="@+id/textViewEditCountry"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Country"
+                    android:paddingVertical="12dp"/>
+                <TextView
+                    android:id="@+id/textViewEditCuisines"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Cuisines"
+                    android:paddingVertical="12dp"/>
+                <TextView
+                    android:id="@+id/textViewEditDiets"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Dietary Preferences"
+                    android:paddingVertical="12dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Appearance Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E0E0E0">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🎨 Appearance"
+                    android:textStyle="bold"
+                    android:textSize="16sp"/>
+                <RadioGroup
+                    android:id="@+id/radioGroupTheme"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <RadioButton android:id="@+id/radioLight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Light Mode"/>
+                    <RadioButton android:id="@+id/radioDark" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dark Mode"/>
+                    <RadioButton android:id="@+id/radioSystem" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Follow System"/>
+                </RadioGroup>
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchAllCaps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Display name in ALL CAPS"
+                    android:checked="true"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>

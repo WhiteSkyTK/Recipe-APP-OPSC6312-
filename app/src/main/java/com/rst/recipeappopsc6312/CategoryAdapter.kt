@@ -5,10 +5,21 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 
-class CategoryAdapter(private val categoryList: List<Category>) :
-    RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
+class CategoryAdapter(
+    private val categoryList: List<Category>,
+    private val onCategoryClick: (Category) -> Unit
+) : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
 
-    inner class ViewHolder(val chip: Chip) : RecyclerView.ViewHolder(chip)
+    inner class ViewHolder(val chip: Chip) : RecyclerView.ViewHolder(chip) {
+        init {
+            chip.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onCategoryClick(categoryList[position])
+                }
+            }
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val chip = LayoutInflater.from(parent.context)
@@ -20,11 +31,6 @@ class CategoryAdapter(private val categoryList: List<Category>) :
         val category = categoryList[position]
         holder.chip.text = category.name
         holder.chip.isChecked = category.isSelected
-
-        holder.chip.setOnCheckedChangeListener { _, isChecked ->
-            category.isSelected = isChecked
-            // Here you would trigger the logic to filter recipes based on this category
-        }
     }
 
     override fun getItemCount() = categoryList.size

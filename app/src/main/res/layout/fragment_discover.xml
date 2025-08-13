@@ -14,12 +14,25 @@
         android:id="@+id/textViewPageTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="🍦 Desserts n Sweets"
+        android:text="🔍 Discover"
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"
         android:layout_marginTop="16dp"
         android:layout_marginStart="24dp"/>
+
+    <!-- NEW: Search Bar -->
+    <EditText
+        android:id="@+id/editTextSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/search_bar_background"
+        android:drawableStart="@android:drawable/ic_menu_search"
+        android:drawablePadding="12dp"
+        android:hint="Search desserts 🍦..."
+        android:padding="14dp" />
 
     <!-- Grid of Recipes -->
     <androidx.recyclerview.widget.RecyclerView

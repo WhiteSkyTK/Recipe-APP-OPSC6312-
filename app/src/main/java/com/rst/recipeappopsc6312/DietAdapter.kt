@@ -5,24 +5,28 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
-class DietAdapter(private val dietList: List<Diet>) :
-    RecyclerView.Adapter<DietAdapter.DietViewHolder>() {
+class DietAdapter(private val onClick: (Diet) -> Unit) :
+    ListAdapter<Diet, DietAdapter.DietViewHolder>(DietDiffCallback) {
 
     inner class DietViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val image: ImageView = itemView.findViewById(R.id.imageViewDiet)
-        val name: TextView = itemView.findViewById(R.id.textViewDietName)
+        private val image: ImageView = itemView.findViewById(R.id.imageViewDiet)
+        private val name: TextView = itemView.findViewById(R.id.textViewDietName)
 
-        init {
+        fun bind(diet: Diet) {
+            name.text = diet.name
+            itemView.isSelected = diet.isSelected
+            Glide.with(itemView.context)
+                .load(diet.imageResId)
+                .override(100, 100) // Resize for performance
+                .into(image)
+
             itemView.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    val diet = dietList[position]
-                    diet.isSelected = !diet.isSelected
-                    itemView.isSelected = diet.isSelected
-                }
+                onClick(diet)
             }
         }
     }
@@ -33,20 +37,17 @@ class DietAdapter(private val dietList: List<Diet>) :
     }
 
     override fun onBindViewHolder(holder: DietViewHolder, position: Int) {
-        val diet = dietList[position]
-        holder.image.setImageResource(diet.imageResId)
-        holder.name.text = diet.name
-        holder.itemView.isSelected = diet.isSelected
+        holder.bind(getItem(position))
+    }
+}
 
-        Glide.with(holder.itemView.context)
-            .load(diet.imageResId)
-            .override(100, 100) // Resize to 100x100 pixels
-            .into(holder.image)
+// DiffUtil object to calculate list changes efficiently
+object DietDiffCallback : DiffUtil.ItemCallback<Diet>() {
+    override fun areItemsTheSame(oldItem: Diet, newItem: Diet): Boolean {
+        return oldItem.name == newItem.name
     }
 
-    override fun getItemCount(): Int = dietList.size
-
-    fun getSelectedDiets(): List<Diet> {
-        return dietList.filter { it.isSelected }
+    override fun areContentsTheSame(oldItem: Diet, newItem: Diet): Boolean {
+        return oldItem == newItem
     }
 }
