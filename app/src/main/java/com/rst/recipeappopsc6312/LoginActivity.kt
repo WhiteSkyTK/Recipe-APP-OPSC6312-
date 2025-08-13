@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -30,6 +31,8 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        enableEdgeToEdge()
+        //TODO: Add edge-to-edge support
         // Find all the views from our layout
         val emailLayout = findViewById<TextInputLayout>(R.id.textInputLayoutEmail)
         val emailEditText = findViewById<TextInputEditText>(R.id.editTextEmail)

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/welcome"
-    android:background="#E0EBED"
+    android:background="@color/welcome_background"
     android:padding="32dp"
     android:fitsSystemWindows="true"
     tools:context=".WelcomeActivity">
@@ -65,6 +65,7 @@
         android:text="Get Started"
         android:backgroundTint="#313742"
         android:paddingVertical="12dp"
+        android:textColor="@color/white"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toTopOf="@id/buttonLogin"
         app:layout_constraintStart_toStartOf="parent"

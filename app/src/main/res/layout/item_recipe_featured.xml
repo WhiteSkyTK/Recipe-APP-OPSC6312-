@@ -1,3 +1,6 @@
+<!-- res/layout/item_recipe_featured.xml -->
+<!-- This version has stronger constraints to prevent text overlap. -->
+
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -13,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Decorative SVG Lines -->
+        <!-- Decorative Lines -->
         <ImageView
             android:id="@+id/decorative_line1"
             android:layout_width="150dp"
@@ -25,46 +28,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@android:color/white" />
 
-        <!-- Recipe Title -->
-        <TextView
-            android:id="@+id/textViewRecipeTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Blackberry fro-yo"
-            android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@id/textViewSubtitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/imageCard"/>
-
-        <!-- Recipe Subtitle -->
-        <TextView
-            android:id="@+id/textViewSubtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="With: bay sugar"
-            android:textColor="@android:color/white"
-            android:layout_marginBottom="20dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@id/textViewRecipeTitle"/>
-
-        <!-- Decorative Line 2 (Bottom-Right) -->
-
-        <ImageView
-            android:id="@+id/decorative_line2"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:src="@drawable/line2"
-            android:layout_marginEnd="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:tint="@android:color/white" />
-
-        <!-- Card for the Image to create rounded corners -->
+        <!-- Card for the Image -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/imageCard"
             android:layout_width="100dp"
@@ -84,7 +48,7 @@
                 tools:src="@tools:sample/backgrounds/scenic"/>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Cooking Time (Positioned directly under the image card) -->
+        <!-- Cooking Time -->
         <TextView
             android:id="@+id/textViewTime"
             android:layout_width="wrap_content"
@@ -98,6 +62,36 @@
             app:layout_constraintTop_toBottomOf="@id/imageCard"
             app:layout_constraintStart_toStartOf="@id/imageCard"
             app:layout_constraintEnd_toEndOf="@id/imageCard"/>
+
+        <!-- Vertical Chain of Text -->
+        <!-- This ensures the text views will wrap and push each other down correctly. -->
+        <TextView
+            android:id="@+id/textViewRecipeTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Blackberry fro-yo with a very long name"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/textViewSubtitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/imageCard"/>
+
+        <TextView
+            android:id="@+id/textViewSubtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="With: bay sugar and some other ingredients"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/textViewRecipeTitle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/textViewRecipeTitle"
+            app:layout_constraintEnd_toEndOf="@id/textViewRecipeTitle"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

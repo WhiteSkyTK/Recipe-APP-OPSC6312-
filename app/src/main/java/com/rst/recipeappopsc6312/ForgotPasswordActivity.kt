@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -24,6 +25,8 @@ class ForgotPasswordActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forgot_password)
 
+        enableEdgeToEdge()
+        //TODO: Add edge-to-edge support
         // Find all the views from the layout
         val emailLayout = findViewById<TextInputLayout>(R.id.textInputLayoutEmail)
         val emailEditText = findViewById<TextInputEditText>(R.id.editTextEmail)

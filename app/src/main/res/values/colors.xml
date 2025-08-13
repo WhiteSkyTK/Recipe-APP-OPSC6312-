@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
+    <!-- Light Theme Colors -->
+    <color name="primary_blue">#88A0A8</color>
+    <color name="light_background">#FFFFFF</color>
+    <color name="dark_background">#1C1C1E</color>
+    <color name="dark_surface">#2C2C2E</color>
+    <color name="light_text">#1C1C1E</color>
+    <color name="dark_text">#FFFFFF</color>
+
+    <!-- Welcome Screen Specific Colors -->
+    <color name="welcome_background">#E0EBED</color>
+    <color name="welcome_button_dark">#313742</color>
+    <color name="welcome_button_light_blue">#B0C4DE</color>
+    <color name="welcome_button_text_dark">#343A40</color>
+
+    <!-- General UI Colors -->
     <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="light_grey_stroke">#E0E0E0</color>
 </resources>

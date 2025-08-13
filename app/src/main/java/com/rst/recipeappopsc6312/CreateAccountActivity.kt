@@ -17,19 +17,26 @@ import com.google.android.material.textfield.TextInputLayout
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import android.net.Uri
+import androidx.activity.enableEdgeToEdge
+import java.io.File
 
 class CreateAccountActivity : AppCompatActivity() {
 
     private lateinit var registrationData: RegistrationData
     private lateinit var progressBar: ProgressBar
+    private var localProfileImagePath: String? = null
     private val TAG = "CreateAccountActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_account)
 
+        enableEdgeToEdge()
+        //TODO: Add edge-to-edge support
         // Receive the data object from the previous screen
         registrationData = intent.getParcelableExtra("REGISTRATION_DATA") ?: RegistrationData()
+        localProfileImagePath = intent.getStringExtra("PROFILE_IMAGE_PATH")
 
         // Find views
         val usernameLayout = findViewById<TextInputLayout>(R.id.textInputLayoutUsername)
@@ -62,37 +69,56 @@ class CreateAccountActivity : AppCompatActivity() {
 
     private fun handleSignUp(username: String, email: String, password: String) {
         Log.d(TAG, "handleSignUp: Attempting to create user with email: $email")
-        progressBar.visibility = View.VISIBLE // Show loading animation
+        progressBar.visibility = View.VISIBLE
 
         FirebaseManager.auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     Log.d(TAG, "Firebase Auth user created successfully.")
-                    val firebaseUser = FirebaseManager.auth.currentUser
-                    if (firebaseUser != null) {
-                        // User created in Auth, now save their full profile to Firestore
-                        saveUserProfile(firebaseUser.uid, username, email)
-                    } else {
-                        // This case is unlikely but good to handle
+                    val userId = FirebaseManager.auth.currentUser?.uid
+                    if (userId == null) {
+                        // This is a failsafe, should not happen
                         progressBar.visibility = View.GONE
-                        Toast.makeText(this, "Sign up failed: Could not get user.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Sign up failed: Could not get user ID.", Toast.LENGTH_SHORT).show()
+                        return@addOnCompleteListener
+                    }
+
+                    // Now, check if we need to upload a profile picture
+                    if (localProfileImagePath != null) {
+                        val fileUri = Uri.fromFile(File(localProfileImagePath!!))
+                        val storageRef = FirebaseManager.storage.reference.child("profile_pictures/$userId/profile.jpg")
+
+                        Log.d(TAG, "Uploading profile picture...")
+                        storageRef.putFile(fileUri)
+                            .addOnSuccessListener {
+                                storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                                    Log.d(TAG, "Profile picture uploaded. Saving profile with URL.")
+                                    saveUserProfile(userId, username, email, downloadUrl.toString())
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e(TAG, "Profile picture upload failed. Saving profile without URL.", e)
+                                saveUserProfile(userId, username, email, null) // Still save profile on failure
+                            }
+                    } else {
+                        Log.d(TAG, "No profile picture. Saving profile without URL.")
+                        saveUserProfile(userId, username, email, null)
                     }
                 } else {
-                    progressBar.visibility = View.GONE // Hide loading on failure
+                    progressBar.visibility = View.GONE
                     Log.e(TAG, "Firebase Auth user creation failed.", task.exception)
                     Toast.makeText(this, "Sign up failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }
 
-    private fun saveUserProfile(userId: String, username: String, email: String) {
-        Log.d(TAG, "saveUserProfile: Attempting to save profile to Firestore for user ID: $userId")
-
-        // Create a map of all the user's data collected during registration
+    private fun saveUserProfile(userId: String, username: String, email: String, imageUrl: String?) {
+        Log.d(TAG, "saveUserProfile: Attempting to save profile to Firestore.")
         val userProfile = hashMapOf(
             "id" to userId,
             "username" to username,
             "email" to email,
+            "profileImageUrl" to imageUrl,
             "full_name" to registrationData.fullName,
             "phone_number" to registrationData.phoneNumber,
             "country" to registrationData.country,
@@ -102,17 +128,15 @@ class CreateAccountActivity : AppCompatActivity() {
             "selected_diets" to registrationData.selectedDiets
         )
 
-        // Save the profile to a 'users' collection in Firestore, using the auth ID as the document ID
-        FirebaseManager.firestore.collection("users").document(userId)
-            .set(userProfile)
+        FirebaseManager.firestore.collection("users").document(userId).set(userProfile)
             .addOnSuccessListener {
-                progressBar.visibility = View.GONE // Hide loading on success
+                progressBar.visibility = View.GONE
                 Log.d(TAG, "User profile saved successfully to Firestore.")
                 Toast.makeText(this, "Sign Up Successful! 🎉", Toast.LENGTH_LONG).show()
                 navigateToMainApp()
             }
             .addOnFailureListener { e ->
-                progressBar.visibility = View.GONE // Hide loading on failure
+                progressBar.visibility = View.GONE
                 Log.e(TAG, "Failed to save user profile to Firestore.", e)
                 Toast.makeText(this, "Failed to save profile: ${e.message}", Toast.LENGTH_SHORT).show()
             }
