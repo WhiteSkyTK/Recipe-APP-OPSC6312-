@@ -15,7 +15,7 @@ Welcome to the official repository for Hamory Kitchen, a smart recipe and meal p
 
 | Splash & Login | Country & Cuisine | Diet & Profile |
 | :---: | :---: | :---: |
-| *[Screenshot of Splash Screen]* | *[Screenshot of Country Selection]* | *[Screenshot of Diet Selection]* |
+| *https://photos.google.com/photo/AF1QipP34Da4ZVnCNJyp2cou4fOpGRkRdAcnx-pJxutR* | *[Screenshot of Country Selection]* | *[Screenshot of Diet Selection]* |
 | *[Screenshot of Login Screen]* | *[Screenshot of Cuisine Selection]* | *[Screenshot of Profile Completion]* |
 | *[Screenshot of Forgot Password]* | *[Screenshot of Create Account]* | *[Screenshot of User Profile]* |
 
