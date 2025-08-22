@@ -52,7 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Blueberry muffins"
-            android:textColor="@android:color/black"
+            android:tint="?android:attr/textColorPrimary"
             android:textStyle="bold"
             android:textSize="16sp"
             android:layout_marginTop="12dp"/>
@@ -63,8 +63,8 @@
             android:layout_height="wrap_content"
             android:text="40 Min"
             android:drawableStart="@drawable/ic_time"
-            app:tint="@android:color/black"
-            android:drawablePadding="4dp"
+            app:tint="?android:attr/textColorPrimary"
+            android:drawablePadding="2dp"
             android:layout_marginTop="4dp"/>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -23,7 +23,6 @@ class CategoryFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerViewAllCategories)
 
         // Get the full category list from the central DummyData object
-        val categoryList = DummyData.getAllCategories()
 
         categoryAdapter = CategoryAdapter(categoryList) { clickedCategory ->
             // This is where you handle the click on a category

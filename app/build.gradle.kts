@@ -7,6 +7,7 @@ plugins {
     id("kotlin-parcelize")
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0"
     id("com.google.gms.google-services")
+    id("kotlin-kapt")
 }
 
 // Load secrets from local.properties
@@ -43,6 +44,12 @@ android {
         // Read secrets from the loaded local.properties
         buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY")}\"")
+        buildConfigField("String", "SPOONACULAR_API_KEY", "\"${localProperties.getProperty("spoonacular.api.key")}\"")
+        buildConfigField("String", "SPOONACULAR_API_KEY_1", "\"${localProperties.getProperty("spoonacular.api.key1")}\"")
+        buildConfigField("String", "SPOONACULAR_API_KEY_2", "\"${localProperties.getProperty("spoonacular.api.key2")}\"")
+        buildConfigField("String", "SPOONACULAR_API_KEY_3", "\"${localProperties.getProperty("spoonacular.api.key3")}\"")
+        buildConfigField("String", "SPOONACULAR_API_KEY_4", "\"${localProperties.getProperty("spoonacular.api.key4")}\"")
+        buildConfigField("String", "SPOONACULAR_API_KEY_5", "\"${localProperties.getProperty("spoonacular.api.key5")}\"")
     }
     buildTypes {
         release {
@@ -57,11 +64,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlin {
-        jvmToolchain(11)
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 
@@ -73,6 +80,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.auth)
     implementation(libs.androidx.media3.common.ktx)
+    implementation(libs.androidx.ui.text)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -105,4 +113,25 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage.ktx)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
+
+    // Optional - Test helpers
+    testImplementation(libs.androidx.room.testing)
+
+    // Gson for Type Converters (if not already added)
+    implementation(libs.gson)
+    implementation(libs.androidx.fragment.ktx)
+
+    // ... other dependencies
+    implementation(libs.text.recognition)
+    implementation("com.github.amlcurran.showcaseview:library:5.4.3")
+    implementation("com.hbb20:ccp:2.7.3")
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.1.0")
+    //implementation("com.spoonacular:android-client:2.0.2")
 }

@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="?android:attr/windowBackground"
     tools:context=".PreferencesActivity"
     android:id="@+id/preferences_layout">
 
@@ -29,22 +29,19 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="⚙️ Preferences"
+                android:text="Preferences ⚙️"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/black"
+                android:textColor="?android:attr/textColorPrimary"
                 android:layout_centerInParent="true"/>
         </RelativeLayout>
 
         <!-- Personal Preferences Card -->
         <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.App.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="#E0E0E0">
+            android:layout_marginTop="24dp">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -82,10 +79,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="#E0E0E0">
+            style="@style/Widget.App.Card">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -105,7 +99,30 @@
                     <RadioButton android:id="@+id/radioLight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Light Mode"/>
                     <RadioButton android:id="@+id/radioDark" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dark Mode"/>
                     <RadioButton android:id="@+id/radioSystem" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Follow System"/>
+
                 </RadioGroup>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?attr/colorOutline"
+                    android:layout_marginVertical="12dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔢 Unit System"
+                    android:textStyle="bold"/>
+
+                <RadioGroup
+                    android:id="@+id/radioGroupUnits"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <RadioButton android:id="@+id/radioMetric" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Metric (grams, ml)"/>
+                    <RadioButton android:id="@+id/radioImperial" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Imperial (ounces, cups)"/>
+                </RadioGroup>
+
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/switchAllCaps"
                     android:layout_width="match_parent"

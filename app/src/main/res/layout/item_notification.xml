@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
+            android:textColor="?android:attr/textColor"
             tools:text="New Update Available" />
 
         <TextView
@@ -37,6 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"
+            android:textColor="?android:attr/textColor"
             tools:text="Today / 10:52 PM" />
     </LinearLayout>
 </LinearLayout>

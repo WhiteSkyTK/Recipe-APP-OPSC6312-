@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="?android:attr/windowBackground"
     tools:context=".MainActivity"
     android:id="@+id/main_content_layout">
 
@@ -29,14 +29,15 @@
                 tools:text="☀️ Good Morning\nEBMTС"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/black"/>
+                android:textColor="?android:attr/textColorPrimary"/>
             <ImageView
                 android:id="@+id/buttonFavorites"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_heart_outline"
                 android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                app:tint="?android:attr/textColor" />
             <ImageView
                 android:id="@+id/buttonNotifications"
                 android:layout_width="wrap_content"
@@ -44,6 +45,7 @@
                 android:src="@drawable/ic_notification"
                 android:layout_toStartOf="@id/buttonFavorites"
                 android:layout_marginEnd="16dp"
+                app:tint="?android:attr/textColor"
                 android:layout_centerVertical="true"/>
             <ImageView
                 android:id="@+id/buttonAddRecipe"
@@ -52,6 +54,7 @@
                 android:src="@drawable/ic_add_circle"
                 android:layout_toStartOf="@id/buttonNotifications"
                 android:layout_marginEnd="16dp"
+                app:tint="?android:attr/textColor"
                 android:layout_centerVertical="true"/>
         </RelativeLayout>
 
@@ -67,12 +70,13 @@
 
     <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/bottom_nav_background"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottom_nav_menu"/>
-
+    android:id="@+id/bottomNavigationView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:background="@drawable/bottom_nav_background"
+    app:itemIconTint="@color/bottom_nav_item_color"
+    app:itemTextColor="@color/bottom_nav_item_color"
+    app:labelVisibilityMode="selected"
+    app:menu="@menu/bottom_nav_menu"/>
 </RelativeLayout>

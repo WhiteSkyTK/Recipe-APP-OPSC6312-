@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?android:attr/windowBackground"
     tools:context=".RecipeDetailActivity"
     android:id="@+id/recipe_detail_layout">
 
@@ -20,6 +21,7 @@
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <ImageView
@@ -45,19 +47,17 @@
         android:background="@drawable/rounded_top_corners"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
 
             <!-- This is the main scrolling content area -->
             <androidx.core.widget.NestedScrollView
+                android:id="@+id/content_scroll_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:padding="24dp">
 
                 <LinearLayout
+                    android:id="@+id/main_content_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
@@ -71,14 +71,16 @@
                         android:textSize="24sp"
                         android:textStyle="bold"
                         android:layout_gravity="center_horizontal"
-                        android:textColor="@android:color/black"/>
+                        android:textColor="?android:attr/textColor"/>
                     <TextView
                         android:id="@+id/textViewTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        app:drawableStartCompat="@drawable/ic_time"
                         tools:text="15 mins"
-                        android:drawableStart="@drawable/ic_time"
-                        android:drawablePadding="8dp"
+                        android:drawablePadding="2dp"
+                        app:tint="?android:attr/textColorPrimary"
+                        android:textColor="?android:attr/textColor"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="8dp"/>
                     <TextView
@@ -87,8 +89,19 @@
                         android:layout_height="wrap_content"
                         tools:text="by TK"
                         android:drawablePadding="8dp"
+                        android:textColor="?android:attr/textColor"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="4dp"/>
+                    <TextView
+                        android:id="@+id/textViewRecipeDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:text="This is a delightful cake that is perfect for any occasion. It's easy to make and tastes delicious!"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:lineSpacingMultiplier="1.2"/>
 
                     <!-- Nutrition Section -->
                     <TextView
@@ -97,7 +110,7 @@
                         android:text="Nutrition Facts 🍎"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@android:color/black"
+                        android:textColor="?android:attr/textColor"
                         android:layout_marginTop="24dp"/>
                     <HorizontalScrollView
                         android:layout_width="match_parent"
@@ -132,12 +145,13 @@
                                 android:text="Ingredients 🍋"
                                 android:textSize="18sp"
                                 android:textStyle="bold"
-                                android:textColor="@android:color/black"/>
+                                android:textColor="?android:attr/textColor"/>
                             <TextView
                                 android:id="@+id/textViewServings"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
+                                android:textColor="?android:attr/textColor"
                                 tools:text="☀️ 6 Serves"/>
                         </LinearLayout>
 
@@ -178,6 +192,7 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerViewIngredients"
                         android:layout_width="match_parent"
+                        android:textColor="?android:attr/textColor"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
@@ -189,7 +204,7 @@
                         android:text="Method 🍳"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@android:color/black"
+                        android:textColor="?android:attr/textColor"
                         android:layout_marginTop="24dp"/>
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerViewMethod"
@@ -200,7 +215,6 @@
 
                 </LinearLayout>
             </androidx.core.widget.NestedScrollView>
-        </LinearLayout>
     </FrameLayout>
     <!-- Floating Action Button for Favorite -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -208,8 +222,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_heart_outline"
+        app:backgroundTint="?attr/colorSecondary"
         app:layout_anchor="@id/app_bar_layout"
+        android:contentDescription="toggle_favorite"
         app:layout_anchorGravity="bottom|end"
         android:layout_marginEnd="24dp"/>
 
+    <FrameLayout
+        android:id="@+id/loadingOverlayContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ProgressBar
+            android:id="@+id/loadingIndicator"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+    </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

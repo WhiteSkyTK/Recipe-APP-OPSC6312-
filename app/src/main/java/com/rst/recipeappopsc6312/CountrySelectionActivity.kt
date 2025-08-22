@@ -8,11 +8,14 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
@@ -30,7 +33,9 @@ class CountrySelectionActivity : AppCompatActivity() {
     private lateinit var continueButton: Button
     private lateinit var backButton: ImageView
     private lateinit var countryAdapter: CountryAdapter
-    private lateinit var progressBar: ProgressBar
+    private lateinit var loadingOverlayContainer: FrameLayout // For the overlay
+    private lateinit var progressBar: ProgressBar          // For the actual progress bar
+
     private lateinit var loadingBar: ProgressBar
     private var countryList: List<Country> = emptyList()
     private var selectedCountry: Country? = null
@@ -44,8 +49,14 @@ class CountrySelectionActivity : AppCompatActivity() {
         setContentView(R.layout.activity_country_selection)
 
         enableEdgeToEdge()
-        //TODO: Add edge-to-edge support
-        // Check if we are in edit mode
+        val countrySelectionLayout = findViewById<View>(R.id.countrySelectionLayout) // Add this ID to your root layout in XML
+
+        // This is the correct way to handle edge-to-edge
+        ViewCompat.setOnApplyWindowInsetsListener(countrySelectionLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0) // We handle bottom padding with the nav bar
+            insets
+        }
         isEditMode = intent.getBooleanExtra("IS_EDIT_MODE", false)
 
         // Initialize registrationData, creating a new object if one isn't passed
@@ -55,13 +66,16 @@ class CountrySelectionActivity : AppCompatActivity() {
         searchEditText = findViewById(R.id.editTextSearch)
         continueButton = findViewById(R.id.buttonContinue)
         backButton = findViewById(R.id.imageViewBack)
-        progressBar = findViewById(R.id.progressBar)
-        loadingBar = findViewById(R.id.LoadingBar)
+        loadingOverlayContainer = findViewById(R.id.loadingOverlayContainer) // Find the FrameLayout
+        progressBar = loadingOverlayContainer.findViewById(R.id.loadingIndicator) // Find ProgressBar INSIDE the FrameLayout
+        val topProgressBar = findViewById<ProgressBar>(R.id.progressBar)
         recyclerView.layoutManager = LinearLayoutManager(this)
+
 
         if (isEditMode) {
             // If editing, hide the progress bar and change the button text
-            progressBar.visibility = View.GONE
+            topProgressBar.visibility = View.GONE
+            showLoading(false)
             continueButton.text = "Save Changes"
         }
 
@@ -78,9 +92,10 @@ class CountrySelectionActivity : AppCompatActivity() {
         if (cachedCountries.isNotEmpty()) {
             countryList = sortCountries(cachedCountries)
             setupRecyclerViewAndSearch()
+            showLoading(false)
         } else {
             // Show the loading animation before starting the network call
-            loadingBar.visibility = View.VISIBLE
+            showLoading(true)
             fetchCountriesFromApi()
         }
     }
@@ -116,7 +131,7 @@ class CountrySelectionActivity : AppCompatActivity() {
 
         call.enqueue(object : Callback<List<Country>> {
             override fun onResponse(call: Call<List<Country>>, response: Response<List<Country>>) {
-                loadingBar.visibility = View.GONE // Hide loading on success
+                showLoading(false)
                 if (response.isSuccessful) {
                     val fetchedList = response.body() ?: emptyList()
                     countryList = sortCountries(fetchedList)
@@ -128,7 +143,7 @@ class CountrySelectionActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<List<Country>>, t: Throwable) {
-                loadingBar.visibility = View.GONE // Hide loading on failure
+                showLoading(false)
                 Toast.makeText(this@CountrySelectionActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
@@ -173,17 +188,16 @@ class CountrySelectionActivity : AppCompatActivity() {
 
     private fun updateUserCountry(newCountry: String) {
         val userId = FirebaseManager.auth.currentUser?.uid ?: return
-
-        loadingBar.visibility = View.VISIBLE
+        showLoading(true)
         FirebaseManager.firestore.collection("users").document(userId)
             .update("country", newCountry)
             .addOnSuccessListener {
-                loadingBar.visibility = View.GONE
+                showLoading(false)
                 Toast.makeText(this, "Country updated!", Toast.LENGTH_SHORT).show()
                 finish() // Go back to the preferences screen
             }
             .addOnFailureListener { e ->
-                loadingBar.visibility = View.GONE
+                showLoading(false)
                 Toast.makeText(this, "Failed to update country: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
@@ -208,5 +222,15 @@ class CountrySelectionActivity : AppCompatActivity() {
         } else {
             emptyList()
         }
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        loadingOverlayContainer.visibility = if (isLoading) View.VISIBLE else View.GONE
+
+        // Disable/enable other UI elements to prevent interaction during loading
+        searchEditText.isEnabled = !isLoading
+        recyclerView.isEnabled = !isLoading // Or find a way to make items unclickable
+        continueButton.isEnabled = !isLoading && (selectedCountry != null) // Keep original logic for continue button
+        backButton.isEnabled = !isLoading
     }
 }

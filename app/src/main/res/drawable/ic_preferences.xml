@@ -2,8 +2,10 @@
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
+    android:tint="?android:attr/textColorPrimary"
     android:viewportHeight="24">
   <path
+
       android:strokeWidth="1"
       android:pathData="M12,7L20,7"
       android:fillColor="#00000000"

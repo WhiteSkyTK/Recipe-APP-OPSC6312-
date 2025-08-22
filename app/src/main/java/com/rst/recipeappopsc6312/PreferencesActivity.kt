@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.RadioGroup
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
@@ -21,7 +22,7 @@ class PreferencesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_preferences) // Use the new layout file
-
+        enableEdgeToEdge()
         val preferencesLayout = findViewById<View>(R.id.preferences_layout) // Add this ID to your root layout in XML
 
         // This is the correct way to handle edge-to-edge
@@ -33,12 +34,13 @@ class PreferencesActivity : AppCompatActivity() {
 
         val backButton = findViewById<ImageView>(R.id.imageViewBack)
         val themeRadioGroup = findViewById<RadioGroup>(R.id.radioGroupTheme)
+        val unitRadioGroup = findViewById<RadioGroup>(R.id.radioGroupUnits)
         val allCapsSwitch = findViewById<MaterialSwitch>(R.id.switchAllCaps)
         val editCountry = findViewById<TextView>(R.id.textViewEditCountry)
         val editCuisines = findViewById<TextView>(R.id.textViewEditCuisines)
         val editDiets = findViewById<TextView>(R.id.textViewEditDiets)
 
-        loadCurrentSettings(themeRadioGroup, allCapsSwitch)
+        loadCurrentSettings(themeRadioGroup, allCapsSwitch, unitRadioGroup)
 
         // --- Click Listeners ---
         backButton.setOnClickListener {
@@ -57,6 +59,14 @@ class PreferencesActivity : AppCompatActivity() {
 
         allCapsSwitch.setOnCheckedChangeListener { _, isChecked ->
             saveCapitalizationSetting(isChecked)
+        }
+
+        unitRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            val selectedSystem = when (checkedId) {
+                R.id.radioImperial -> UnitConverter.IMPERIAL
+                else -> UnitConverter.METRIC
+            }
+            saveUnitSetting(selectedSystem)
         }
 
         // --- Navigation to Edit Preferences ---
@@ -80,7 +90,7 @@ class PreferencesActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadCurrentSettings(radioGroup: RadioGroup, allCapsSwitch: MaterialSwitch) {
+    private fun loadCurrentSettings(radioGroup: RadioGroup, allCapsSwitch: MaterialSwitch, unitGroup: RadioGroup) {
         val prefs = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
         // Default to Light Mode if no setting is saved
         val currentTheme = prefs.getInt("ThemeMode", AppCompatDelegate.MODE_NIGHT_NO)
@@ -92,6 +102,12 @@ class PreferencesActivity : AppCompatActivity() {
             else -> radioGroup.check(R.id.radioLight)
         }
         allCapsSwitch.isChecked = useAllCaps
+
+        val currentUnitSystem = prefs.getString("UnitSystem", UnitConverter.METRIC)
+        when (currentUnitSystem) {
+            UnitConverter.IMPERIAL -> unitGroup.check(R.id.radioImperial)
+            else -> unitGroup.check(R.id.radioMetric)
+        }
     }
 
     private fun saveThemeSetting(mode: Int) {
@@ -104,5 +120,10 @@ class PreferencesActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
         prefs.edit().putBoolean("UseAllCaps", useAllCaps).apply()
         Log.d(TAG, "Capitalization setting saved: $useAllCaps")
+    }
+
+    private fun saveUnitSetting(system: String) {
+        val prefs = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        prefs.edit().putString("UnitSystem", system).apply()
     }
 }

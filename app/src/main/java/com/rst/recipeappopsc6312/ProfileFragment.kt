@@ -1,5 +1,7 @@
 package com.rst.recipeappopsc6312
 
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -10,10 +12,13 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.android.material.materialswitch.MaterialSwitch
 import de.hdodenhof.circleimageview.BuildConfig
 import de.hdodenhof.circleimageview.CircleImageView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
 
@@ -36,9 +41,23 @@ class ProfileFragment : Fragment() {
         val aboutUsTextView = view.findViewById<TextView>(R.id.textViewAboutUs)
         val reportIssueTextView = view.findViewById<TextView>(R.id.textViewReportIssue)
         val versionTextView = view.findViewById<TextView>(R.id.textViewVersion)
+        val myRecipesButton = view.findViewById<Button>(R.id.buttonMyRecipes)
+        val logOutButton = view.findViewById<Button>(R.id.buttonLogOut)
 
         // --- Load User Data from Firebase ---
         loadUserProfile(profileImageView, userNameTextView, userEmailTextView)
+
+        logOutButton.setOnClickListener {
+            // Show a confirmation dialog before logging out
+            AlertDialog.Builder(requireContext())
+                .setTitle("Log Out")
+                .setMessage("Are you sure you want to log out and clear all local data?")
+                .setPositiveButton("Log Out") { _, _ ->
+                    logoutUser()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
 
         // Set the app version text
         try {
@@ -51,9 +70,11 @@ class ProfileFragment : Fragment() {
         }
 
         // --- Set Click Listeners ---
-
+        myRecipesButton.setOnClickListener {
+            val intent = Intent(activity, MyRecipesActivity::class.java)
+            startActivity(intent)
+        }
         editProfileButton.setOnClickListener {
-            // FIXED: Launch the new EditProfileActivity
             val intent = Intent(activity, EditProfileActivity::class.java)
             startActivity(intent)
         }
@@ -91,6 +112,38 @@ class ProfileFragment : Fragment() {
         }
 
         return view
+    }
+
+    private fun logoutUser() {
+        Log.d(TAG, "Logging out user and clearing all data.")
+
+        // 1. Sign out from Firebase
+        FirebaseManager.auth.signOut()
+
+        // 2. Clear all SharedPreferences
+        val appSettingsPrefs = requireActivity().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        val appCachePrefs = requireActivity().getSharedPreferences("AppCache", Context.MODE_PRIVATE)
+        val favoritesPrefs = requireActivity().getSharedPreferences("FavoritePrefs", Context.MODE_PRIVATE)
+        appSettingsPrefs.edit().clear().apply()
+        appCachePrefs.edit().clear().apply()
+        favoritesPrefs.edit().clear().apply()
+        Log.d(TAG, "All SharedPreferences cleared.")
+
+        // 3. Clear the Room database in a background thread
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                AppDatabase.getDatabase(requireContext()).clearAllTables()
+                Log.d(TAG, "Room database cleared successfully.")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error clearing Room database.", e)
+            }
+        }
+
+        // 4. Navigate to the Login screen and clear the back stack
+        val intent = Intent(activity, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        activity?.finish() // Close MainActivity
     }
 
     private fun loadUserProfile(imageView: CircleImageView, nameView: TextView, emailView: TextView) {

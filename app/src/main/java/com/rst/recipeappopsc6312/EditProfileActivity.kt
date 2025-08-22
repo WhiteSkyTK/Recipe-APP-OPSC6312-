@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -31,7 +32,14 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var fullNameEditText: TextInputEditText
     private lateinit var usernameEditText: TextInputEditText
     private lateinit var phoneEditText: TextInputEditText
-    private lateinit var progressBar: ProgressBar // Add a ProgressBar to your layout
+    private lateinit var loadingOverlayContainer: FrameLayout // For the overlay
+    private lateinit var progressBar: ProgressBar          // For the ProgressBar INSIDE the overlay
+    private lateinit var saveButton: Button
+    private lateinit var backButton: ImageView
+    private lateinit var changePhotoButton: TextView
+    private lateinit var changePasswordButton: TextView
+
+
 
     private var profileImageUri: Uri? = null
     private var tempImageUri: Uri? = null
@@ -77,12 +85,14 @@ class EditProfileActivity : AppCompatActivity() {
         fullNameEditText = findViewById(R.id.editTextFullName)
         usernameEditText = findViewById(R.id.editTextUsername)
         phoneEditText = findViewById(R.id.editTextPhone)
-        val changePhotoButton = findViewById<TextView>(R.id.textViewChangePhoto)
-        val changePasswordButton = findViewById<TextView>(R.id.textViewChangePassword)
-        val saveButton = findViewById<Button>(R.id.buttonSaveChanges)
-        val backButton = findViewById<ImageView>(R.id.imageViewBack)
-        // progressBar = findViewById(R.id.progressBar) //TODO Make sure this ID exists in your XML
+        changePhotoButton = findViewById(R.id.textViewChangePhoto)
+        changePasswordButton = findViewById(R.id.textViewChangePassword)
+        saveButton = findViewById(R.id.buttonSaveChanges)
+        backButton = findViewById(R.id.imageViewBack)
+        loadingOverlayContainer = findViewById(R.id.loadingOverlayContainer) // Ensure this ID exists in your XML
+        progressBar = loadingOverlayContainer.findViewById(R.id.loadingIndicator) // Ensure this ID exists INSIDE the FrameLayout in XML
 
+        showLoading(false)
         loadUserProfile()
 
         // --- Click Listeners ---
@@ -93,12 +103,15 @@ class EditProfileActivity : AppCompatActivity() {
         changePasswordButton.setOnClickListener {
             val user = FirebaseManager.auth.currentUser
             if (user?.email != null) {
+                showLoading(true) // Show loading before sending email
                 FirebaseManager.auth.sendPasswordResetEmail(user.email!!)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Password reset link sent to your email.", Toast.LENGTH_LONG).show()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "Failed to send reset link: ${e.message}", Toast.LENGTH_SHORT).show()
+                    .addOnCompleteListener { task -> // Use addOnCompleteListener for robustness
+                        showLoading(false) // Hide loading after attempt
+                        if (task.isSuccessful) {
+                            Toast.makeText(this, "Password reset link sent to your email.", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(this, "Failed to send reset link: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        }
                     }
             }
         }
@@ -108,10 +121,25 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
+    private fun showLoading(isLoading: Boolean) {
+        loadingOverlayContainer.visibility = if (isLoading) View.VISIBLE else View.GONE
+        // Disable/Enable interactive elements
+        profileImageView.isEnabled = !isLoading
+        fullNameEditText.isEnabled = !isLoading
+        usernameEditText.isEnabled = !isLoading
+        phoneEditText.isEnabled = !isLoading
+        changePhotoButton.isEnabled = !isLoading
+        changePasswordButton.isEnabled = !isLoading
+        saveButton.isEnabled = !isLoading
+        backButton.isEnabled = !isLoading
+    }
+
     private fun loadUserProfile() {
         val userId = FirebaseManager.auth.currentUser?.uid ?: return
+        showLoading(true)
         FirebaseManager.firestore.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
+                showLoading(false)
                 if (document != null && document.exists()) {
                     fullNameEditText.setText(document.getString("full_name"))
                     usernameEditText.setText(document.getString("username"))
@@ -121,12 +149,15 @@ class EditProfileActivity : AppCompatActivity() {
                         Glide.with(this).load(imageUrl).into(profileImageView)
                     }
                 }
+            }.addOnFailureListener {
+                showLoading(false)
+                Toast.makeText(this, "Failed to load profile: ${it.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun saveChanges() {
         val userId = FirebaseManager.auth.currentUser?.uid ?: return
-        progressBar.visibility = View.VISIBLE
+        showLoading(true)
 
         if (profileImageUri != null) {
             // Case 1: A new image was selected, upload it first
@@ -138,7 +169,7 @@ class EditProfileActivity : AppCompatActivity() {
                     }
                 }
                 .addOnFailureListener { e ->
-                    progressBar.visibility = View.GONE
+                    showLoading(false)
                     Toast.makeText(this, "Failed to upload image: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         } else {
@@ -160,12 +191,12 @@ class EditProfileActivity : AppCompatActivity() {
 
         FirebaseManager.firestore.collection("users").document(userId).update(updates)
             .addOnSuccessListener {
-                // progressBar.visibility = View.GONE
+                showLoading(false)
                 Toast.makeText(this, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
                 finish() // Use finish() to go back
             }
             .addOnFailureListener { e ->
-                // progressBar.visibility = View.GONE
+                showLoading(false)
                 Toast.makeText(this, "Failed to update profile: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
@@ -201,6 +232,9 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun validateInput(): Boolean {
+        fullNameEditText.error = null // Clear previous errors
+        usernameEditText.error = null
+
         if (fullNameEditText.text.isNullOrBlank()) {
             fullNameEditText.error = "Full name cannot be empty"
             return false
@@ -209,6 +243,7 @@ class EditProfileActivity : AppCompatActivity() {
             usernameEditText.error = "Username cannot be empty"
             return false
         }
+        // Add phone number validation if needed
         return true
     }
 }

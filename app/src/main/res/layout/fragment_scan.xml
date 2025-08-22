@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@android:color/white"
+    android:background="?android:attr/windowBackground"
     android:padding="24dp"
     tools:context=".ScanFragment">
 
@@ -17,37 +17,46 @@
         android:text="What's in your kitchen? 🧑‍🍳"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"/>
+        android:textColor="?android:attr/textColorPrimary"/>
 
     <!-- Input Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:layout_marginTop="16dp">
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayoutIngredient"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Type, scan, or voice an ingredient">
+            android:hint="Type an ingredient..."
+            app:endIconMode="custom"
+            app:endIconDrawable="@drawable/ic_add"
+            app:endIconContentDescription="Add Ingredient">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editTextIngredient"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:inputType="text"/>
         </com.google.android.material.textfield.TextInputLayout>
         <ImageButton
             android:id="@+id/buttonScan"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:src="@drawable/ic_scan"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"/>
         <ImageButton
             android:id="@+id/buttonVoice"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:src="@drawable/ic_mic"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"/>
     </LinearLayout>
 
     <com.google.android.material.chip.ChipGroup
@@ -67,19 +76,19 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Recommendations for you ✨"
+        android:text="Your Scan History ✨"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
+        android:textColor="?android:attr/textColorPrimary"
         android:layout_marginTop="24dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewRecommendations"
+        android:id="@+id/recyclerViewHistory"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginTop="12dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_recipe_recommended"/>
+        tools:listitem="@layout/item_scan_history"/>
 
 </LinearLayout>

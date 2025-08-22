@@ -9,6 +9,8 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -25,7 +27,14 @@ class DietarySelectionActivity : AppCompatActivity() {
         setContentView(R.layout.activity_dietary_selection)
 
         enableEdgeToEdge()
-        //TODO: Add edge-to-edge support
+        val dietSelectionLayout = findViewById<View>(R.id.dietSelectionLayout) // Add this ID to your root layout in XML
+
+        // This is the correct way to handle edge-to-edge
+        ViewCompat.setOnApplyWindowInsetsListener(dietSelectionLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0) // We handle bottom padding with the nav bar
+            insets
+        }
         isEditMode = intent.getBooleanExtra("IS_EDIT_MODE", false)
         // Receive the data object from the previous screen
         registrationData = intent.getParcelableExtra("REGISTRATION_DATA") ?: RegistrationData()
