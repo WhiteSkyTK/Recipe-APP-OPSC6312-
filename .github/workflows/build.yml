@@ -24,10 +24,10 @@ jobs:
         run: |
           echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> local.properties
           echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> local.properties
-          # optional: only if you ever add signing secrets
-          if [ -n "${{ secrets.RELEASE_STORE_FILE }}" ]; then
-            echo "RELEASE_STORE_FILE=${{ secrets.RELEASE_STORE_FILE }}" >> local.properties
-            echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}" >> local.properties
+          # Optional signing secrets
+          if [ -n "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" ]; then
+            echo "RELEASE_STORE_FILE=my-release-key.jks" >> local.properties
+            echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> local.properties
             echo "RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> local.properties
             echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> local.properties
           fi
@@ -38,14 +38,7 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > app/my-release-key.jks
-
-      - name: Configure Signing
-        run: |
-          echo "RELEASE_STORE_FILE=my-release-key.jks" >> local.properties
-          echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}" >> local.properties
-          echo "RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> local.properties
-          echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> local.properties
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > app/my-release-key.jks
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
