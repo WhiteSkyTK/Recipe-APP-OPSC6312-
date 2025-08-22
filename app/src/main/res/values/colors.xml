@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Light Theme Colors -->
+    <!-- Primary Brand Color -->
     <color name="primary_blue">#88A0A8</color>
+
+    <!-- Light Theme Colors -->
     <color name="light_background">#FFFFFF</color>
-    <color name="dark_background">#1C1C1E</color>
-    <color name="dark_surface">#2C2C2E</color>
     <color name="light_text">#1C1C1E</color>
+    <color name="light_card_stroke">#E0E0E0</color>
+    <color name="light_chip_background">#F0F0F0</color>
+
+    <!-- Dark Theme Colors -->
+    <color name="dark_background">#1C1C1E</color>
+    <color name="dark_surface">#2C2C2E</color> <!-- For cards and nav bars -->
     <color name="dark_text">#FFFFFF</color>
+    <color name="dark_card_stroke">#48484A</color>
+    <color name="dark_chip_background">#3A3A3C</color>
 
     <!-- Welcome Screen Specific Colors -->
     <color name="welcome_background">#E0EBED</color>
@@ -14,8 +22,22 @@
     <color name="welcome_button_light_blue">#B0C4DE</color>
     <color name="welcome_button_text_dark">#343A40</color>
 
+    <color name="light_card_background">#90B5BB</color> <!-- A very light, blue-tinted grey -->
+    <color name="dark_card_background">#3A4144</color>  <!-- A dark, blue-tinted grey -->
+
+    <color name="profile_image_border">#E0E0E0</color>
+
+    <!-- Chip Colors - Light Theme -->
+    <color name="chip_selected_background_light">#90B5BB</color> <!-- Your current selected color for light -->
+    <color name="chip_default_background_light">#F0F0F0</color>  <!-- Your current default color for light -->
+
     <!-- General UI Colors -->
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
-    <color name="light_grey_stroke">#E0E0E0</color>
+    <color name="transparent">#00000000</color>
+    <color name="transparent_blue">#1B90B5BB</color>
+
+
+
+
 </resources>

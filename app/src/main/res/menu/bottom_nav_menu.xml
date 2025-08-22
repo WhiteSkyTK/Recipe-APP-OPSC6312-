@@ -15,7 +15,7 @@
     <item
         android:id="@+id/nav_cart"
         android:icon="@drawable/ic_cart"
-        android:title="Shop List"/>
+        android:title="Items"/>
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_profile"

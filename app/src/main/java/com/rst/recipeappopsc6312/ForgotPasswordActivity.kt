@@ -4,7 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
+import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -17,7 +19,12 @@ import com.google.android.material.textfield.TextInputLayout
 
 class ForgotPasswordActivity : AppCompatActivity() {
 
-    private lateinit var progressBar: ProgressBar
+    private lateinit var loadingOverlayContainer: FrameLayout
+    private lateinit var progressBar: ProgressBar // Already the one inside the overlay
+    private lateinit var emailEditText: TextInputEditText
+    private lateinit var sendOtpButton: Button
+    private lateinit var backButton: ImageView
+
     private val TAG = "ForgotPasswordActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,14 +33,16 @@ class ForgotPasswordActivity : AppCompatActivity() {
         setContentView(R.layout.activity_forgot_password)
 
         enableEdgeToEdge()
-        //TODO: Add edge-to-edge support
-        // Find all the views from the layout
+
         val emailLayout = findViewById<TextInputLayout>(R.id.textInputLayoutEmail)
-        val emailEditText = findViewById<TextInputEditText>(R.id.editTextEmail)
-        val sendOtpButton = findViewById<Button>(R.id.buttonSendOtp)
-        val backButton = findViewById<ImageView>(R.id.imageViewBack)
-        // You'll need to add a ProgressBar to your activity_forgot_password.xml layout
-        // progressBar = findViewById(R.id.progressBar)
+        emailEditText = findViewById(R.id.editTextEmail)
+        sendOtpButton = findViewById(R.id.buttonSendLink)
+        backButton = findViewById(R.id.imageViewBack)
+
+        loadingOverlayContainer = findViewById(R.id.loadingOverlayContainer) // Ensure this ID exists in your XML
+        progressBar = loadingOverlayContainer.findViewById(R.id.loadingIndicator) // Ensure this ID exists INSIDE the FrameLayout in XML
+
+        showLoading(false)
 
         backButton.setOnClickListener {
             finish() // Go back to the previous screen (Login)
@@ -49,13 +58,22 @@ class ForgotPasswordActivity : AppCompatActivity() {
         }
     }
 
+    private fun showLoading(isLoading: Boolean) {
+        loadingOverlayContainer.visibility = if (isLoading) View.VISIBLE else View.GONE
+        // Disable/Enable interactive elements
+        emailEditText.isEnabled = !isLoading
+        sendOtpButton.isEnabled = !isLoading
+        backButton.isEnabled = !isLoading
+    }
+
+
     private fun sendPasswordResetEmail(email: String) {
         Log.d(TAG, "sendPasswordResetEmail: Attempting to send reset email to: $email")
-        // progressBar.visibility = View.VISIBLE // Show loading animation
+        showLoading(true)
 
         FirebaseManager.auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
-                // progressBar.visibility = View.GONE // Hide loading animation
+                showLoading(false)
                 if (task.isSuccessful) {
                     Log.d(TAG, "Password reset email sent successfully.")
                     Toast.makeText(this, "Password reset link sent to your email.", Toast.LENGTH_LONG).show()

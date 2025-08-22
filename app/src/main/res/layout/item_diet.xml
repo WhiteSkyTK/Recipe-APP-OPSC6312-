@@ -11,8 +11,8 @@
 
     <ImageView
         android:id="@+id/imageViewDiet"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:scaleType="centerInside"
         tools:src="@tools:sample/avatars"
         android:layout_marginBottom="8dp"/>
@@ -22,6 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="14sp"
+        android:textColor="?android:attr/textColor"
         android:textStyle="bold"
         android:textAlignment="center"
         tools:text="Vegetarian" />

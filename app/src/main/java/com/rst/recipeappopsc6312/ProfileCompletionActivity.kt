@@ -2,12 +2,14 @@ package com.rst.recipeappopsc6312
 
 import android.Manifest
 import android.app.DatePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
@@ -19,19 +21,23 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.hbb20.CountryCodePicker
 import de.hdodenhof.circleimageview.CircleImageView
 import java.io.File
 import java.util.Calendar
 import java.io.FileOutputStream
+import java.util.Locale
 
 
 class ProfileCompletionActivity : AppCompatActivity() {
 
     private lateinit var profileImageView: CircleImageView
     private lateinit var fullNameEditText: TextInputEditText
-    private lateinit var phoneEditText: TextInputEditText
+    private lateinit var ccp: CountryCodePicker
     private lateinit var genderAutoComplete: AutoCompleteTextView
     private lateinit var dobEditText: TextInputEditText
     private lateinit var dobLayout: TextInputLayout
@@ -70,19 +76,32 @@ class ProfileCompletionActivity : AppCompatActivity() {
         setContentView(R.layout.activity_profile_completion)
 
         enableEdgeToEdge()
-        //TODO: Add edge-to-edge support
+        val profileSelectionLayout = findViewById<View>(R.id.profileCompletionLayout) // Add this ID to your root layout in XML
+
+        // This is the correct way to handle edge-to-edge
+        ViewCompat.setOnApplyWindowInsetsListener(profileSelectionLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0) // We handle bottom padding with the nav bar
+            insets
+        }
         // Receive the data object from the previous screen
         registrationData = intent.getParcelableExtra("REGISTRATION_DATA") ?: RegistrationData()
 
         // Find views
         profileImageView = findViewById(R.id.profile_image)
         fullNameEditText = findViewById(R.id.editTextFullName)
-        phoneEditText = findViewById(R.id.editTextPhone)
+        ccp = findViewById(R.id.ccp)
         genderAutoComplete = findViewById(R.id.autoCompleteGender)
         dobEditText = findViewById(R.id.editTextDob)
         dobLayout = findViewById(R.id.textInputLayoutDob) // This is for the icon click
         val continueButton = findViewById<Button>(R.id.buttonContinue)
         val backButton = findViewById<ImageView>(R.id.imageViewBack)
+
+        val countryName = registrationData.country
+        if (!countryName.isNullOrBlank()) {
+            // The library will find the correct code (e.g., "+27" for "South Africa")
+            ccp.setCountryForNameCode(getCountryCodeFromName(countryName))
+        }
 
         setupGenderDropdown()
         setupClickListeners(continueButton, backButton)
@@ -92,6 +111,10 @@ class ProfileCompletionActivity : AppCompatActivity() {
         val genders = arrayOf("Male", "Female", "Other")
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, genders)
         genderAutoComplete.setAdapter(adapter)
+    }
+
+    private fun getCountryCodeFromName(countryName: String): String {
+        return Locale.getISOCountries().find { Locale("", it).displayCountry == countryName } ?: "ZA"
     }
 
     private fun setupClickListeners(continueButton: Button, backButton: ImageView) {
@@ -111,7 +134,7 @@ class ProfileCompletionActivity : AppCompatActivity() {
         continueButton.setOnClickListener {
             if (validateInput()) {
                 registrationData.fullName = fullNameEditText.text.toString().trim()
-                registrationData.phoneNumber = phoneEditText.text.toString().trim()
+                registrationData.phoneNumber = ccp.fullNumberWithPlus
                 registrationData.gender = genderAutoComplete.text.toString().takeIf { it.isNotBlank() }
                 registrationData.dateOfBirth = dobEditText.text.toString().takeIf { it.isNotBlank() }
 
@@ -163,9 +186,29 @@ class ProfileCompletionActivity : AppCompatActivity() {
     }
     private fun showDatePickerDialog() {
         val calendar = Calendar.getInstance()
-        DatePickerDialog(this, { _, year, month, day ->
-            dobEditText.setText("$day/${month + 1}/$year")
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                dobEditText.setText("$day/${month + 1}/$year")
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+
+        // 1. Set the maximum date to today (user cannot be born in the future)
+        // To be safe, let's set a minimum age of 13
+        val maxDateCalendar = Calendar.getInstance()
+        maxDateCalendar.add(Calendar.YEAR, -13)
+        datePickerDialog.datePicker.maxDate = maxDateCalendar.timeInMillis
+
+        // 2. Set the minimum date (e.g., user cannot be more than 100 years old)
+        val minDateCalendar = Calendar.getInstance()
+        minDateCalendar.add(Calendar.YEAR, -100)
+        datePickerDialog.datePicker.minDate = minDateCalendar.timeInMillis
+
+        datePickerDialog.show()
     }
 
     private fun validateInput(): Boolean {
@@ -174,14 +217,19 @@ class ProfileCompletionActivity : AppCompatActivity() {
             fullNameEditText.error = "Full name cannot be empty"
             return false
         }
-        if (phoneEditText.text.isNullOrBlank()) {
-            phoneEditText.error = "Phone number cannot be empty"
+        if (!ccp.isValidFullNumber) {
+            // INSTEAD of trying to set an error on the hidden text field...
+            // ccp.editText_registeredCarrierNumber.error = "Invalid phone number"
+
+            // ++ SHOW A TOAST MESSAGE instead.
+            Toast.makeText(this, "Please enter a valid phone number.", Toast.LENGTH_SHORT).show()
             return false
         }
         return true
     }
 
     private fun navigateToNextScreen() {
+        setDefaultUnitSystem(registrationData.country)
         val intent = Intent(this, CreateAccountActivity::class.java)
         intent.putExtra("REGISTRATION_DATA", registrationData)
         // Pass the path of the locally saved image file
@@ -204,5 +252,20 @@ class ProfileCompletionActivity : AppCompatActivity() {
             Log.e("ProfileCompletion", "Failed to save image locally", e)
             null
         }
+    }
+
+    private fun setDefaultUnitSystem(countryName: String?) {
+        // List of countries that primarily use the Imperial system
+        val imperialCountries = listOf("United States", "Liberia", "Myanmar")
+
+        val systemToSet = if (imperialCountries.contains(countryName)) {
+            UnitConverter.IMPERIAL
+        } else {
+            UnitConverter.METRIC
+        }
+
+        // Save this default to SharedPreferences
+        val prefs = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        prefs.edit().putString("UnitSystem", systemToSet).apply()
     }
 }

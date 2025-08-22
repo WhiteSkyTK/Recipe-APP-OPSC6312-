@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
 class FeaturedRecipeAdapter(
-    private val recipeList: List<Recipe>,
+    private var recipeList: List<Recipe>,
     private val onRecipeClick: (Recipe) -> Unit
 ) : RecyclerView.Adapter<FeaturedRecipeAdapter.ViewHolder>() {
 
@@ -39,10 +39,23 @@ class FeaturedRecipeAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val recipe = recipeList[position]
         holder.recipeTitle.text = recipe.title
-        holder.recipeSubtitle.text = recipe.description // Using description for the subtitle
         holder.recipeTime.text = "${recipe.timeInMins} Min"
         Glide.with(holder.itemView.context).load(recipe.imageUrl).into(holder.recipeImage)
+
+        val newMaxLength = 30 // Define your desired new maximum length
+
+        val shortDescription = if (recipe.description.length > newMaxLength) {
+            recipe.description.substring(0, newMaxLength) + "..."
+        } else {
+            recipe.description
+        }
+        holder.recipeSubtitle.text = shortDescription
     }
 
     override fun getItemCount() = recipeList.size
+
+    fun updateData(newRecipes: List<Recipe>) {
+        this.recipeList = newRecipes
+        notifyDataSetChanged()
+    }
 }

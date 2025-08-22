@@ -2,6 +2,8 @@ package com.rst.recipeappopsc6312
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.animation.AnimationUtils
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -40,8 +42,10 @@ class WelcomeActivity : AppCompatActivity() {
         val googleSignInButton = findViewById<MaterialButton>(R.id.buttonGoogleSignIn)
         val getStartedButton = findViewById<MaterialButton>(R.id.buttonGetStarted)
         val loginButton = findViewById<MaterialButton>(R.id.buttonLogin)
+        val emojiTextView = findViewById<TextView>(R.id.textViewEmoji)
 
-        // --- Set Click Listeners ---
+        val waveAnimation = AnimationUtils.loadAnimation(this, R.anim.wave_animation)
+        emojiTextView.startAnimation(waveAnimation)
 
         // 1. "Get Started" button navigates to the registration flow
         getStartedButton.setOnClickListener {
@@ -57,21 +61,21 @@ class WelcomeActivity : AppCompatActivity() {
 
         // 3. "Continue with Google" button handles one-tap sign-in
         googleSignInButton.setOnClickListener {
-            // This is where you will trigger the Supabase Google One-Tap Sign-in flow
+            // This is where you will trigger the  Google One-Tap Sign-in flow
             handleGoogleSignIn()
         }
     }
 
     private fun handleGoogleSignIn() {
-        // --- Placeholder for your Supabase Google Sign-In Logic ---
-        Toast.makeText(this, "Initiating Google Sign-In...", Toast.LENGTH_SHORT).show()
+        // --- Placeholder for your  Google Sign-In Logic ---
+        Toast.makeText(this, "Coming Soon...", Toast.LENGTH_SHORT).show()
 
-        // 1. Call the Supabase/Google SDK to start the sign-in process.
+        // 1. Call the /Google SDK to start the sign-in process.
         // 2. The SDK will show a bottom sheet with the user's Google accounts.
 
         // 3. In the success callback from the SDK, you will:
         //    a. Get the user's Google account details (name, email).
-        //    b. Create a new user record in your Supabase 'profiles' table.
+        //    b. Create a new user record in your  'profiles' table.
         //    c. Populate the profile with the default data you planned:
         //       - name = from Google
         //       - username = auto-generated (e.g., from email or a random string)
@@ -81,9 +85,9 @@ class WelcomeActivity : AppCompatActivity() {
         //    d. Once the profile is created successfully, navigate to the main app.
 
         // For now, we'll simulate a successful sign-in and navigation
-        val intent = Intent(this, MainActivity::class.java)
+        //val intent = Intent(this, MainActivity::class.java)
         // Clear the activity stack so the user can't go back to the welcome screen
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
+       // intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+       // startActivity(intent)
     }
 }

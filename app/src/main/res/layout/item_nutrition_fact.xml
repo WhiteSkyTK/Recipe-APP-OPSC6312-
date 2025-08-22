@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:text="278.4"
         android:textStyle="bold"
-        android:textColor="@android:color/black"/>
+        android:tint="?android:attr/textColorPrimary"/>
 
     <TextView
         android:id="@+id/textViewNutritionLabel"

@@ -2,17 +2,43 @@ package com.rst.recipeappopsc6312
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
+import java.util.Calendar
 
 class HomeFragment : Fragment() {
+
+    private val viewModel: ShoppingViewModel by viewModels {
+        val database = AppDatabase.getDatabase(requireContext())
+        // Provide the missing FirebaseStorage instance as the fourth argument
+        val repository = ShoppingRepository(
+            database.shoppingDao(),
+            database.recipeDao(),
+            database.scanHistoryDao(),
+            FirebaseFirestore.getInstance(),
+            FirebaseStorage.getInstance()
+        )
+        ShoppingViewModelFactory(repository)
+    }
+    private lateinit var featuredAdapter: FeaturedRecipeAdapter
+    private lateinit var timeOfDayAdapter: HomeRecipeAdapter
+    private lateinit var categoryAdapter: CategoryAdapter
+    private lateinit var recommendedAdapter: HomeRecipeAdapter
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -20,42 +46,122 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        // Find all the RecyclerViews and buttons
-        val featuredRecyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewFeatured)
-        val categoriesRecyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewCategories)
-        val recommendedRecyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewRecommended)
-        val seeAllCategories = view.findViewById<TextView>(R.id.textViewCategorySeeAll)
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
 
-        // --- Setup Click Listeners ---
+        setupRecyclerViews(view)
+        observeViewModel(view)
 
-        // A shared click listener for any recipe card that navigates to the detail screen
+        swipeRefreshLayout.setOnRefreshListener {
+            // Tell the ViewModel to fetch fresh data
+            viewModel.refreshHomeScreenData()
+        }
+
+        // Tell the ViewModel to start loading data
+        viewModel.loadHomeScreenData()
+
+        return view
+    }
+
+    private fun setupRecyclerViews(view: View) {
         val onRecipeClicked = { recipe: Recipe ->
             val intent = Intent(activity, RecipeDetailActivity::class.java)
             intent.putExtra("RECIPE_ID", recipe.id)
             startActivity(intent)
         }
 
-        seeAllCategories.setOnClickListener {
-            (activity as? MainActivity)?.loadFragment(CategoryFragment(), -1)
+        val onFavoriteClicked = { recipe: Recipe -> viewModel.toggleFavorite(recipe) }
+
+        // ++ UPDATE the adapter initializations
+        timeOfDayAdapter = HomeRecipeAdapter(emptyList(), onRecipeClicked, onFavoriteClicked, viewModel.favoriteIds, viewLifecycleOwner)
+        recommendedAdapter = HomeRecipeAdapter(emptyList(), onRecipeClicked, onFavoriteClicked, viewModel.favoriteIds, viewLifecycleOwner)
+        // Initialize adapters with empty lists
+        featuredAdapter = FeaturedRecipeAdapter(emptyList(), onRecipeClicked)
+        categoryAdapter = CategoryAdapter(emptyList()) { }
+
+        // Find RecyclerViews and set their layouts and adapters
+        view.findViewById<RecyclerView>(R.id.recyclerViewFeatured).apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            adapter = featuredAdapter
+        }
+        view.findViewById<RecyclerView>(R.id.recyclerViewTimeOfDay).apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            adapter = timeOfDayAdapter
+        }
+        view.findViewById<RecyclerView>(R.id.recyclerViewCategories).apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            adapter = categoryAdapter
+        }
+        view.findViewById<RecyclerView>(R.id.recyclerViewRecommended).apply {
+            layoutManager = GridLayoutManager(context, 2)
+            adapter = recommendedAdapter
+        }
+    }
+    private fun observeViewModel(view: View) {
+        val timeOfDayTitle = view.findViewById<TextView>(R.id.textViewTimeOfDayTitle)
+        // Observer for Featured Recipes
+        viewModel.featuredRecipes.observe(viewLifecycleOwner) { recipes ->
+            featuredAdapter.updateData(recipes)
         }
 
-        // --- Setup Adapters and Layout Managers ---
+        // Observer for Recommended Recipes (the main list to be filtered)
+        viewModel.recommendedRecipes.observe(viewLifecycleOwner) { allRecipes ->
+            recommendedAdapter.updateData(allRecipes)
 
-        // 1. Featured Recipes: Uses the special FeaturedRecipeAdapter
-        featuredRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        featuredRecyclerView.adapter = FeaturedRecipeAdapter(DummyData.getFeaturedRecipes(), onRecipeClicked)
-
-        // 2. Categories: Uses the CategoryAdapter
-        categoriesRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        categoriesRecyclerView.adapter = CategoryAdapter(DummyData.getCategories()) { category ->
-            // Handle category chip click, e.g., navigate to a filtered list or show a toast
-            Toast.makeText(context, "${category.name} clicked", Toast.LENGTH_SHORT).show()
+            // The onCategoryClick lambda is now simpler
+            categoryAdapter.onCategoryClick = { category ->
+                val filteredList = if (category.name.equals("All", ignoreCase = true)) {
+                    allRecipes
+                } else {
+                    allRecipes.filter { it.category.equals(category.name, ignoreCase = true) }
+                }
+                recommendedAdapter.updateData(filteredList)
+            }
         }
 
-        // 3. Recommended Recipes: Uses the standard RecipeAdapter
-        recommendedRecyclerView.layoutManager = GridLayoutManager(context, 2)
-        recommendedRecyclerView.adapter = RecipeAdapter(DummyData.getRecommendedRecipes(), onRecipeClicked)
+        // Observer for Categories
+        viewModel.categories.observe(viewLifecycleOwner) { categories ->
+            categoryAdapter.updateData(categories)
+        }
 
-        return view
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            // This assumes your ViewModel has an isLoading LiveData
+            swipeRefreshLayout.isRefreshing = isLoading
+        }
+
+        setupTimeOfDaySection(timeOfDayTitle)
+    }
+
+    private fun setupTimeOfDaySection(titleView: TextView) {
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+
+        titleView.text = when (hour) {
+            in 5..10 -> GreetingManager.getRandomMorningGreeting()
+            in 11..13 -> GreetingManager.getRandomLunchGreeting()
+            in 14..17 -> GreetingManager.getRandomAfternoonGreeting()
+            in 18..21 -> GreetingManager.getRandomDinnerGreeting()
+            else -> GreetingManager.getRandomNightGreeting()
+        }
+
+        lifecycleScope.launch {
+            val repository = viewModel.repository
+            val recipeList = when (hour) {
+                in 5..10 -> repository.getBreakfastRecipes()
+                in 11..13 -> repository.getLunchRecipes()
+                in 14..17 -> repository.getSnackRecipes()
+                in 18..21 -> repository.getDinnerRecipes()
+                else -> repository.getSnackRecipes()
+            }
+
+            // ++ ADD THIS LOG to see what data is being fetched
+            Log.d("HomeFragment", "Time of Day section fetched ${recipeList.size} recipes.")
+
+            if (recipeList.isNotEmpty()) {
+                timeOfDayAdapter.updateData(recipeList)
+            } else {
+                // You could optionally hide the section if no recipes are found
+                Log.w("HomeFragment", "No recipes found for this time of day.")
+            }
+        }
     }
 }

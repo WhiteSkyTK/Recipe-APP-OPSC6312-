@@ -10,46 +10,70 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ProgressBar
+import android.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
 class DiscoverFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var recipeAdapter: RecipeAdapter
+    private lateinit var discoverAdapter: DiscoverRecipeAdapter
     private var recipeList = mutableListOf<Recipe>()
     private var isLoading = false
     private var currentPage = 0
     private val pageSize = 10 // Load 10 items at a time
+    private lateinit var paginationProgressBar: ProgressBar
+
+
+    private val viewModel: DiscoverViewModel by viewModels {
+        val db = AppDatabase.getDatabase(requireContext())
+        val repo = ShoppingRepository(
+            db.shoppingDao(),
+            db.recipeDao(),
+            db.scanHistoryDao(),
+            FirebaseFirestore.getInstance(),
+            FirebaseStorage.getInstance())
+        DiscoverViewModelFactory(repo)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_discover, container, false)
-        recyclerView = view.findViewById(R.id.recyclerViewDiscover)
-        val searchEditText = view.findViewById<EditText>(R.id.editTextSearch)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewDiscover)
+        val searchView = view.findViewById<SearchView>(R.id.searchViewRecipes) // ++ USE CORRECT ID
+        paginationProgressBar = view.findViewById(R.id.paginationProgressBar) // ++ FIND PROGRESS BAR
 
-        setupRecyclerView()
-        loadMoreRecipes()
+        setupRecyclerView(recyclerView)
+        observeViewModel()
+
 
         // Add the search listener
-        searchEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // The filter call will now work correctly
-                recipeAdapter.filter.filter(s)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                if (!query.isNullOrBlank()) {
+                    // ++ LOG THE SEARCH QUERY ++
+                    viewModel.repository.logSearchQuery(query)
+                }
+                discoverAdapter.filter.filter(query)
+                return false
             }
-
-            override fun afterTextChanged(s: Editable?) {}
+            override fun onQueryTextChange(newText: String?): Boolean {
+                // We don't log on every character change, only on submit.
+                discoverAdapter.filter.filter(newText)
+                return false
+            }
         })
-
         return view
     }
 
-    private fun setupRecyclerView() {
+    private fun setupRecyclerView(recyclerView: RecyclerView) {
         // Define what happens when a recipe is clicked
         val onRecipeClicked = { recipe: Recipe ->
             val intent = Intent(activity, RecipeDetailActivity::class.java)
@@ -57,41 +81,39 @@ class DiscoverFragment : Fragment() {
             startActivity(intent)
         }
 
-        // FIXED: Initialize the adapter correctly with the click listener
-        recipeAdapter = RecipeAdapter(recipeList, onRecipeClicked)
+        // Initialize the adapter correctly with all its listeners
+        discoverAdapter = DiscoverRecipeAdapter(emptyList(), onRecipeClicked,
+            onFavoriteClick = { recipe -> viewModel.toggleFavorite(recipe) },
+            favoritesLiveData = viewModel.favoriteIds,
+            lifecycleOwner = viewLifecycleOwner
+        )
+
         val layoutManager = GridLayoutManager(context, 2)
         recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = recipeAdapter
+        recyclerView.adapter = discoverAdapter
 
         // Add scroll listener for pagination
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                val visibleItemCount = layoutManager.childCount
-                val totalItemCount = layoutManager.itemCount
-                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-
-                if (!isLoading) {
-                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
-                        loadMoreRecipes()
-                    }
+                if (!recyclerView.canScrollVertically(1)) {
+                    viewModel.loadMoreRecipes()
                 }
             }
         })
     }
 
-    private fun loadMoreRecipes() {
-        isLoading = true
-        // Simulate a network delay
-        Handler(Looper.getMainLooper()).postDelayed({
-            val newRecipes = DummyData.getDiscoverRecipes(currentPage, pageSize)
-            if (newRecipes.isNotEmpty()) {
-                val startPosition = recipeList.size
-                recipeList.addAll(newRecipes)
-                recipeAdapter.notifyItemRangeInserted(startPosition, newRecipes.size)
-                currentPage++
-            }
-            isLoading = false
-        }, 500) // 0.5 second delay
+
+    private fun observeViewModel() {
+        viewModel.recipes.observe(viewLifecycleOwner) { recipes ->
+            // The updateData function in your new adapter will handle updating both lists
+            discoverAdapter.updateData(recipes)
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            // Show/hide the pagination loading indicator
+            paginationProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
     }
 }

@@ -1,3 +1,99 @@
-Check out our live recipe generator app hosted on Hugging Face Spaces!
+# Hamory Kitchen 🍳
 
+Welcome to the official repository for Hamory Kitchen, a smart recipe and meal planning application. This project is being developed by **RST Innovations** as a final-year Portfolio of Evidence for Rosebank College.
+
+**Team Members:**
+* Tokollo Nonyane (ST10296818)
+* Sagwadi Mashimbye (ST10168528)
+* Rinae Magadagela (ST10361117)
+
+---
+
+## 📸 Screenshots
+
+*(Here you will add screenshots of your application. Replace the placeholder text with your images.)*
+
+| Splash & Login | Country & Cuisine | Diet & Profile |
+| :---: | :---: | :---: |
+| *[Screenshot of Splash Screen]* | *[Screenshot of Country Selection]* | *[Screenshot of Diet Selection]* |
+| *[Screenshot of Login Screen]* | *[Screenshot of Cuisine Selection]* | *[Screenshot of Profile Completion]* |
+| *[Screenshot of Forgot Password]* | *[Screenshot of Create Account]* | *[Screenshot of User Profile]* |
+
+| Main App & Navigation | Features |
+| :---: | :---: |
+| *[Screenshot of Home Fragment]* | *[Screenshot of Scan Fragment with ingredients]* |
+| *[Screenshot of Discover Fragment]* | *[Screenshot of Shopping List]* |
+| *[Screenshot of My Recipes Activity]* | *[Screenshot of Favorites Fragment]* |
+| *[Screenshot of Preferences Activity]* | *[Screenshot of Recipe Detail Activity]* |
+
+---
+
+## ✨ Features
+
+Hamory Kitchen is packed with features designed to make meal planning and cooking a seamless and personalized experience.
+
+### Core Features
+* **User Authentication:** A complete registration and login system using Firebase Authentication. Users can sign up with an email and password, and their profile data is securely stored in Firestore.
+* **Dynamic Home Screen:** The home screen provides a personalized experience with:
+    * **Featured Recipes:** A top banner showcasing beautiful, high-quality recipes.
+    * **Time of Day Recommendations:** A smart section that suggests relevant meals (Breakfast, Lunch, etc.) with friendly, randomized greetings based on the time of day.
+    * **Personalized Recommendations:** A main grid of recipes powered by a recommendation engine that considers the user's diet, favorite cuisines, and activity.
+* **Recipe Discovery:** A dedicated "Discover" screen with an "endless scroll" feature and a search bar to filter through all public recipes.
+* **Add & Manage Recipes:** Users can create, edit, and delete their own recipes through a detailed form. They have the option to keep recipes private or publish them for the community to see.
+* **Smart Ingredient Scanner:** Users can find recipes based on ingredients they have at home using three input methods:
+    * **Typing:** Manually enter ingredients.
+    * **Voice Input:** Use their voice to list ingredients.
+    * **Camera Scan:** Use the camera and ML Kit to recognize ingredients from text (e.g., a grocery receipt).
+* **Advanced Shopping List:** A multi-list system that includes a manual "My List" and automatically generated lists from recipes. Users can switch between lists, and the system prevents duplicate items.
+* **Offline Favorites:** Users can favorite any recipe. The full recipe data is saved to the local Room database, making all favorited recipes available 100% offline.
+
+### Technical Features
+* **API Integration:** The app fetches public recipes from the Spoonacular API and uses a "cache-first" strategy by saving them to a Firestore database to minimize API calls and improve performance.
+* **Offline-First Architecture:** The app is built using an MVVM (Model-View-ViewModel) architecture with a Repository pattern. It prioritizes loading data from the local RoomDB for a fast, offline-capable experience before syncing with Firebase.
+* **User Tracking & Recommendation Engine:** The app silently tracks user activity (viewed recipes, search queries, view duration) and uses this data, along with user preferences (diet, cuisines), to power a scoring system that provides personalized recipe recommendations.
+
+---
+Check out our live recipe generator app hosted on Hugging Face Spaces!
 [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/shirosora1234/RST-Innovations-Recipe-App)
+
+## 🛠️ How to Install and Test
+
+To get the project running, follow these steps:
+
+1.  **Clone the Repository:**
+    ```bash
+    git clone [https://github.com/your-username/Recipe-APP-OPSC6312-.git](https://github.com/your-username/Recipe-APP-OPSC6312-.git)
+    ```
+2.  **Firebase Setup:**
+    * Create a new project in the [Firebase Console](https://console.firebase.google.com/).
+    * Add an Android app to your Firebase project with the package name `com.rst.recipeappopsc6312`.
+    * Download the generated `google-services.json` file and place it in the `app/` directory of the project.
+    * In the Firebase Console, enable **Authentication** (with Email/Password provider) and **Firestore Database**.
+3.  **API Key Setup:**
+    * Get an API key from [Spoonacular](https://spoonacular.com/food-api).
+    * In the root directory of the project, create a file named `local.properties`.
+    * Add your API key(s) to this file. This file is ignored by Git to keep your keys secure.
+    ```properties
+    spoonacular.api.key.1="YOUR_API_KEY_HERE"
+    # Add other keys if you have them
+    ```
+4.  **Build and Run:**
+    * Open the project in Android Studio.
+    * Let Gradle sync the dependencies.
+    * Build and run the app on an emulator or a physical device.
+
+---
+
+## 🤖 Automated Testing & CI/CD
+
+This project uses **Unit Testing** to ensure the core logic is reliable and **GitHub Actions** for Continuous Integration.
+
+* **Unit Tests:** Key logic, especially within the `Repository` and `ViewModels`, is covered by unit tests to verify its correctness.
+* **GitHub Actions:** A workflow is configured in `.github/workflows/build.yml`. On every push or pull request to the `main` branch, this workflow automatically:
+    1.  Checks out the code.
+    2.  Sets up the correct Java environment.
+    3.  Runs all the unit tests using Gradle.
+    4.  Builds a debug version of the APK to ensure the app compiles successfully.
+
+This ensures that the codebase remains healthy and that new changes don't break existing functionality.
+
