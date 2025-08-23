@@ -15,16 +15,33 @@ Welcome to the official repository for Hamory Kitchen, a smart recipe and meal p
 
 | Splash & Login | Country & Cuisine | Diet & Profile |
 | :---: | :---: | :---: |
-| *[Screenshot of Splash Screen]* | *[Screenshot of Country Selection]* | *[Screenshot of Diet Selection]* |
-| *[Screenshot of Login Screen]* | *[Screenshot of Cuisine Selection]* | *[Screenshot of Profile Completion]* |
-| *[Screenshot of Forgot Password]* | *[Screenshot of Create Account]* | *[Screenshot of User Profile]* |
+| * <img width="720" height="1600" alt="Screenshot_20250822-223201" src="https://github.com/user-attachments/assets/2719c1e9-b5ce-4609-88b9-11f64d67923b" />
+* | *<img width="720" height="1600" alt="Screenshot_20250822-223236" src="https://github.com/user-attachments/assets/4153cf65-de9e-413f-a3dd-3c4d49f5c9c5" />
+ * | *<img width="720" height="1600" alt="Screenshot_20250822-223248" src="https://github.com/user-attachments/assets/2f830263-4620-47c9-897a-5207b3930c8b" />
+ * |
+| *<img width="720" height="1600" alt="Screenshot_20250822-223221" src="https://github.com/user-attachments/assets/82ad3d6c-a574-4d58-b75f-100cef42afd5" />
+ * | * <img width="720" height="1600" alt="Screenshot_20250822-223243" src="https://github.com/user-attachments/assets/e8aa35e8-8073-448f-b84e-dc5de08cc678" />
+* | *<img width="720" height="1600" alt="Screenshot_20250822-223427" src="https://github.com/user-attachments/assets/0fccb092-e646-4631-bff1-5b7e4c375151" />
+ * |
+| * <img width="720" height="1600" alt="Screenshot_20250822-223226" src="https://github.com/user-attachments/assets/3700e6fa-4179-40a5-8824-40516b02423d" />
+* | *<img width="720" height="1600" alt="Screenshot_20250822-223427 (1)" src="https://github.com/user-attachments/assets/17e6797d-aaa4-43df-a469-8f5209017b72" />
+ * | *<img width="720" height="1600" alt="Screenshot_20250822-223606" src="https://github.com/user-attachments/assets/6c45eca0-f34f-4542-87d0-66673992b4d1" />
+ * |
 
 | Main App & Navigation | Features |
 | :---: | :---: |
-| *[Screenshot of Home Fragment]* | *[Screenshot of Scan Fragment with ingredients]* |
-| *[Screenshot of Discover Fragment]* | *[Screenshot of Shopping List]* |
-| *[Screenshot of My Recipes Activity]* | *[Screenshot of Favorites Fragment]* |
-| *[Screenshot of Preferences Activity]* | *[Screenshot of Recipe Detail Activity]* |
+| * <img width="720" height="1600" alt="Screenshot_20250822-223539" src="https://github.com/user-attachments/assets/4cab09ae-3182-4472-929e-a9e3241993b8" />
+* | *<img width="720" height="1600" alt="Screenshot_20250822-223548" src="https://github.com/user-attachments/assets/7034e3cf-f457-4d20-9ccd-50b9a3bc94fd" />
+ * |
+| * <img width="720" height="1600" alt="Screenshot_20250822-223544" src="https://github.com/user-attachments/assets/7201f7a1-9045-4f9b-8cad-2bf3051eac90" />
+* | *<img width="720" height="1600" alt="Screenshot_20250822-223553 (1)" src="https://github.com/user-attachments/assets/3a53532b-3c09-4e2e-91a8-56db89f2fb54" />
+ * |
+| * <img width="720" height="1600" alt="Screenshot_20250822-223610" src="https://github.com/user-attachments/assets/8e97f7db-cd2c-4350-ac54-78249f53f5e9" />
+* | *<img width="720" height="1600" alt="Screenshot_20250822-223709" src="https://github.com/user-attachments/assets/6ff9450f-6f24-43f4-b3b9-616d2c8e8412" />
+ * |
+| * <img width="720" height="1600" alt="Screenshot_20250822-223625" src="https://github.com/user-attachments/assets/d362d7bc-f223-4d5c-9e84-0eeec8c64568" />
+* | * <img width="720" height="1600" alt="Screenshot_20250822-230352" src="https://github.com/user-attachments/assets/6524a9ae-881f-4b51-bc8e-b6ecbfb387e7" />
+* |
 
 ---
 
