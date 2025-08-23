@@ -50,6 +50,7 @@ android {
         buildConfigField("String", "SPOONACULAR_API_KEY_3", "\"${localProperties.getProperty("spoonacular.api.key3")}\"")
         buildConfigField("String", "SPOONACULAR_API_KEY_4", "\"${localProperties.getProperty("spoonacular.api.key4")}\"")
         buildConfigField("String", "SPOONACULAR_API_KEY_5", "\"${localProperties.getProperty("spoonacular.api.key5")}\"")
+        buildConfigField("String", "TASTY_API_KEY", "\"${localProperties.getProperty("tasty.api.key")}\"")
     }
     buildTypes {
         release {

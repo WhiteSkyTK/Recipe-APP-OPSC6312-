@@ -37,6 +37,7 @@ class ProfileCompletionActivity : AppCompatActivity() {
 
     private lateinit var profileImageView: CircleImageView
     private lateinit var fullNameEditText: TextInputEditText
+    private lateinit var phoneEditText: TextInputEditText
     private lateinit var ccp: CountryCodePicker
     private lateinit var genderAutoComplete: AutoCompleteTextView
     private lateinit var dobEditText: TextInputEditText
@@ -90,12 +91,15 @@ class ProfileCompletionActivity : AppCompatActivity() {
         // Find views
         profileImageView = findViewById(R.id.profile_image)
         fullNameEditText = findViewById(R.id.editTextFullName)
+        phoneEditText = findViewById(R.id.editTextPhone)
         ccp = findViewById(R.id.ccp)
         genderAutoComplete = findViewById(R.id.autoCompleteGender)
         dobEditText = findViewById(R.id.editTextDob)
         dobLayout = findViewById(R.id.textInputLayoutDob) // This is for the icon click
         val continueButton = findViewById<Button>(R.id.buttonContinue)
         val backButton = findViewById<ImageView>(R.id.imageViewBack)
+
+        ccp.registerCarrierNumberEditText(phoneEditText)
 
         val countryName = registrationData.country
         if (!countryName.isNullOrBlank()) {
@@ -218,11 +222,7 @@ class ProfileCompletionActivity : AppCompatActivity() {
             return false
         }
         if (!ccp.isValidFullNumber) {
-            // INSTEAD of trying to set an error on the hidden text field...
-            // ccp.editText_registeredCarrierNumber.error = "Invalid phone number"
-
-            // ++ SHOW A TOAST MESSAGE instead.
-            Toast.makeText(this, "Please enter a valid phone number.", Toast.LENGTH_SHORT).show()
+            phoneEditText.error = "Invalid phone number" // Set error on the actual input field
             return false
         }
         return true

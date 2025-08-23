@@ -3,37 +3,55 @@ package com.rst.recipeappopsc6312
 import java.text.DecimalFormat
 
 object UnitConverter {
-    // Define conversion factors
+    // Define conversion factors as constants for clarity
     private const val GRAMS_TO_OUNCES = 0.035274
     private const val ML_TO_FL_OUNCES = 0.033814
 
-    // Define the systems
     const val METRIC = "METRIC"
     const val IMPERIAL = "IMPERIAL"
 
-    fun convert(amount: Double, unit: String, targetSystem: String): String {
-        val df = DecimalFormat("#.##") // Format to two decimal places
+    fun convert(quantityString: String, unit: String, targetSystem: String): String {
+        val amount = parseQuantity(quantityString)
+        val df = DecimalFormat("#.##")
 
-        return when (targetSystem) {
-            IMPERIAL -> convertToImperial(amount, unit, df)
-            METRIC -> convertToMetric(amount, unit, df)
-            else -> "${df.format(amount)} $unit" // Default to original if system is unknown
+        val (convertedAmount, convertedUnit) = when (targetSystem) {
+            IMPERIAL -> convertToImperial(amount, unit)
+            else -> amount to unit
         }
+
+        return "${df.format(convertedAmount)} $convertedUnit".trim()
     }
 
-    private fun convertToImperial(amount: Double, unit: String, df: DecimalFormat): String {
+    private fun convertToImperial(amount: Double, unit: String): Pair<Double, String> {
         return when (unit.lowercase()) {
-            "g", "grams" -> "${df.format(amount * GRAMS_TO_OUNCES)} oz"
-            "ml", "milliliters" -> "${df.format(amount * ML_TO_FL_OUNCES)} fl oz"
-            // Add more metric to imperial conversions here if needed
-            else -> "${df.format(amount)} $unit" // Return original if no conversion is available
+            // Use the named constants
+            "g", "grams" -> (amount * GRAMS_TO_OUNCES) to "oz"
+            "ml", "milliliters" -> (amount * ML_TO_FL_OUNCES) to "fl oz"
+            else -> amount to unit
         }
     }
 
-    private fun convertToMetric(amount: Double, unit: String, df: DecimalFormat): String {
-        // Note: Spoonacular API data is already mostly metric-friendly,
-        // but this is where you would convert from imperial if needed.
-        // For now, we'll just format it.
-        return "${df.format(amount)} $unit"
+    private fun parseQuantity(input: String?): Double {
+        if (input.isNullOrBlank()) return 0.0
+        if (input.contains(" ")) {
+            val parts = input.split(" ")
+            if (parts.size == 2) {
+                val whole = parts[0].toDoubleOrNull() ?: 0.0
+                val fraction = parseQuantity(parts[1])
+                return whole + fraction
+            }
+        }
+        return when (input) {
+            "½", "1/2" -> 0.5
+            "⅓", "1/3" -> 0.333
+            "⅔", "2/3" -> 0.667
+            "¼", "1/4" -> 0.25
+            "¾", "3/4" -> 0.75
+            "⅛", "1/8" -> 0.125
+            "⅜", "3/8" -> 0.375
+            "⅝", "5/8" -> 0.625
+            "⅞", "7/8" -> 0.875
+            else -> input.toDoubleOrNull() ?: 0.0
+        }
     }
 }

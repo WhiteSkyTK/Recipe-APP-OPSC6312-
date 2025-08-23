@@ -10,7 +10,7 @@ import com.bumptech.glide.Glide
 
 class RecipeMatchAdapter(
     private var matches: List<RecipeMatch>,
-    private val onClick: (Recipe) -> Unit
+    private val onClick: (RecipeMatch) -> Unit
 ) : RecyclerView.Adapter<RecipeMatchAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -37,7 +37,7 @@ class RecipeMatchAdapter(
             else -> "You need $missingCount more ingredients"
         }
 
-        holder.itemView.setOnClickListener { onClick(match.recipe) }
+        holder.itemView.setOnClickListener { onClick(match) }
     }
 
     override fun getItemCount() = matches.size

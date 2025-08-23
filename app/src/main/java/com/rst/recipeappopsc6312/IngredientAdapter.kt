@@ -6,10 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 
-class IngredientAdapter(private var ingredientList: MutableList<Ingredient>) :
-    RecyclerView.Adapter<IngredientAdapter.ViewHolder>() {
+class IngredientAdapter(
+    private var ingredientList: MutableList<Ingredient>,
+    private val missingIngredients: List<String>?
+) : RecyclerView.Adapter<IngredientAdapter.ViewHolder>() {
 
     private var isSelectionMode = false
     val selectedIngredients = mutableSetOf<Ingredient>()
@@ -40,8 +43,20 @@ class IngredientAdapter(private var ingredientList: MutableList<Ingredient>) :
         val amount = ingredient.quantity.toDoubleOrNull() ?: 0.0
 
         // 3. Call the converter and set the text
-        val convertedQuantity = UnitConverter.convert(amount, ingredient.unit, preferredSystem)
+        val convertedQuantity = UnitConverter.convert(ingredient.quantity, ingredient.unit, preferredSystem)
         holder.quantityTextView.text = convertedQuantity
+
+        if (missingIngredients?.contains(ingredient.name.lowercase()) == true) {
+            // If the ingredient is missing, color it red
+            holder.nameTextView.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_light))
+            holder.quantityTextView.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_light))
+        } else {
+            // Otherwise, use the default text color from the app's theme
+            val typedValue = android.util.TypedValue()
+            context.theme.resolveAttribute(android.R.attr.textColor, typedValue, true)
+            holder.nameTextView.setTextColor(typedValue.data)
+            holder.quantityTextView.setTextColor(typedValue.data)
+        }
 
         // --- The rest of your selection logic is correct ---
         if (isSelectionMode) {

@@ -1,5 +1,6 @@
 package com.rst.recipeappopsc6312
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
@@ -44,9 +45,15 @@ class ScanResultsActivity : AppCompatActivity() {
         val recyclerView: RecyclerView = findViewById(R.id.recyclerViewResults)
         val ingredients = intent.getStringArrayListExtra("INGREDIENTS")
 
-        val matchAdapter = RecipeMatchAdapter(emptyList()) { recipe ->
-            // Handle click to open RecipeDetailActivity
+        val matchAdapter = RecipeMatchAdapter(emptyList()) { match ->
+            val intent = Intent(this, RecipeDetailActivity::class.java)
+            // Pass the recipe ID
+            intent.putExtra("RECIPE_ID", match.recipe.id)
+            // Pass the list of missing ingredients
+            intent.putStringArrayListExtra("MISSING_INGREDIENTS", ArrayList(match.missingIngredients))
+            startActivity(intent)
         }
+
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = matchAdapter
 

@@ -72,8 +72,8 @@ class HomeFragment : Fragment() {
         val onFavoriteClicked = { recipe: Recipe -> viewModel.toggleFavorite(recipe) }
 
         // ++ UPDATE the adapter initializations
-        timeOfDayAdapter = HomeRecipeAdapter(emptyList(), onRecipeClicked, onFavoriteClicked, viewModel.favoriteIds, viewLifecycleOwner)
-        recommendedAdapter = HomeRecipeAdapter(emptyList(), onRecipeClicked, onFavoriteClicked, viewModel.favoriteIds, viewLifecycleOwner)
+        timeOfDayAdapter = HomeRecipeAdapter(emptyList(), onRecipeClicked, onFavoriteClicked, viewModel.allFavorites, viewLifecycleOwner)
+        recommendedAdapter = HomeRecipeAdapter(emptyList(), onRecipeClicked, onFavoriteClicked, viewModel.allFavorites, viewLifecycleOwner)
         // Initialize adapters with empty lists
         featuredAdapter = FeaturedRecipeAdapter(emptyList(), onRecipeClicked)
         categoryAdapter = CategoryAdapter(emptyList()) { }

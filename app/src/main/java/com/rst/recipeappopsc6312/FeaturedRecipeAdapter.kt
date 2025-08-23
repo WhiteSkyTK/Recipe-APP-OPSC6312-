@@ -39,17 +39,23 @@ class FeaturedRecipeAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val recipe = recipeList[position]
         holder.recipeTitle.text = recipe.title
+
+        // This adapter sets the time
         holder.recipeTime.text = "${recipe.timeInMins} Min"
-        Glide.with(holder.itemView.context).load(recipe.imageUrl).into(holder.recipeImage)
 
-        val newMaxLength = 30 // Define your desired new maximum length
-
-        val shortDescription = if (recipe.description.length > newMaxLength) {
-            recipe.description.substring(0, newMaxLength) + "..."
+        // This adapter calculates and sets the short description
+        val titleLength = recipe.title.length
+        val totalCharLimit = 80
+        val remainingChars = totalCharLimit - titleLength
+        val descriptionLimit = if (remainingChars < 20) 20 else remainingChars
+        val shortDescription = if (recipe.description.length > descriptionLimit) {
+            recipe.description.substring(0, descriptionLimit) + "..."
         } else {
             recipe.description
         }
         holder.recipeSubtitle.text = shortDescription
+
+        Glide.with(holder.itemView.context).load(recipe.imageUrl).into(holder.recipeImage)
     }
 
     override fun getItemCount() = recipeList.size

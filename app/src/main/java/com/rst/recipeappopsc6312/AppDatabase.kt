@@ -11,10 +11,9 @@ import androidx.room.TypeConverters
         Recipe::class,
         ShoppingList::class,
         ShoppingItem::class,
-        FavoriteRecipe::class,
         ScanHistoryItem::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 ) // Increment version on schema changes
 @TypeConverters(

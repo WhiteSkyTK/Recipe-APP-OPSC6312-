@@ -11,11 +11,6 @@ import kotlinx.coroutines.flow.Flow // For reactive updates
 
 @Dao
 interface RecipeDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertRecipe(recipe: Recipe)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllRecipes(recipes: List<Recipe>)
 
     @Update
     suspend fun updateRecipe(recipe: Recipe)
@@ -23,11 +18,6 @@ interface RecipeDao {
     @Query("SELECT * FROM recipes WHERE id IN (:recipeIds)")
     fun getRecipesByIds(recipeIds: List<String>): LiveData<List<Recipe>>
 
-    @Query("SELECT * FROM recipes WHERE id = :recipeId LIMIT 1")
-    suspend fun getRecipeById(recipeId: String): Recipe?
-
-    @Query("SELECT * FROM recipes WHERE userId = :userId ORDER BY title ASC")
-    fun getUserRecipes(userId: String): Flow<List<Recipe>> // Observe user's recipes
 
     @Query("SELECT * FROM recipes ORDER BY title ASC")
     fun getAllRecipes(): Flow<List<Recipe>> // Observe all recipes
@@ -54,16 +44,6 @@ interface RecipeDao {
     @Query("SELECT * FROM recipes WHERE mealType = :mealType AND isPublic = 1")
     suspend fun getRecipesByMealType(mealType: String): List<Recipe>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addToFavorites(favorite: FavoriteRecipe)
-
-    @Query("DELETE FROM favorite_recipes WHERE id = :recipeId")
-    suspend fun removeFromFavorites(recipeId: String)
-
-    @Query("SELECT * FROM favorite_recipes")
-    fun getAllFavoriteIds(): LiveData<List<FavoriteRecipe>>
-
-
 
     @Query("SELECT COUNT(id) FROM recipes")
     suspend fun getRecipeCount(): Int
@@ -71,24 +51,38 @@ interface RecipeDao {
     @Delete
     suspend fun deleteRecipe(recipe: Recipe)
 
-    // ++ THIS IS THE NEW QUERY for the FavoritesFragment ++
-    @Query("SELECT * FROM recipes WHERE isFavorite = 1")
-    fun getAllFavorites(): LiveData<List<Recipe>>
-
-    // ++ THIS IS THE NEW QUERY for the RecipeDetailActivity heart icon ++
-    @Query("SELECT isFavorite FROM recipes WHERE id = :recipeId")
-    fun isFavorite(recipeId: String): LiveData<Boolean>
-
     // ++ THIS is for a quick, one-time check
     @Query("SELECT isFavorite FROM recipes WHERE id = :recipeId")
     suspend fun isFavoriteNow(recipeId: String): Boolean?
 
-    // ++ ADD THIS function to update the favorite status
+    // --- Core Recipe Functions ---
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRecipe(recipe: Recipe)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllRecipes(recipes: List<Recipe>)
+
+    @Query("SELECT * FROM recipes WHERE id = :recipeId LIMIT 1")
+    suspend fun getRecipeById(recipeId: String): Recipe?
+
+    @Query("SELECT * FROM recipes WHERE userId = :userId")
+    fun getUserRecipes(userId: String): Flow<List<Recipe>>
+
+    // --- Favorite Functions ---
+
+    // Gets all recipes that are marked as a favorite
+    @Query("SELECT * FROM recipes WHERE isFavorite = 1")
+    fun getAllFavorites(): LiveData<List<Recipe>>
+
+    // Observes the favorite status of a single recipe
+    @Query("SELECT isFavorite FROM recipes WHERE id = :recipeId")
+    fun isFavorite(recipeId: String): LiveData<Boolean>
+
+    // Updates the favorite status for a specific recipe
     @Query("UPDATE recipes SET isFavorite = :isFavorite WHERE id = :recipeId")
     suspend fun updateFavoriteStatus(recipeId: String, isFavorite: Boolean)
 
-    @Query("SELECT * FROM favorite_recipes")
-    suspend fun getAllFavoriteIdsNow(): List<FavoriteRecipe>
-
+    @Query("SELECT id FROM recipes WHERE isFavorite = 1")
+    suspend fun getFavoriteRecipeIds(): List<String>
 }
 

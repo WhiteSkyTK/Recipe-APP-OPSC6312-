@@ -84,7 +84,7 @@ class DiscoverFragment : Fragment() {
         // Initialize the adapter correctly with all its listeners
         discoverAdapter = DiscoverRecipeAdapter(emptyList(), onRecipeClicked,
             onFavoriteClick = { recipe -> viewModel.toggleFavorite(recipe) },
-            favoritesLiveData = viewModel.favoriteIds,
+            favoritesLiveData = viewModel.allFavorites,
             lifecycleOwner = viewLifecycleOwner
         )
 

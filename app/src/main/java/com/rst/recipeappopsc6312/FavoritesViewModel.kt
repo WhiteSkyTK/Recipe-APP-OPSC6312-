@@ -5,11 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 
 class FavoritesViewModel(repository: ShoppingRepository) : ViewModel() {
-
-    // 1. Get the LiveData list of favorite IDs from the repository.
-    private val favoriteIds: LiveData<List<FavoriteRecipe>> = repository.getAllFavoriteIds()
-
-    // 2. Use switchMap to automatically transform the list of IDs into a list of full Recipe objects.
-    //    Whenever the favorite IDs change, this will automatically re-fetch the correct recipe details.
+    // This is now very simple and directly gets the list of full Recipe objects
     val favoriteRecipes: LiveData<List<Recipe>> = repository.getAllFavorites()
 }

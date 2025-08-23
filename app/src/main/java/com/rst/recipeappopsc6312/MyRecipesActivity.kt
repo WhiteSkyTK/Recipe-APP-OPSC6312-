@@ -76,16 +76,14 @@ class MyRecipesActivity : AppCompatActivity() {
         val onFavoriteClicked = { recipe: Recipe ->
             // Tell the ViewModel to handle the favorite logic
             viewModel.toggleFavorite(recipe)
-            // Note: We don't need to manually update the UI here anymore,
-            // the LiveData observer in the adapter will do it automatically.
         }
 
         // Initialize the adapter with BOTH click listeners
         myRecipesAdapter = HomeRecipeAdapter(
             recipeList = emptyList(),
             onRecipeClick = onRecipeClicked,
-            onFavoriteClick = { recipe -> viewModel.toggleFavorite(recipe) },
-            favoritesLiveData = viewModel.favoriteIds,
+            onFavoriteClick = onFavoriteClicked,
+            favoritesLiveData = viewModel.allFavorites,
             lifecycleOwner = this // The Activity is the LifecycleOwner
         )
 

@@ -39,9 +39,3 @@ class ScanViewModel(private val repository: ShoppingRepository) : ViewModel() {
         }
     }
 }
-
-// A helper data class to hold a recipe and its match information
-data class RecipeMatch(
-    val recipe: Recipe,
-    val missingIngredients: List<String>
-)

@@ -5,6 +5,7 @@ data class SpoonacularRecipe(
     val id: Int,
     val title: String,
     val image: String?,
+    val imageType: String?,
     val servings: Int,
     val readyInMinutes: Int,
     val sourceName: String?,

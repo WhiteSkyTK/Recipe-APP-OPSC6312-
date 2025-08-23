@@ -7,8 +7,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.activity.viewModels
 import com.google.firebase.firestore.FirebaseFirestore
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -32,6 +34,8 @@ class RecipeDetailActivity : AppCompatActivity() {
 
     private lateinit var ingredientAdapter: IngredientAdapter
     private lateinit var nutritionLayout: LinearLayout
+    private lateinit var nutritionScrollView: HorizontalScrollView // ++ ADD
+    private lateinit var noNutritionTextView: TextView
     private lateinit var loadingIndicator: ProgressBar
     private var currentRecipe: Recipe? = null
     private var currentServings = 0
@@ -39,6 +43,7 @@ class RecipeDetailActivity : AppCompatActivity() {
     private var isIngredientSelectionMode = false
     private var viewStartTime: Long = 0 // ++ ADD property to store start time
     private var recipeId: String? = null // ++ ADD property to store recipe ID
+    private var missingIngredients: List<String>? = null
 
 
     private val shoppingViewModel: ShoppingViewModel by viewModels {
@@ -72,9 +77,10 @@ class RecipeDetailActivity : AppCompatActivity() {
     private lateinit var titleTextView: TextView
     private lateinit var timeTextView: TextView
     private lateinit var authorTextView: TextView
-    private lateinit var descriptionTextView: TextView // Assuming you have one
     private lateinit var ingredientsRecyclerView: RecyclerView
     private lateinit var methodRecyclerView: RecyclerView
+    private lateinit var descriptionTextView: TextView
+    private lateinit var readMoreTextView: TextView
     private lateinit var favoriteFab: FloatingActionButton
     private lateinit var servingsValueTextView: TextView
     private lateinit var decreaseButton: TextView
@@ -91,7 +97,8 @@ class RecipeDetailActivity : AppCompatActivity() {
         titleTextView = findViewById(R.id.textViewRecipeTitle)
         timeTextView = findViewById(R.id.textViewTime)
         authorTextView = findViewById(R.id.textViewAuthor)
-        descriptionTextView = findViewById(R.id.textViewRecipeDescription) // Add this to your layout if you don't have it
+        descriptionTextView = findViewById(R.id.textViewRecipeDescription)
+        readMoreTextView = findViewById(R.id.textViewReadMore) // Add this to your layout if you don't have it
         ingredientsRecyclerView = findViewById(R.id.recyclerViewIngredients)
         methodRecyclerView = findViewById(R.id.recyclerViewMethod)
         favoriteFab = findViewById(R.id.fabFavorite)
@@ -99,6 +106,8 @@ class RecipeDetailActivity : AppCompatActivity() {
         decreaseButton = findViewById(R.id.buttonDecreaseServings)
         increaseButton = findViewById(R.id.buttonIncreaseServings)
         nutritionLayout = findViewById(R.id.nutritionLayout)
+        nutritionScrollView = findViewById(R.id.nutritionScrollView) // ++ FIND
+        noNutritionTextView = findViewById(R.id.textViewNoNutrition)
 
         enableEdgeToEdge()
         val recipeLayout = findViewById<View>(R.id.recipe_detail_layout) // Add this ID to your root layout in XML
@@ -122,7 +131,7 @@ class RecipeDetailActivity : AppCompatActivity() {
             return
         }
 
-        shoppingViewModel.repository.logRecipeView(recipeId)
+        missingIngredients = intent.getStringArrayListExtra("MISSING_INGREDIENTS")
 
         observeViewModel()
         recipeDetailViewModel.fetchRecipe(recipeId) // Pass the source
@@ -292,7 +301,12 @@ class RecipeDetailActivity : AppCompatActivity() {
         }
 
         recipeDetailViewModel.isFavorite.observe(this) { isFavorite ->
-            val heartIcon = if (isFavorite) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
+            // If isFavorite is null (meaning not in the DB), treat it as false.
+            val heartIcon = if (isFavorite == true) {
+                R.drawable.ic_heart_filled
+            } else {
+                R.drawable.ic_heart_outline
+            }
             favoriteFab.setImageResource(heartIcon)
         }
 
@@ -321,6 +335,20 @@ class RecipeDetailActivity : AppCompatActivity() {
         authorTextView.text = "by ${recipeToDisplay.author}"
         descriptionTextView.text = recipeToDisplay.description // Populate description
 
+        descriptionTextView.post {
+            // ++ ADD THIS LOG to see the line count
+            Log.d("ReadMoreDebug", "Description line count is: ${descriptionTextView.lineCount}")
+
+            if (descriptionTextView.lineCount >= 4) {
+                readMoreTextView.visibility = View.VISIBLE
+                readMoreTextView.setOnClickListener {
+                    toggleReadMoreState()
+                }
+            } else {
+                readMoreTextView.visibility = View.GONE
+            }
+        }
+
         // Populate nutrition facts
         nutritionLayout.removeAllViews()
         recipeToDisplay.nutrition.forEach { fact ->
@@ -330,9 +358,27 @@ class RecipeDetailActivity : AppCompatActivity() {
             nutritionLayout.addView(factView)
         }
 
+        if (recipeToDisplay.nutrition.isEmpty()) {
+            // If the list is empty, hide the scroll view and show the message
+            nutritionScrollView.visibility = View.GONE
+            noNutritionTextView.visibility = View.VISIBLE
+        } else {
+            // If there is data, show the scroll view and hide the message
+            nutritionScrollView.visibility = View.VISIBLE
+            noNutritionTextView.visibility = View.GONE
+
+            nutritionLayout.removeAllViews()
+            recipeToDisplay.nutrition.forEach { fact ->
+                val factView = LayoutInflater.from(this).inflate(R.layout.item_nutrition_fact, nutritionLayout, false)
+                factView.findViewById<TextView>(R.id.textViewNutritionValue).text = fact.value
+                factView.findViewById<TextView>(R.id.textViewNutritionLabel).text = fact.label
+                nutritionLayout.addView(factView)
+            }
+        }
+
         // Setup RecyclerViews
         // Ensure adapters can handle new list submissions gracefully
-        ingredientAdapter = IngredientAdapter(recipeToDisplay.ingredients.toMutableList())
+        ingredientAdapter = IngredientAdapter(recipeToDisplay.ingredients.toMutableList(), missingIngredients)
         ingredientsRecyclerView.layoutManager = LinearLayoutManager(this)
         ingredientsRecyclerView.adapter = ingredientAdapter
 
@@ -356,14 +402,12 @@ class RecipeDetailActivity : AppCompatActivity() {
         }
 
         favoriteFab.setOnClickListener {
-            lifecycleScope.launch {
-                // Save the full recipe to Room to ensure it's available offline
-                AppDatabase.getDatabase(this@RecipeDetailActivity).recipeDao().insertRecipe(recipeToDisplay)
-
-                // Now call the inherited toggleFavorite function, passing the recipe
-                recipeDetailViewModel.toggleFavorite(recipeToDisplay)
-            }
+            recipeDetailViewModel.toggleFavorite(recipeToDisplay)
         }
+
+        ingredientAdapter = IngredientAdapter(recipeToDisplay.ingredients.toMutableList(), missingIngredients)
+        ingredientsRecyclerView.layoutManager = LinearLayoutManager(this)
+        ingredientsRecyclerView.adapter = ingredientAdapter
     }
 
     private fun updateServingsAndValues(recipeForServings: Recipe) {
@@ -420,6 +464,17 @@ class RecipeDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun toggleReadMoreState() {
+        if (readMoreTextView.text.toString().equals("Read More", ignoreCase = true)) {
+            descriptionTextView.maxLines = Integer.MAX_VALUE
+            descriptionTextView.ellipsize = null // Remove the "..."
+            readMoreTextView.text = "Read Less"
+        } else {
+            descriptionTextView.maxLines = 4
+            descriptionTextView.ellipsize = android.text.TextUtils.TruncateAt.END // Restore the "..."
+            readMoreTextView.text = "Read More"
+        }
+    }
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true

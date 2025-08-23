@@ -7,7 +7,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     private const val BASE_URL = "https://api.spoonacular.com/"
-    private const val MEALDB_BASE_URL = "https://www.themealdb.com/"
 
     val instance: SpoonacularApiService by lazy {
 
@@ -25,18 +24,33 @@ object RetrofitClient {
         retrofit.create(SpoonacularApiService::class.java)
     }
 
-    val mealDbInstance: TheMealDBApiService by lazy {
-        val logging = HttpLoggingInterceptor()
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+    private const val TASTY_BASE_URL = "https://tasty.p.rapidapi.com/"
+
+    val tastyInstance: TastyApiService by lazy {
+        // 1. Create a logger to see the API calls
+        val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+
+        // 2. Create a custom OkHttpClient that adds the required headers
         val client = OkHttpClient.Builder()
             .addInterceptor(logging)
+            .addInterceptor { chain ->
+                // This intercepts every request and adds the headers
+                val request = chain.request().newBuilder()
+                    .addHeader("x-rapidapi-host", "tasty.p.rapidapi.com")
+                    // IMPORTANT: Get your key securely from BuildConfig
+                    .addHeader("x-rapidapi-key", BuildConfig.TASTY_API_KEY)
+                    .build()
+                chain.proceed(request)
+            }
             .build()
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl(MEALDB_BASE_URL)
+        // 3. Build Retrofit using this custom client
+        Retrofit.Builder()
+            .baseUrl(TASTY_BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        retrofit.create(TheMealDBApiService::class.java)
+            .create(TastyApiService::class.java)
     }
+
 }

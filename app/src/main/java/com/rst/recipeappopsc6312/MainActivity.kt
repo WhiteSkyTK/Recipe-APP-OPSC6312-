@@ -157,10 +157,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        mainViewModel.favoriteIds.observe(this) { favorites ->
+        // In MainActivity.kt -> onCreate()
+        mainViewModel.allFavorites.observe(this) { favorites ->
             hasFavorites = !favorites.isNullOrEmpty()
         }
-
         // favoritesButton OnClickListener
         favoritesButton.setOnClickListener {
             val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
