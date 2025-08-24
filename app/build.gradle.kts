@@ -56,15 +56,19 @@ android {
         buildConfigField("String", "TASTY_API_KEY", "\"${localProperties.getProperty("tasty.api.key")}\"")
     }
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Tell the release build to use the signing configuration we created
-            signingConfig = signingConfigs.getByName("release")
+
+            // ++ THIS IS THE FIX ++
+            // Only try to apply the signing config if the property exists.
+            if (localProperties.getProperty("RELEASE_STORE_FILE") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
