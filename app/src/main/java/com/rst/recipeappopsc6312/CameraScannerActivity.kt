@@ -12,6 +12,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.objects.ObjectDetection
+import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
@@ -57,7 +59,7 @@ class CameraScannerActivity : AppCompatActivity() {
                 val mediaImage = imageProxy.image
                 if (mediaImage != null) {
                     val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-                    recognizeText(image)
+                    recognizeObjects(image) // Call the new object recognition function
                 }
                 imageProxy.close()
             }
@@ -67,18 +69,40 @@ class CameraScannerActivity : AppCompatActivity() {
         })
     }
 
-    private fun recognizeText(image: InputImage) {
-        val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-        recognizer.process(image)
-            .addOnSuccessListener { visionText ->
-                val recognizedLines = visionText.textBlocks.flatMap { it.lines }.map { it.text }
-                val resultIntent = Intent()
-                resultIntent.putStringArrayListExtra("scanned_ingredients", ArrayList(recognizedLines))
-                setResult(Activity.RESULT_OK, resultIntent)
-                finish() // Close the camera and return to the ScanFragment
+    private fun recognizeObjects(image: InputImage) {
+        // Configure the object detector
+        val options = ObjectDetectorOptions.Builder()
+            .setDetectorMode(ObjectDetectorOptions.SINGLE_IMAGE_MODE)
+            .enableClassification()  // We need this to get the name of the object
+            .build()
+        val objectDetector = ObjectDetection.getClient(options)
+
+        objectDetector.process(image)
+            .addOnSuccessListener { detectedObjects ->
+                if (detectedObjects.isEmpty()) {
+                    Toast.makeText(this, "No objects recognized.", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
+                }
+
+                // Get the name of the most confident result
+                val topResult = detectedObjects.maxByOrNull { obj ->
+                    obj.labels.maxByOrNull { it.confidence }?.confidence ?: 0f
+                }
+
+                val topLabel = topResult?.labels?.firstOrNull()?.text
+
+                if (topLabel != null) {
+                    // Send the recognized object name back to the ScanFragment
+                    val resultIntent = Intent()
+                    resultIntent.putStringArrayListExtra("scanned_ingredients", arrayListOf(topLabel))
+                    setResult(Activity.RESULT_OK, resultIntent)
+                    finish()
+                } else {
+                    Toast.makeText(this, "Could not classify the object.", Toast.LENGTH_SHORT).show()
+                }
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Text recognition failed.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Object recognition failed.", Toast.LENGTH_SHORT).show()
             }
     }
 }

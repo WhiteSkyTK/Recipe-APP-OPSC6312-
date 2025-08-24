@@ -23,11 +23,14 @@ android {
 
     // Define the signing configuration for your release builds
     signingConfigs {
-        create("release") {
-            storeFile = file(localProperties.getProperty("RELEASE_STORE_FILE"))
-            storePassword = localProperties.getProperty("RELEASE_STORE_PASSWORD")
-            keyAlias = localProperties.getProperty("RELEASE_KEY_ALIAS")
-            keyPassword = localProperties.getProperty("RELEASE_KEY_PASSWORD")
+        // Only configure the release signing if the properties exist
+        if (localProperties.getProperty("RELEASE_STORE_FILE") != null) {
+            create("release") {
+                storeFile = file(localProperties.getProperty("RELEASE_STORE_FILE"))
+                storePassword = localProperties.getProperty("RELEASE_STORE_PASSWORD")
+                keyAlias = localProperties.getProperty("RELEASE_KEY_ALIAS")
+                keyPassword = localProperties.getProperty("RELEASE_KEY_PASSWORD")
+            }
         }
     }
     buildFeatures {
@@ -138,5 +141,6 @@ dependencies {
     implementation ("androidx.camera:camera-camera2:1.4.2")
     implementation ("androidx.camera:camera-lifecycle:1.4.2")
     implementation ("androidx.camera:camera-view:1.4.2")
-    //implementation("com.spoonacular:android-client:2.0.2")
+    implementation("com.google.mlkit:object-detection:17.0.2")
+
 }
