@@ -10,30 +10,48 @@ class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     private val _recipes = MutableLiveData<List<Recipe>>(emptyList())
     val recipes: LiveData<List<Recipe>> = _recipes
 
-    private val _recipeUpdated = MutableLiveData<Pair<String, Boolean>>()
-    val recipeUpdated: LiveData<Pair<String, Boolean>> = _recipeUpdated
-
-
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val pageSize = 10 // How many recipes to load at a time
+    private var currentSortOption = "Recommended"
+    private var isFetching = false
+    private var canLoadMore = true
 
-    init {
-        loadMoreRecipes() // Load the first page
+    fun setSortOption(sortOption: String) {
+        if (sortOption == currentSortOption) return // No change
+
+        currentSortOption = sortOption
+        // Reset the list and pagination state
+        _recipes.value = emptyList()
+        canLoadMore = true
+        isFetching = false
+        // The repository's last document map will handle the cursor reset
+
+        loadMoreRecipes()
     }
 
     fun loadMoreRecipes() {
-        if (_isLoading.value == true) return // Prevent multiple loads at once
+        if (isFetching || !canLoadMore) return
 
-        _isLoading.value = true
+        isFetching = true
+        // Show the main progress bar only for the first page
+        if (_recipes.value.isNullOrEmpty()) {
+            _isLoading.value = true
+        }
+
         viewModelScope.launch {
-            val newRecipes = repository.getDiscoverRecipes(pageSize)
-            // Add the new recipes to the existing list
-            val currentList = _recipes.value ?: emptyList()
-            _recipes.postValue(currentList + newRecipes)
+            val newRecipes = repository.getDiscoverPage(currentSortOption, 10)
+
+            if (newRecipes.isNotEmpty()) {
+                val currentList = _recipes.value ?: emptyList()
+                _recipes.postValue(currentList + newRecipes)
+            } else {
+                // If we get an empty list, it means we've reached the end
+                canLoadMore = false
+            }
+
             _isLoading.postValue(false)
+            isFetching = false
         }
     }
-
 }

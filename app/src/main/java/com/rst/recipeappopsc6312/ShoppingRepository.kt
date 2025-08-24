@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -23,6 +24,8 @@ class ShoppingRepository(
     private val apiService = RetrofitClient.instance
 
     private val tastyApiService = RetrofitClient.tastyInstance
+    private val lastDocumentSnapshots = mutableMapOf<String, com.google.firebase.firestore.DocumentSnapshot?>()
+
 
     // Get lists directly from Room. Room is the source of truth for the UI.
     fun getAllShoppingListsForUser(userId: String) = shoppingDao.getAllShoppingListsForUser(userId)
@@ -53,7 +56,7 @@ class ShoppingRepository(
         // 2. Define the types of recipes you want
         val spoonacularTags = listOf(
             // Meals
-            "breakfast", "brunch", "lunch", "dinner", "snack", "dessert", "supper",
+            "african", "breakfast", "brunch", "lunch", "dinner", "snack", "dessert", "supper",
 
             // Courses
             "appetizer", "starter", "main course", "side dish", "soup", "salad",
@@ -103,10 +106,9 @@ class ShoppingRepository(
             }
         }
 
-
         val tastyQueries = listOf(
             // Proteins
-            "chicken", "beef", "pork", "lamb", "fish", "shrimp", "tofu", "egg",
+            "african" ,"chicken", "beef", "pork", "lamb", "fish", "shrimp", "tofu", "egg",
 
             // Meals
             "breakfast", "brunch", "lunch", "dinner", "snack", "dessert",
@@ -144,70 +146,75 @@ class ShoppingRepository(
     }
 
     suspend fun getPublicRecipes(forceRefresh: Boolean = false): List<Recipe> {
-        var cachedRecipesList: List<Recipe> = emptyList()
-        try {
-            // 1. Always get the cache first to use as a fallback if all API calls fail.
-            val cachedRecipesQuery = firestore.collection("recipes")
-                .whereEqualTo("public", true).limit(100).get().await()
-            if (!cachedRecipesQuery.isEmpty) {
-                cachedRecipesList = cachedRecipesQuery.toObjects(Recipe::class.java)
-            }
+        val cachedRecipesQuery = firestore.collection("recipes")
+            .whereEqualTo("public", true).limit(100).get().await()
+        val cachedRecipes = cachedRecipesQuery.toObjects(Recipe::class.java)
 
-            // 2. If we don't need to refresh and the cache is good, return it immediately.
-            if (!forceRefresh && cachedRecipesList.size >= 50) {
-                Log.d("API_FETCH", "Found ${cachedRecipesList.size} recipes in Firestore cache. Using them.")
-                return cachedRecipesList.shuffled()
-            }
-
-            // 3. If a refresh is needed, call BOTH APIs in parallel.
-            Log.d("API_FETCH", "Cache is empty or refresh is forced. Fetching from both APIs.")
-            var spoonacularRecipes = emptyList<Recipe>()
-            var tastyRecipes = emptyList<Recipe>()
-
-            kotlinx.coroutines.coroutineScope {
-                launch {
-                    try {
-                        val apiKeys = listOf(
-                            BuildConfig.SPOONACULAR_API_KEY_1, BuildConfig.SPOONACULAR_API_KEY_2,
-                            BuildConfig.SPOONACULAR_API_KEY_3, BuildConfig.SPOONACULAR_API_KEY_4,
-                            BuildConfig.SPOONACULAR_API_KEY_5
-                        )
-                        val response = apiService.getRandomRecipes(apiKeys.random(), 25, "main course,dessert,snack")
-                        spoonacularRecipes = response.recipes.map { it.toAppRecipe() }
-                    } catch (e: Exception) {
-                        Log.e("API_FETCH", "Spoonacular refresh failed: ${e.message}")
-                    }
-                }
-                launch {
-                    try {
-                        val response = tastyApiService.listRecipes(0, 25, null)
-                        tastyRecipes = response.results.map { it.toAppRecipe() }
-                    } catch (e: Exception) {
-                        Log.e("API_FETCH", "Tasty refresh failed: ${e.message}")
-                    }
-                }
-            }
-
-            // 4. Combine the results and remove any duplicates.
-            val newRecipes = (spoonacularRecipes + tastyRecipes).distinctBy { it.id }
-
-            // 5. If we got new recipes, save them to the cache and return them.
-            if (newRecipes.isNotEmpty()) {
-                newRecipes.forEach { recipe ->
-                    firestore.collection("recipes").document(recipe.id).set(recipe)
-                }
-                Log.d("API_FETCH", "Successfully fetched and cached ${newRecipes.size} new recipes.")
-                return newRecipes.shuffled()
-            }
-
-            // 6. If both APIs failed, return the old cache so the user doesn't see a blank screen.
-            Log.e("API_FETCH", "Both APIs failed to return new recipes. Returning stale cache.")
-            return cachedRecipesList.shuffled()
-
-        } catch (e: Exception) {
-            Log.e("API_FETCH", "A critical error occurred in getPublicRecipes: ${e.message}")
-            return cachedRecipesList // Final fallback
+        if (!forceRefresh && cachedRecipes.size >= 50) {
+            Log.d("API_FETCH", "Found ${cachedRecipes.size} recipes in cache. Using them.")
+            return cachedRecipes.shuffled()
         }
+
+        // If a refresh is needed, call our new smart fetching function
+        return fetchAndCacheNewRecipes(cachedRecipes)
+    }
+
+    private suspend fun fetchAndCacheNewRecipes(cachedRecipes: List<Recipe>): List<Recipe> {
+        Log.d("API_FETCH", "Cache is low or refresh forced. Fetching from both APIs.")
+        var spoonacularRecipes = emptyList<Recipe>()
+        var tastyRecipes = emptyList<Recipe>()
+
+        // 1. Gather user preferences to guide the API calls
+        val userId = FirebaseManager.auth.currentUser?.uid
+        var userCuisines = emptyList<String>()
+        if (userId != null) {
+            val userProfileDoc = firestore.collection("users").document(userId).get().await()
+            userCuisines = userProfileDoc.get("selected_cuisines") as? List<String> ?: emptyList()
+        }
+
+        // 2. Define the full list of possible tags/queries
+        val tastyQueries = listOf("chicken", "beef", "pork", "lamb", "fish", "shrimp", "tofu", "egg", "breakfast", "brunch", "lunch", "dinner", "snack", "dessert", "pasta", "pizza", "burger", "sandwich", "tacos", "salad", "soup", "curry", "stir fry", "fried rice", "30 minute meals", "quick dessert", "meal prep", "one pot", "easy dinner", "italian", "mexican", "indian", "thai", "chinese", "japanese", "greek", "french", "american", "mediterranean", "vegetarian", "vegan", "keto", "gluten free", "healthy", "high protein", "holiday", "christmas", "thanksgiving", "party food", "bbq", "summer")
+        val spoonacularTags = listOf("breakfast", "brunch", "lunch", "dinner", "snack", "dessert", "supper", "appetizer", "starter", "main course", "side dish", "soup", "salad", "bread", "sandwich", "wraps", "pizza", "pasta", "casserole", "vegetarian", "vegan", "keto", "paleo", "low-carb", "gluten free", "dairy free", "high protein", "low fat", "italian", "mexican", "indian", "thai", "chinese", "japanese", "mediterranean", "french", "greek", "spanish", "american", "middle eastern", "caribbean", "holiday", "christmas", "thanksgiving", "easter", "halloween", "summer", "winter", "spring", "fall", "chicken", "beef", "pork", "lamb", "seafood", "fish", "shrimp", "tofu", "eggs", "comfort food", "healthy", "quick", "slow cooker", "instant pot", "bbq", "grilling", "stir fry", "baking")
+
+        // 3. Build the final, prioritized list of search terms
+        val finalSpoonacularTags = (listOf("african") + userCuisines + spoonacularTags.shuffled().take(5)).distinct()
+        val finalTastyQueries = (listOf("african") + userCuisines + tastyQueries.shuffled().take(5)).distinct()
+
+        // 4. Call both APIs in parallel for maximum efficiency
+        coroutineScope {
+            launch {
+                try {
+                    val apiKeys = listOf(
+                        BuildConfig.SPOONACULAR_API_KEY_1, BuildConfig.SPOONACULAR_API_KEY_2,
+                        BuildConfig.SPOONACULAR_API_KEY_3, BuildConfig.SPOONACULAR_API_KEY_4,
+                        BuildConfig.SPOONACULAR_API_KEY_5
+                    )
+                    val response = apiService.getRandomRecipes(apiKeys.random(), 25, finalSpoonacularTags.joinToString(","))
+                    spoonacularRecipes = response.recipes.map { it.toAppRecipe() }
+                } catch (e: Exception) { Log.e("API_FETCH", "Spoonacular refresh failed: ${e.message}") }
+            }
+            launch {
+                try {
+                    val response = tastyApiService.listRecipes(0, 25, finalTastyQueries.joinToString(" "))
+                    tastyRecipes = response.results.map { it.toAppRecipe() }
+                } catch (e: Exception) { Log.e("API_FETCH", "Tasty refresh failed: ${e.message}") }
+            }
+        }
+
+        // 5. Combine the new recipes with the old cache and remove duplicates
+        val allRecipes = (cachedRecipes + spoonacularRecipes + tastyRecipes).distinctBy { it.id }
+
+        // 6. Save the complete, updated list back to Firestore
+        if (allRecipes.isNotEmpty()) {
+            allRecipes.forEach { recipe ->
+                firestore.collection("recipes").document(recipe.id).set(recipe)
+            }
+            Log.d("API_FETCH", "Successfully fetched and cached. Total recipes in DB: ${allRecipes.size}")
+            return allRecipes.shuffled()
+        }
+
+        // 7. If everything fails, return the original cache
+        return cachedRecipes.shuffled()
     }
 
     suspend fun addItems(items: List<ShoppingItem>, listId: String, userId: String) {
@@ -684,4 +691,68 @@ class ShoppingRepository(
     fun getScanHistory(): LiveData<List<ScanHistoryItem>> = scanHistoryDao.getScanHistory()
     suspend fun saveScanToHistory(historyItem: ScanHistoryItem) = scanHistoryDao.insert(historyItem)
 
+    suspend fun getSortedAndFilteredRecipes(sortOption: String, category: String?): List<Recipe> {
+        return try {
+            var query: com.google.firebase.firestore.Query = firestore.collection("recipes")
+                .whereEqualTo("public", true)
+
+            // Apply category filter if one is selected
+            if (category != null && category != "All") {
+                query = query.whereEqualTo("category", category)
+            }
+
+            // Apply sorting
+            when (sortOption) {
+                "A-Z" -> query = query.orderBy("title", com.google.firebase.firestore.Query.Direction.ASCENDING)
+                "Z-A" -> query = query.orderBy("title", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                // "Recommended" will be handled separately, so no sorting here.
+            }
+
+            // For now, we fetch a simple list. Pagination can be added back later if needed.
+            val documents = query.limit(50).get().await()
+            documents.toObjects(Recipe::class.java)
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error getting sorted/filtered recipes", e)
+            emptyList()
+        }
+    }
+
+    suspend fun getDiscoverPage(sortOption: String, pageSize: Int): List<Recipe> {
+        if (sortOption == "Recommended") {
+            // The recommendation engine is complex and doesn't support simple pagination.
+            // We'll return the top 20 results as a single page.
+            return getRecommendedForYou()
+        }
+
+        return try {
+            var query: com.google.firebase.firestore.Query = firestore.collection("recipes")
+                .whereEqualTo("public", true)
+
+            // Apply sorting based on the user's choice
+            when (sortOption) {
+                "Popular" -> query = query.orderBy("isPopular", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                "Cook Time" -> query = query.orderBy("timeInMins", com.google.firebase.firestore.Query.Direction.ASCENDING)
+                "A-Z" -> query = query.orderBy("title", com.google.firebase.firestore.Query.Direction.ASCENDING)
+                "Z-A" -> query = query.orderBy("title", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            }
+
+            // If this is not the first page, start after the last document we saw
+            val lastDoc = lastDocumentSnapshots[sortOption]
+            if (lastDoc != null) {
+                query = query.startAfter(lastDoc)
+            }
+
+            val documents = query.limit(pageSize.toLong()).get().await()
+
+            // Save the last document of this page for the next query
+            if (documents.size() > 0) {
+                lastDocumentSnapshots[sortOption] = documents.documents[documents.size() - 1]
+            }
+
+            documents.toObjects(Recipe::class.java)
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error getting discover page for sort: $sortOption", e)
+            emptyList()
+        }
+    }
 }

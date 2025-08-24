@@ -1,7 +1,9 @@
 package com.rst.recipeappopsc6312
 
+import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,27 +12,26 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import android.util.Log
-import android.widget.FrameLayout
-import android.widget.ProgressBar
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
-import java.util.UUID
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Dispatchers
+import java.io.File
+import java.util.UUID
 
 class AddRecipeFragment : Fragment() {
     private val TAG = "AddRecipeFragment"
@@ -41,6 +42,7 @@ class AddRecipeFragment : Fragment() {
     private lateinit var deleteButton: Button
 
     private var coverImageUri: Uri? = null
+    private var tempImageUri: Uri? = null
     private var recipeToEdit: Recipe? = null
     private var editRecipeId: String? = null
 
@@ -56,7 +58,17 @@ class AddRecipeFragment : Fragment() {
         AddRecipeViewModelFactory(repository)
     }
 
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    // ++ NEW LAUNCHER for taking a picture
+    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            coverImageUri = tempImageUri
+            coverPhotoImageView.setImageURI(coverImageUri)
+            coverPhotoImageView.scaleType = ImageView.ScaleType.CENTER_CROP
+        }
+    }
+
+    // Renamed for clarity
+    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             coverImageUri = it
             coverPhotoImageView.setImageURI(it)
@@ -64,6 +76,14 @@ class AddRecipeFragment : Fragment() {
         }
     }
 
+    // ++ NEW LAUNCHER for camera permission
+    private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            openCamera()
+        } else {
+            Toast.makeText(requireContext(), "Camera permission is required.", Toast.LENGTH_SHORT).show()
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Check if a recipe ID was passed for editing
@@ -96,17 +116,15 @@ class AddRecipeFragment : Fragment() {
         mealTypeAutoComplete.setAdapter(mealTypeAdapter)
 
         // --- Click Listeners ---
-        coverPhotoImageView.setOnClickListener {
-            pickImageLauncher.launch("image/*")
-        }
+        coverPhotoImageView.setOnClickListener { showImagePickerDialog() }
         addIngredientButton.setOnClickListener { addIngredientView() }
         addStepButton.setOnClickListener { addStepView() }
         saveButton.setOnClickListener { saveRecipe() }
         deleteButton.setOnClickListener {
             recipeToEdit?.let { recipe ->
                 AlertDialog.Builder(requireContext())
-                    .setTitle("Delete Recipe")
-                    .setMessage("Are you sure you want to permanently delete this recipe?")
+                    .setTitle("Delete Recipe 🗑️")
+                    .setMessage("Are you sure you want to permanently delete this recipe? 😥")
                     .setPositiveButton("Delete") { _, _ ->
                         viewModel.deleteRecipe(recipe)
                         showLoading(true)
@@ -116,6 +134,54 @@ class AddRecipeFragment : Fragment() {
             }
         }
         return view
+    }
+
+    private fun showImagePickerDialog() {
+        val options = arrayOf("Take Photo", "Choose from Gallery", "Remove Photo")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Set Cover Photo")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> checkCameraPermissionAndOpen()
+                    1 -> galleryLauncher.launch("image/*")
+                    2 -> {
+                        coverImageUri = null
+                        coverPhotoImageView.setImageResource(R.drawable.ic_add_a_photo)
+                        coverPhotoImageView.scaleType = ImageView.ScaleType.CENTER
+                    }
+                }
+            }
+            .show()
+    }
+
+    private fun checkCameraPermissionAndOpen() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                openCamera()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Permission Needed")
+                    .setMessage("Camera access is required to take a photo for your recipe.")
+                    .setPositiveButton("OK") { _, _ ->
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+            else -> {
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        }
+    }
+
+    private fun openCamera() {
+        val file = File(requireContext().filesDir, "temp_image.jpg")
+        tempImageUri = FileProvider.getUriForFile(requireContext(), "${requireContext().packageName}.provider", file)
+        cameraLauncher.launch(tempImageUri)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

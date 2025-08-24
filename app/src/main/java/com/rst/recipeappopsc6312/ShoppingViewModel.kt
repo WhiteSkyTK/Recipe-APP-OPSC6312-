@@ -218,10 +218,16 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     fun refreshHomeScreenData() {
         _isLoading.value = true
         viewModelScope.launch {
-            _featuredRecipes.postValue(repository.getFeaturedRecipes(forceRefresh = true))
-            // ++ ALSO CHANGE this line for the refresh action ++
-            _recommendedRecipes.postValue(repository.getRecommendedForYou())
+            // 1. Fetch a fresh list of public recipes from the API
+            val freshPublicRecipes = repository.getPublicRecipes(forceRefresh = true)
+
+            // 2. Use that single list to update both LiveData properties
+            _featuredRecipes.postValue(freshPublicRecipes.shuffled().take(10))
+            _recommendedRecipes.postValue(freshPublicRecipes)
+
+            // 3. Also refresh the categories based on the new data
             _categories.postValue(repository.getAllCategories(forceRefresh = true))
+
             _isLoading.postValue(false)
         }
     }

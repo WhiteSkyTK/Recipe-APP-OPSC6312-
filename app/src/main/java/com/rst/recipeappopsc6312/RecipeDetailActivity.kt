@@ -414,31 +414,25 @@ class RecipeDetailActivity : AppCompatActivity() {
         servingsValueTextView.text = currentServings.toString()
         val ratio = currentServings.toDouble() / originalServings.toDouble()
 
-        // ++ THIS LOGIC IS NOW UPDATED FOR THE NEW INGREDIENT CLASS ++
         val newIngredients = recipeForServings.ingredients.map { originalIngredient ->
-            // The original quantity is now just a number string
-            val originalQty = originalIngredient.quantity.toDoubleOrNull()
+            // ++ USE the smart parser to handle fractions like "½" ++
+            val originalQty = UnitConverter.parseQuantity(originalIngredient.quantity)
 
-            val newQtyStringValue = if (originalQty != null) {
-                val newQty = originalQty * ratio
-                // Formatting logic to make the numbers look nice
-                if (newQty == 0.0) "0"
-                else if (newQty < 1 && newQty > 0) String.format("%.2f", newQty).removeSuffix("0").removeSuffix("0").removeSuffix(".")
-                else if (newQty % 1 == 0.0) newQty.toInt().toString()
-                else String.format("%.1f", newQty).removeSuffix("0").removeSuffix(".")
-            } else {
-                originalIngredient.quantity // If not a number, keep original text
-            }
+            val newQty = originalQty * ratio
 
-            // Create the new Ingredient object with all three required parameters
+            // Formatting logic to make the numbers look nice
+            val newQtyStringValue = if (newQty == 0.0) "0"
+            else if (newQty < 1 && newQty > 0) String.format("%.2f", newQty).removeSuffix("0").removeSuffix("0").removeSuffix(".")
+            else if (newQty % 1 == 0.0) newQty.toInt().toString()
+            else String.format("%.1f", newQty).removeSuffix("0").removeSuffix(".")
+
             Ingredient(
                 name = originalIngredient.name,
                 quantity = newQtyStringValue,
-                unit = originalIngredient.unit // Pass the unit separately
+                unit = originalIngredient.unit
             )
         }
-        ingredientAdapter.updateIngredients(newIngredients.toMutableList())
-
+        ingredientAdapter.updateIngredients(newIngredients)
         updateNutritionFacts(ratio, recipeForServings.nutrition)
     }
 

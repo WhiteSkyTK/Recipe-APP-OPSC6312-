@@ -1,8 +1,8 @@
 package com.rst.recipeappopsc6312
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognizerIntent
@@ -15,10 +15,16 @@ import android.widget.Toast
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.textfield.TextInputEditText
@@ -29,19 +35,23 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.util.Locale
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+
 class ScanFragment : Fragment() {
 
     private lateinit var ingredientInputLayout: TextInputLayout
-    private lateinit var ingredientEditText: TextInputEditText
     private lateinit var ingredientChipGroup: ChipGroup
     private lateinit var historyRecyclerView: RecyclerView
     private lateinit var historyAdapter: ScanHistoryAdapter
-    private lateinit var recipeMatchAdapter: RecipeMatchAdapter
+    private lateinit var cameraPreviewView: PreviewView
+    private lateinit var lottieAnimationView: LottieAnimationView
+    private lateinit var cameraExecutor: ExecutorService
+    private var imageAnalyzer: ImageAnalysis? = null
     private val TAG = "ScanFragment"
 
     private val viewModel: ScanViewModel by viewModels {
         val db = AppDatabase.getDatabase(requireContext())
-        // ++ UPDATE this to match the new constructor
         val repo = ShoppingRepository(
             db.shoppingDao(),
             db.recipeDao(),
@@ -50,17 +60,6 @@ class ScanFragment : Fragment() {
             FirebaseStorage.getInstance()
         )
         ScanViewModelFactory(repo)
-    }
-
-
-    // ++ LAUNCHER FOR CAMERA (to get a photo) ++
-    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-        if (bitmap != null) {
-            val image = InputImage.fromBitmap(bitmap, 0)
-            recognizeTextFromImage(image)
-        } else {
-            Toast.makeText(context, "Failed to capture image", Toast.LENGTH_SHORT).show()
-        }
     }
 
     // ++ LAUNCHER FOR VOICE INPUT ++
@@ -77,16 +76,13 @@ class ScanFragment : Fragment() {
         }
     }
 
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                // Permission is granted. Continue the action
-                cameraLauncher.launch(null)
-            } else {
-                // Explain to the user that the feature is unavailable
-                Toast.makeText(context, "Camera permission is needed to scan ingredients.", Toast.LENGTH_LONG).show()
-            }
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            startCamera()
+        } else {
+            Toast.makeText(context, "Camera permission is needed to scan ingredients.", Toast.LENGTH_LONG).show()
         }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -95,60 +91,25 @@ class ScanFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_scan, container, false)
 
         ingredientInputLayout = view.findViewById(R.id.textInputLayoutIngredient)
-        ingredientEditText = view.findViewById(R.id.editTextIngredient)
+        val ingredientEditText = view.findViewById<TextInputEditText>(R.id.editTextIngredient)
         ingredientChipGroup = view.findViewById(R.id.chipGroupIngredients)
         historyRecyclerView = view.findViewById(R.id.recyclerViewHistory)
+        cameraPreviewView = view.findViewById(R.id.cameraPreviewView)
+        lottieAnimationView = view.findViewById(R.id.lottieAnimationView)
+        cameraExecutor = Executors.newSingleThreadExecutor()
 
         setupHistoryList()
         observeViewModel()
 
-        // ++ IMPROVED TYPING: Add ingredient on keyboard "Enter" or "Done" button press ++
-        ingredientEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
-                addTypedIngredient()
-                return@setOnEditorActionListener true
-            }
-            false
-        }
-
-        // Add ingredient when the end icon is clicked (optional, if you have one)
-        ingredientEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
-                addTypedIngredient()
-                return@setOnEditorActionListener true
-            }
-            false
+        // Check for permissions and start the camera
+        if (allPermissionsGranted()) {
+            startCamera()
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
 
         view.findViewById<View>(R.id.buttonScan).setOnClickListener {
-            when {
-                // 1. Check if we already have permission
-                ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.CAMERA
-                ) == PackageManager.PERMISSION_GRANTED -> {
-                    // Permission is already granted, launch the camera
-                    cameraLauncher.launch(null)
-                }
-
-                // 2. (RECOMMENDED) Explain why you need the permission if they denied it before
-                shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
-                    AlertDialog.Builder(requireContext())
-                        .setTitle("Permission Needed")
-                        .setMessage("This feature requires camera access to scan ingredients. Please grant the permission to continue.")
-                        .setPositiveButton("OK") { _, _ ->
-                            // After they tap OK, request the permission again
-                            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
-                        .setNegativeButton("Cancel", null)
-                        .show()
-                }
-
-                // 3. If it's the first time, just ask for permission
-                else -> {
-                    requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-                }
-            }
+            analyzeCurrentImage()
         }
 
         view.findViewById<View>(R.id.buttonVoice).setOnClickListener {
@@ -178,39 +139,76 @@ class ScanFragment : Fragment() {
                 Toast.makeText(context, "Please add some ingredients first", Toast.LENGTH_SHORT).show()
             }
         }
+
+        ingredientEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                addTypedIngredient(ingredientEditText)
+                return@setOnEditorActionListener true
+            }
+            false
+        }
+
         return view
     }
 
-    private fun addTypedIngredient() {
-        val ingredientName = ingredientEditText.text.toString().trim()
-        if (ingredientName.isNotEmpty()) {
-            addIngredientChip(ingredientName)
-            ingredientEditText.text?.clear()
+    private fun startCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
+        cameraProviderFuture.addListener({
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            val preview = Preview.Builder().build().also {
+                it.setSurfaceProvider(cameraPreviewView.surfaceProvider)
+            }
+            // We create the analyzer here but don't set a listener yet
+            imageAnalyzer = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+
+            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            try {
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalyzer)
+            } catch (exc: Exception) {
+                Log.e(TAG, "Use case binding failed", exc)
+            }
+        }, ContextCompat.getMainExecutor(requireContext()))
+    }
+
+    @SuppressLint("UnsafeOptInUsageError")
+    private fun analyzeCurrentImage() {
+        lottieAnimationView.visibility = View.VISIBLE // Show animation
+
+        imageAnalyzer?.setAnalyzer(cameraExecutor) { imageProxy ->
+            val mediaImage = imageProxy.image
+            if (mediaImage != null) {
+                val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+                val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+
+                recognizer.process(image)
+                    .addOnSuccessListener { visionText ->
+                        // Split the recognized text by lines and add each as a chip
+                        activity?.runOnUiThread {
+                            visionText.text.split("\n").forEach { line ->
+                                if (line.isNotBlank()) {
+                                    addIngredientChip(line.trim().replaceFirstChar { it.uppercase() })
+                                }
+                            }
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "Text recognition failed", e)
+                    }
+                    .addOnCompleteListener {
+                        imageProxy.close()
+                        activity?.runOnUiThread {
+                            lottieAnimationView.visibility = View.GONE // Hide animation
+                        }
+                        // Stop analyzing after one frame to prevent continuous scanning
+                        imageAnalyzer?.clearAnalyzer()
+                    }
+            }
         }
     }
 
-    private fun recognizeTextFromImage(image: InputImage) {
-        val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-        recognizer.process(image)
-            .addOnSuccessListener { visionText ->
-                // Task completed successfully
-                // We get blocks of text, then lines, then words.
-                // Let's add each recognized line as a separate ingredient chip.
-                for (block in visionText.textBlocks) {
-                    for (line in block.lines) {
-                        val lineText = line.text.trim()
-                        if (lineText.isNotBlank()) {
-                            addIngredientChip(lineText.capitalize(Locale.ROOT))
-                        }
-                    }
-                }
-            }
-            .addOnFailureListener { e ->
-                // Task failed with an exception
-                Toast.makeText(context, "Text recognition failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e(TAG, "Text recognition failed", e)
-            }
-    }
     private fun observeViewModel() {
         // Observe the scan history from the ViewModel
         viewModel.scanHistory.observe(viewLifecycleOwner) { history ->
@@ -236,6 +234,15 @@ class ScanFragment : Fragment() {
         historyRecyclerView.layoutManager = LinearLayoutManager(context)
         historyRecyclerView.adapter = historyAdapter
     }
+
+    private fun addTypedIngredient(editText: TextInputEditText) {
+        val ingredientName = editText.text.toString().trim()
+        if (ingredientName.isNotEmpty()) {
+            addIngredientChip(ingredientName)
+            editText.text?.clear()
+        }
+    }
+
     private fun addIngredientChip(name: String) {
         val chip = layoutInflater.inflate(R.layout.item_ingredient_chip, ingredientChipGroup, false) as Chip
         chip.text = name
@@ -249,5 +256,14 @@ class ScanFragment : Fragment() {
         return (0 until ingredientChipGroup.childCount).map { i ->
             (ingredientChipGroup.getChildAt(i) as Chip).text.toString()
         }
+    }
+
+    private fun allPermissionsGranted() = ContextCompat.checkSelfPermission(
+        requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cameraExecutor.shutdown()
     }
 }

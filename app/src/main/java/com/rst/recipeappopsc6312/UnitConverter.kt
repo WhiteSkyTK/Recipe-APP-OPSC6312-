@@ -31,7 +31,7 @@ object UnitConverter {
         }
     }
 
-    private fun parseQuantity(input: String?): Double {
+    internal fun parseQuantity(input: String?): Double {
         if (input.isNullOrBlank()) return 0.0
         if (input.contains(" ")) {
             val parts = input.split(" ")

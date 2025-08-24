@@ -9,9 +9,12 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.SearchView
+import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
@@ -21,14 +24,11 @@ import com.google.firebase.storage.FirebaseStorage
 
 class DiscoverFragment : Fragment() {
 
-    private lateinit var recyclerView: RecyclerView
     private lateinit var discoverAdapter: DiscoverRecipeAdapter
-    private var recipeList = mutableListOf<Recipe>()
-    private var isLoading = false
-    private var currentPage = 0
-    private val pageSize = 10 // Load 10 items at a time
+    private lateinit var mainProgressBar: ProgressBar
     private lateinit var paginationProgressBar: ProgressBar
-
+    private lateinit var sortSpinner: Spinner
+    private lateinit var categorySpinner: Spinner
 
     private val viewModel: DiscoverViewModel by viewModels {
         val db = AppDatabase.getDatabase(requireContext())
@@ -41,6 +41,12 @@ class DiscoverFragment : Fragment() {
         DiscoverViewModelFactory(repo)
     }
 
+    private val shoppingViewModel: ShoppingViewModel by viewModels {
+        val db = AppDatabase.getDatabase(requireContext())
+        val repo = ShoppingRepository(db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(), FirebaseFirestore.getInstance(), FirebaseStorage.getInstance())
+        ShoppingViewModelFactory(repo)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,29 +54,41 @@ class DiscoverFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_discover, container, false)
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewDiscover)
         val searchView = view.findViewById<SearchView>(R.id.searchViewRecipes) // ++ USE CORRECT ID
-        paginationProgressBar = view.findViewById(R.id.paginationProgressBar) // ++ FIND PROGRESS BAR
+        val sortSpinner = view.findViewById<Spinner>(R.id.spinnerSort)
+        mainProgressBar = view.findViewById(R.id.mainProgressBar)
 
         setupRecyclerView(recyclerView)
+        setupSortSpinner(sortSpinner)
         observeViewModel()
 
+        // Initial data load
+        shoppingViewModel.loadHomeScreenData()
 
         // Add the search listener
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                if (!query.isNullOrBlank()) {
-                    // ++ LOG THE SEARCH QUERY ++
-                    viewModel.repository.logSearchQuery(query)
-                }
                 discoverAdapter.filter.filter(query)
                 return false
             }
             override fun onQueryTextChange(newText: String?): Boolean {
-                // We don't log on every character change, only on submit.
                 discoverAdapter.filter.filter(newText)
                 return false
             }
         })
         return view
+    }
+
+    private fun setupSortSpinner(spinner: Spinner) {
+        val sortOptions = listOf("Recommended", "Popular", "Cook Time", "A-Z", "Z-A")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, sortOptions)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                viewModel.setSortOption(sortOptions[position])
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {
@@ -106,14 +124,11 @@ class DiscoverFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.recipes.observe(viewLifecycleOwner) { recipes ->
-            // The updateData function in your new adapter will handle updating both lists
             discoverAdapter.updateData(recipes)
         }
-
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            // Show/hide the pagination loading indicator
-            paginationProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            // This now controls the main, centered progress bar
+            mainProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
-
     }
 }
