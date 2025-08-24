@@ -7,11 +7,13 @@ Welcome to the official repository for Harmony Kitchen, a smart recipe and meal 
 * Sagwadi Mashimbye (ST10168528)
 * Rinae Magadagela (ST10361117)
 
-A special thank you to the **JB Marks Education Trust** and **Rosebank College** for their invaluable support throughout our studies.
+A special thank you to the **JB Marks Education Trust Fund** and **Rosebank College** for their invaluable support throughout our studies.
 
 ---
 
 ## 🚀 Live Demo
+
+YouTube Link: []()
 
 Check out our live recipe generator app hosted on Hugging Face Spaces!
 
@@ -64,16 +66,13 @@ Harmony Kitchen is packed with features designed to make meal planning and cooki
 
 ---
 
-Check out our live recipe generator app hosted on Hugging Face Spaces!
-[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/shirosora1234/RST-Innovations-Recipe-App)
-
 ## 🛠️ How to Install and Test
 
 To get the project running, follow these simple steps:
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/your-username/Recipe-APP-OPSC6312-.git](https://github.com/your-username/Recipe-APP-OPSC6312-.git)
+    git clone [https://github.com/WhiteSkyTK/Recipe-APP-OPSC6312-.git](https://github.com/WhiteSkyTK/Recipe-APP-OPSC6312-.git)
     ```
 2.  **Firebase Setup:**
     * Create a new project in the [Firebase Console](https://console.firebase.google.com/).
