@@ -26,9 +26,6 @@ class DiscoverFragment : Fragment() {
 
     private lateinit var discoverAdapter: DiscoverRecipeAdapter
     private lateinit var mainProgressBar: ProgressBar
-    private lateinit var paginationProgressBar: ProgressBar
-    private lateinit var sortSpinner: Spinner
-    private lateinit var categorySpinner: Spinner
 
     private val viewModel: DiscoverViewModel by viewModels {
         val db = AppDatabase.getDatabase(requireContext())
@@ -76,6 +73,12 @@ class DiscoverFragment : Fragment() {
             }
         })
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewModel.loadDiscoverData()
     }
 
     private fun setupSortSpinner(spinner: Spinner) {

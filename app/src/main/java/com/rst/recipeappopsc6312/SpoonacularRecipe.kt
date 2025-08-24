@@ -13,6 +13,7 @@ data class SpoonacularRecipe(
     val extendedIngredients: List<SpoonacularIngredient>,
     val analyzedInstructions: List<SpoonacularInstruction>,
     val veryPopular: Boolean,
+    val spoonacularScore: Double?,
     val vegetarian: Boolean, // ++ ADD
     val vegan: Boolean,      // ++ ADD
     val glutenFree: Boolean, // ++ ADD

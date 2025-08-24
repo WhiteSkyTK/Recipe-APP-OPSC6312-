@@ -13,10 +13,15 @@ data class TastyRecipe(
     val prep_time_minutes: Int?,    // ++ ADD
     val total_time_minutes: Int?,  // ++ ADD
     val num_servings: Int?,          // ++ ADD
+    val user_ratings: TastyUserRatings?,
     val sections: List<TastySection>?,
     val nutrition: TastyNutrition?, // ++ UPDATE this from {} to a class
     val instructions: List<TastyInstruction>?,
     val tags: List<TastyTag>?
+)
+
+data class TastyUserRatings(
+    val score: Double? // The score is a decimal, e.g., 0.94
 )
 
 data class TastyNutrition(

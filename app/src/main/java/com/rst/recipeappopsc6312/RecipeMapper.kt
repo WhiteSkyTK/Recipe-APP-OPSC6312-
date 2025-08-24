@@ -37,7 +37,7 @@ fun SpoonacularRecipe.toAppRecipe(): Recipe {
         isKeto = this.ketogenic,
         isLowFodmap = this.lowFodmap,
         isPaleo = this.whole30,
-        isPopular = this.veryPopular,
+        isPopular = this.veryPopular || (this.spoonacularScore ?: 0.0) > 85.0,
         nutrition = emptyList()
     )
 }
@@ -109,6 +109,7 @@ fun TastyRecipe.toAppRecipe(): Recipe {
         isPaleo = false,
         isLowFodmap = false,
         diets = dietsList,
+        isPopular = (this.user_ratings?.score ?: 0.0) > 0.9,
         nutrition = nutritionFacts
     )
 }

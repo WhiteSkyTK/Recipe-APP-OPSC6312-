@@ -2,7 +2,6 @@ package com.rst.recipeappopsc6312
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
@@ -13,7 +12,7 @@ class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private var currentSortOption = "Recommended"
+    var currentSortOption = "Recommended"
     private var isFetching = false
     private var canLoadMore = true
 
@@ -28,6 +27,13 @@ class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
         // The repository's last document map will handle the cursor reset
 
         loadMoreRecipes()
+    }
+
+    fun loadDiscoverData() {
+        // Only load if the list is currently empty
+        if (_recipes.value.isNullOrEmpty()) {
+            loadMoreRecipes()
+        }
     }
 
     fun loadMoreRecipes() {
