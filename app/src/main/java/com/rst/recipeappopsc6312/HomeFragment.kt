@@ -62,6 +62,13 @@ class HomeFragment : Fragment() {
         return view
     }
 
+    override fun onResume() {
+        super.onResume()
+        // ++ Refresh the greeting every time the user returns to the screen ++
+        val timeOfDayTitle = view?.findViewById<TextView>(R.id.textViewTimeOfDayTitle)
+        timeOfDayTitle?.text = GreetingManager.getRandomGreetingForCurrentTime()
+    }
+
     private fun setupRecyclerViews(view: View) {
         val onRecipeClicked = { recipe: Recipe ->
             val intent = Intent(activity, RecipeDetailActivity::class.java)
@@ -135,33 +142,25 @@ class HomeFragment : Fragment() {
         val calendar = Calendar.getInstance()
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
 
-        titleView.text = when (hour) {
-            in 5..10 -> GreetingManager.getRandomMorningGreeting()
-            in 11..13 -> GreetingManager.getRandomLunchGreeting()
-            in 14..17 -> GreetingManager.getRandomAfternoonGreeting()
-            in 18..21 -> GreetingManager.getRandomDinnerGreeting()
-            else -> GreetingManager.getRandomNightGreeting()
-        }
+        titleView.text = GreetingManager.getRandomGreetingForCurrentTime()
 
         lifecycleScope.launch {
-            val repository = viewModel.repository
-            val recipeList = when (hour) {
-                in 5..10 -> repository.getBreakfastRecipes()
-                in 11..13 -> repository.getLunchRecipes()
-                in 14..17 -> repository.getSnackRecipes()
-                in 18..21 -> repository.getDinnerRecipes()
-                else -> repository.getSnackRecipes()
-            }
-
-            // ++ ADD THIS LOG to see what data is being fetched
+            val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+            val recipeList = getRecipesForTimeOfDay(hour)
             Log.d("HomeFragment", "Time of Day section fetched ${recipeList.size} recipes.")
-
             if (recipeList.isNotEmpty()) {
                 timeOfDayAdapter.updateData(recipeList)
-            } else {
-                // You could optionally hide the section if no recipes are found
-                Log.w("HomeFragment", "No recipes found for this time of day.")
             }
+        }
+    }
+
+    private suspend fun getRecipesForTimeOfDay(hour: Int): List<Recipe> {
+        return when (hour) {
+            in 5..10 -> viewModel.repository.getBreakfastRecipes()
+            in 11..13 -> viewModel.repository.getLunchRecipes()
+            in 14..17 -> viewModel.repository.getSnackRecipes()
+            in 18..21 -> viewModel.repository.getDinnerRecipes()
+            else -> viewModel.repository.getSnackRecipes()
         }
     }
 }
