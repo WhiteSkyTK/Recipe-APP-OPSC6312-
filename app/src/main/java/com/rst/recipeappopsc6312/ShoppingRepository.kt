@@ -32,10 +32,18 @@ class ShoppingRepository(
     fun getItemsForList(listId: String) = shoppingDao.getItemsForList(listId)
     fun getAllItemsForUser(userId: String) = shoppingDao.getAllItemsForUser(userId)
 
+    suspend fun getFirebaseRecipeCount(): Int {
+        return try {
+            val documents = firestore.collection("recipes").get().await()
+            documents.size()
+        } catch (e: Exception) {
+            0
+        }
+    }
     suspend fun seedFirebaseDatabase() {
         // First, check if we even need to seed. If you have enough recipes, we can stop.
 
-        val currentRecipeCount = firestore.collection("recipes").limit(200).get().await().size()
+        val currentRecipeCount = getFirebaseRecipeCount()
         if (currentRecipeCount >= 200) {
             Log.d("API_SEED", "Firestore has $currentRecipeCount recipes. No seeding needed.")
             return
