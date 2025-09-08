@@ -134,6 +134,17 @@ object GreetingManager {
         "Shhh... it's snack time. 🤫"
     )
 
+    fun getRandomGreetingForCurrentTime(): String {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        return when (hour) {
+            in 5..10 -> getRandomMorningGreeting()
+            in 11..13 -> getRandomLunchGreeting()
+            in 14..17 -> getRandomAfternoonGreeting()
+            in 18..21 -> getRandomDinnerGreeting()
+            else -> getRandomNightGreeting()
+        }
+    }
+
     fun getRandomMorningGreeting() = morningGreetings.random()
     fun getRandomLunchGreeting() = lunchGreetings.random()
     fun getRandomAfternoonGreeting() = afternoonGreetings.random()
