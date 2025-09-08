@@ -41,6 +41,7 @@ androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "
 
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version = "23.2.1" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version = "25.1.4" }
 firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx", version = "21.0.2" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }

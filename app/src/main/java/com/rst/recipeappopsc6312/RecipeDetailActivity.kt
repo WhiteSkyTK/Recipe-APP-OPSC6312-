@@ -415,12 +415,13 @@ class RecipeDetailActivity : AppCompatActivity() {
         val ratio = currentServings.toDouble() / originalServings.toDouble()
 
         val newIngredients = recipeForServings.ingredients.map { originalIngredient ->
-            // ++ USE the smart parser to handle fractions like "½" ++
-            val originalQty = UnitConverter.parseQuantity(originalIngredient.quantity)
+            // ++ THIS IS NOW SAFE AND RELIABLE ++
+            // Because the mapper cleaned the data, this will always work.
+            val originalQty = originalIngredient.quantity.toDoubleOrNull() ?: 0.0
 
             val newQty = originalQty * ratio
 
-            // Formatting logic to make the numbers look nice
+            // This formatting logic is now correct
             val newQtyStringValue = if (newQty == 0.0) "0"
             else if (newQty < 1 && newQty > 0) String.format("%.2f", newQty).removeSuffix("0").removeSuffix("0").removeSuffix(".")
             else if (newQty % 1 == 0.0) newQty.toInt().toString()

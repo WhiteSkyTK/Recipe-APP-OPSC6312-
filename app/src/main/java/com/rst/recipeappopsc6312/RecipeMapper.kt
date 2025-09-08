@@ -2,9 +2,6 @@ package com.rst.recipeappopsc6312
 
 import android.text.Html
 
-/**
- * Converts a recipe from the Spoonacular API to our app's internal Recipe model.
- */
 fun SpoonacularRecipe.toAppRecipe(): Recipe {
     val highQualityImageUrl = if (this.image != null && this.imageType != null) {
         "https://img.spoonacular.com/recipes/${this.id}-636x393.${this.imageType}"
@@ -42,9 +39,6 @@ fun SpoonacularRecipe.toAppRecipe(): Recipe {
     )
 }
 
-/**
- * Converts a recipe from the Tasty API to our app's internal Recipe model.
- */
 fun TastyRecipe.toAppRecipe(): Recipe {
     val totalTime = this.total_time_minutes?.takeIf { it > 0 }
         ?: (this.cook_time_minutes ?: 0) + (this.prep_time_minutes ?: 0)
@@ -55,15 +49,16 @@ fun TastyRecipe.toAppRecipe(): Recipe {
     val ingredients = this.sections?.flatMap { section ->
         section.components.mapNotNull { component ->
             val measurement = component.measurements.firstOrNull()
-            val quantityString = measurement?.quantity
-            val parsableQuantity = convertFractionStringToDoubleString(quantityString)
+            val originalQuantityString = measurement?.quantity
+            val parsableQuantity = convertFractionStringToDoubleString(originalQuantityString)
             val quantityValue = parsableQuantity?.toDoubleOrNull()
 
             if (quantityValue != null && quantityValue > 0) {
                 Ingredient(
                     name = component.ingredient.name.replaceFirstChar { it.uppercase() },
-                    quantity = quantityString!!,
-                    unit = measurement.unit.display_singular
+                    quantity = parsableQuantity!!,
+                    // ++ THIS IS THE FIX: Use safe calls to prevent crashes ++
+                    unit = measurement?.unit?.display_singular ?: ""
                 )
             } else { null }
         }

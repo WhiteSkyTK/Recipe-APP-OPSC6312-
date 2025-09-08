@@ -225,7 +225,18 @@ class MainActivity : AppCompatActivity() {
                         in 12..17 -> "🌤️ Good Afternoon"
                         else -> "🌙 Good Evening"
                     }
-                    greetingTextView.text = "$greetingText\n$fullName"
+                    val fullGreeting = "$greetingText\n$fullName"
+
+                    // ++ Animate the text change ++
+                    if (greetingTextView.text != fullGreeting) {
+                        greetingTextView.animate()
+                            .alpha(0f)
+                            .setDuration(200)
+                            .withEndAction {
+                                greetingTextView.text = fullGreeting
+                                greetingTextView.animate().alpha(1f).duration = 200
+                            }
+                    }
                 }
                 .addOnFailureListener {
                     greetingTextView.text = "☀️ Good Morning\nUSER"

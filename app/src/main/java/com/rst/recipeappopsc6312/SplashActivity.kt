@@ -1,30 +1,36 @@
 package com.rst.recipeappopsc6312
 
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.lifecycle.lifecycleScope
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import io.github.jan.supabase.gotrue.SessionStatus
-import io.github.jan.supabase.gotrue.auth
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
 class SplashActivity : AppCompatActivity() {
     private val TAG = "SplashActivity"
+
+    // Get an instance of our new SplashViewModel
+    private val viewModel: SplashViewModel by viewModels {
+        val db = AppDatabase.getDatabase(application)
+        val repo = ShoppingRepository(
+            db.shoppingDao(),
+            db.recipeDao(),
+            db.scanHistoryDao(),
+            FirebaseFirestore.getInstance(),
+            FirebaseStorage.getInstance()
+        )
+        SplashViewModelFactory(repo)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,21 +39,19 @@ class SplashActivity : AppCompatActivity() {
 
         Log.d(TAG, "onCreate: Splash screen started.")
 
+        // --- Start Your Animations ---
         val logoImageView = findViewById<ImageView>(R.id.imageViewLogo)
-        val splashLayout = findViewById<View>(R.id.splash) // Add this ID to your root layout in XML
         val appNameTextView = findViewById<TextView>(R.id.textViewAppName)
+        val splashLayout = findViewById<View>(R.id.splash)
 
-        // This is the correct way to handle edge-to-edge
         ViewCompat.setOnApplyWindowInsetsListener(splashLayout) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0) // We handle bottom padding with the nav bar
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
             insets
         }
 
-        // 1. Start the "grow in" animation for the logo
         val growInAnimation = AnimationUtils.loadAnimation(this, R.anim.grow_in)
         logoImageView.startAnimation(growInAnimation)
-
 
         try {
             val customTypeface = ResourcesCompat.getFont(this, R.font.islandmoments_regular)
@@ -56,21 +60,22 @@ class SplashActivity : AppCompatActivity() {
             Log.e(TAG, "Failed to load custom font.", e)
         }
 
+        // --- Smart Loading Logic ---
 
-        lifecycleScope.launch {
-            delay(7000) // Wait for 3 seconds total
-            if (FirebaseManager.auth.currentUser != null) {
-                navigateTo(MainActivity::class.java)
-            } else {
-                navigateTo(WelcomeActivity::class.java)
+        // Observe the navigation target LiveData from the ViewModel
+        viewModel.navigationTarget.observe(this) { target ->
+            // When the ViewModel tells us it's ready, we navigate
+            val nextActivity = when (target) {
+                NavigationTarget.MAIN_ACTIVITY -> MainActivity::class.java
+                NavigationTarget.WELCOME_ACTIVITY -> WelcomeActivity::class.java
             }
+            startActivity(Intent(this, nextActivity))
+            // Finish the splash screen so the user can't go back to it
+            finish()
         }
-    }
 
-    private fun navigateTo(activityClass: Class<*>) {
-        val intent = Intent(this, activityClass)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
+        // Tell the ViewModel to start the loading process in the background
+        // The animations will run while this is happening.
+        viewModel.startLoading()
     }
 }

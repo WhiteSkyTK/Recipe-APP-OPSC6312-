@@ -8,6 +8,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.10"
     id("com.google.gms.google-services")
     id("kotlin-kapt")
+    id("com.google.firebase.crashlytics")
 }
 
 // Load secrets from local.properties
@@ -121,6 +122,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.crashlytics)
 
     // Room
     implementation(libs.androidx.room.runtime)

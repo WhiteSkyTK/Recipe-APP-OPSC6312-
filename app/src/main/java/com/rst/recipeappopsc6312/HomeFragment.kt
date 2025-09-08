@@ -47,7 +47,6 @@ class HomeFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
-
         setupRecyclerViews(view)
         observeViewModel(view)
 
@@ -58,8 +57,14 @@ class HomeFragment : Fragment() {
 
         // Tell the ViewModel to start loading data
         viewModel.loadHomeScreenData()
-
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // ++ Refresh the greeting every time the user returns to the screen ++
+        val timeOfDayTitle = view?.findViewById<TextView>(R.id.textViewTimeOfDayTitle)
+        timeOfDayTitle?.text = GreetingManager.getRandomGreetingForCurrentTime()
     }
 
     private fun setupRecyclerViews(view: View) {
@@ -98,6 +103,7 @@ class HomeFragment : Fragment() {
     }
     private fun observeViewModel(view: View) {
         val timeOfDayTitle = view.findViewById<TextView>(R.id.textViewTimeOfDayTitle)
+        setupTimeOfDaySection(timeOfDayTitle)
         // Observer for Featured Recipes
         viewModel.featuredRecipes.observe(viewLifecycleOwner) { recipes ->
             featuredAdapter.updateData(recipes)

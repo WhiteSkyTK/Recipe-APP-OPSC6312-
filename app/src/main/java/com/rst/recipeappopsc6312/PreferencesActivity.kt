@@ -5,7 +5,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -39,6 +41,7 @@ class PreferencesActivity : AppCompatActivity() {
         val editCountry = findViewById<TextView>(R.id.textViewEditCountry)
         val editCuisines = findViewById<TextView>(R.id.textViewEditCuisines)
         val editDiets = findViewById<TextView>(R.id.textViewEditDiets)
+
 
         loadCurrentSettings(themeRadioGroup, allCapsSwitch, unitRadioGroup)
 

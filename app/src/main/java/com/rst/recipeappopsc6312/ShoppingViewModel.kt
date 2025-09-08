@@ -207,10 +207,13 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     fun loadHomeScreenData() {
         _isLoading.value = true
         viewModelScope.launch {
-            _featuredRecipes.postValue(repository.getFeaturedRecipes())
-            // ++ CHANGE this line to call your new function ++
-            _recommendedRecipes.postValue(repository.getRecommendedForYou())
-            _categories.postValue(repository.getAllCategories())
+            // ++ THIS IS THE FIX ++
+            // We now call with forceRefresh = false. This will use the data
+            // that the splash screen just loaded into the cache.
+            val publicRecipes = repository.getPublicRecipes(forceRefresh = false)
+            _featuredRecipes.postValue(publicRecipes.shuffled().take(5))
+            _recommendedRecipes.postValue(publicRecipes)
+            _categories.postValue(repository.getAllCategories(forceRefresh = false))
             _isLoading.postValue(false)
         }
     }
@@ -218,16 +221,11 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     fun refreshHomeScreenData() {
         _isLoading.value = true
         viewModelScope.launch {
-            // 1. Fetch a fresh list of public recipes from the API
+            // This correctly forces a new API call.
             val freshPublicRecipes = repository.getPublicRecipes(forceRefresh = true)
-
-            // 2. Use that single list to update both LiveData properties
-            _featuredRecipes.postValue(freshPublicRecipes.shuffled().take(10))
+            _featuredRecipes.postValue(freshPublicRecipes.shuffled().take(5))
             _recommendedRecipes.postValue(freshPublicRecipes)
-
-            // 3. Also refresh the categories based on the new data
             _categories.postValue(repository.getAllCategories(forceRefresh = true))
-
             _isLoading.postValue(false)
         }
     }
