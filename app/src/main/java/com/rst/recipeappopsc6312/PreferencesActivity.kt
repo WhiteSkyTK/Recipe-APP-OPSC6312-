@@ -10,15 +10,31 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
 
 class PreferencesActivity : AppCompatActivity() {
-
+    private val viewModel: ShoppingViewModel by viewModels {
+        val db = AppDatabase.getDatabase(application)
+        val repo = ShoppingRepository(
+            db.shoppingDao(),
+            db.recipeDao(),
+            db.scanHistoryDao(),
+            FirebaseFirestore.getInstance(),
+            FirebaseStorage.getInstance()
+        )
+        ShoppingViewModelFactory(repo)
+    }
     private val TAG = "PreferencesActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,6 +107,24 @@ class PreferencesActivity : AppCompatActivity() {
             intent.putExtra("IS_EDIT_MODE", true)
             startActivity(intent)
         }
+
+        val upscaleButton = Button(this)
+        upscaleButton.text = "Upscale All Recipe Images"
+        upscaleButton.setOnClickListener {
+            it.isEnabled = false // Disable the button to prevent multiple clicks
+            Toast.makeText(this, "Starting image upscaling... This may take a while.", Toast.LENGTH_LONG).show()
+
+            lifecycleScope.launch {
+                viewModel.repository.upscaleAllRecipeImages()
+                // When done, hide the button and show a confirmation
+                runOnUiThread {
+                    it.visibility = View.GONE
+                    Toast.makeText(this@PreferencesActivity, "Upscaling complete!", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+        // Use the new ID to find the container and add the button
+        findViewById<LinearLayout>(R.id.mainPreferencesContainer).addView(upscaleButton)
     }
 
     private fun loadCurrentSettings(radioGroup: RadioGroup, allCapsSwitch: MaterialSwitch, unitGroup: RadioGroup) {

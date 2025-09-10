@@ -3,12 +3,21 @@ package com.rst.recipeappopsc6312
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
+import com.cloudinary.Transformation
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.net.URL
 
 class ShoppingRepository(
     private val shoppingDao: ShoppingDao,
@@ -44,7 +53,7 @@ class ShoppingRepository(
         // First, check if we even need to seed. If you have enough recipes, we can stop.
 
         val currentRecipeCount = getFirebaseRecipeCount()
-        if (currentRecipeCount >= 200) {
+        if (currentRecipeCount >= 5000) {
             Log.d("API_SEED", "Firestore has $currentRecipeCount recipes. No seeding needed.")
             return
         }
@@ -159,15 +168,14 @@ class ShoppingRepository(
         val cachedRecipes = cachedRecipesQuery.toObjects(Recipe::class.java)
 
         if (!forceRefresh && cachedRecipes.size >= 50) {
-            Log.d("API_FETCH", "Found ${cachedRecipes.size} recipes in cache. Using them.")
             return cachedRecipes.shuffled()
         }
 
-        // If a refresh is needed, call our new smart fetching function
-        return fetchAndCacheNewRecipes(cachedRecipes)
+        val newRecipes = fetchAndUpscaleNewRecipes()
+        return (newRecipes + cachedRecipes).distinctBy { it.id }.shuffled()
     }
 
-    private suspend fun fetchAndCacheNewRecipes(cachedRecipes: List<Recipe>): List<Recipe> {
+    private suspend fun fetchAndUpscaleNewRecipes(): List<Recipe> {
         Log.d("API_FETCH", "Cache is low or refresh forced. Fetching from both APIs.")
         var spoonacularRecipes = emptyList<Recipe>()
         var tastyRecipes = emptyList<Recipe>()
@@ -209,20 +217,21 @@ class ShoppingRepository(
             }
         }
 
-        // 5. Combine the new recipes with the old cache and remove duplicates
-        val allRecipes = (cachedRecipes + spoonacularRecipes + tastyRecipes).distinctBy { it.id }
+        val combinedNewRecipes = (spoonacularRecipes + tastyRecipes).distinctBy { it.id }
 
-        // 6. Save the complete, updated list back to Firestore
-        if (allRecipes.isNotEmpty()) {
-            allRecipes.forEach { recipe ->
-                firestore.collection("recipes").document(recipe.id).set(recipe)
+        if (combinedNewRecipes.isNotEmpty()) {
+            return coroutineScope {
+                combinedNewRecipes.map { recipe ->
+                    async {
+                        val upscaledUrl = upscaleImageWithCloudinary(recipe.imageUrl, recipe.id)
+                        val finalRecipe = recipe.copy(imageUrl = upscaledUrl ?: recipe.imageUrl)
+                        firestore.collection("recipes").document(finalRecipe.id).set(finalRecipe).await()
+                        finalRecipe
+                    }
+                }.map { it.await() }
             }
-            Log.d("API_FETCH", "Successfully fetched and cached. Total recipes in DB: ${allRecipes.size}")
-            return allRecipes.shuffled()
         }
-
-        // 7. If everything fails, return the original cache
-        return cachedRecipes.shuffled()
+        return emptyList()
     }
 
     suspend fun addItems(items: List<ShoppingItem>, listId: String, userId: String) {
@@ -761,6 +770,72 @@ class ShoppingRepository(
         } catch (e: Exception) {
             Log.e("Firestore", "Error getting discover page for sort: $sortOption", e)
             emptyList()
+        }
+    }
+
+    // ++ ADD THIS POWERFUL UPSCALING FUNCTION ++
+    suspend fun upscaleAllRecipeImages() {
+        Log.d("Cloudinary", "Starting batch image upscaling process...")
+        val allRecipes = getPublicRecipes(forceRefresh = false) // Get from cache
+        for (recipe in allRecipes) {
+            if (recipe.imageUrl.contains("cloudinary")) {
+                Log.d("Cloudinary", "Skipping already upscaled image for: ${recipe.title}")
+                continue
+            }
+            val upscaledUrl = upscaleImageWithCloudinary(recipe.imageUrl, recipe.id)
+            if (upscaledUrl != null) {
+                firestore.collection("recipes").document(recipe.id)
+                    .update("imageUrl", upscaledUrl)
+                    .await()
+                Log.d("Cloudinary", "Successfully updated URL for: ${recipe.title}")
+            } else {
+                Log.e("Cloudinary", "Failed to upscale image for: ${recipe.title}")
+            }
+        }
+        Log.d("Cloudinary", "Batch image upscaling process finished.")
+    }
+
+    private suspend fun upscaleImageWithCloudinary(sourceUrl: String, publicId: String): String? {
+        if (sourceUrl.isBlank()) return null
+
+        return try {
+            // 1. Download the image data from the API URL in the background
+            val imageBytes = withContext(Dispatchers.IO) {
+                URL(sourceUrl).readBytes()
+            }
+
+            val deferred = CompletableDeferred<String?>()
+            MediaManager.get().upload(imageBytes)
+                .option("public_id", publicId)
+                .option("overwrite", true)
+                .callback(object : UploadCallback {
+                    override fun onStart(requestId: String) {}
+                    override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
+
+                    override fun onSuccess(requestId: String, resultData: Map<*, *>?) {
+                        // Use the simple string method to create the transformation
+                        val upscaleTransformation =
+                            Transformation<Transformation<*>>() // Use documented Kotlin signature
+                                .effect("e_upscale")
+                        val newUrl = MediaManager.get().url()
+                            .transformation(upscaleTransformation)
+                            .generate(publicId)
+                        deferred.complete(newUrl)
+                    }
+
+                    override fun onError(requestId: String, error: ErrorInfo) {
+                        Log.e("Cloudinary", "Upload error: ${error.description}")
+                        deferred.complete(null)
+                    }
+
+                    override fun onReschedule(requestId: String, error: ErrorInfo) {}
+                }).dispatch()
+
+            deferred.await()
+
+        } catch (e: Exception) {
+            Log.e("Cloudinary", "Failed to download image from URL: $sourceUrl", e)
+            null // Return null if the download fails
         }
     }
 }

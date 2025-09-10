@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.10"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
     id("com.google.gms.google-services")
     id("kotlin-kapt")
     id("com.google.firebase.crashlytics")
@@ -55,6 +55,7 @@ android {
         buildConfigField("String", "SPOONACULAR_API_KEY_4", "\"${localProperties.getProperty("spoonacular.api.key4")}\"")
         buildConfigField("String", "SPOONACULAR_API_KEY_5", "\"${localProperties.getProperty("spoonacular.api.key5")}\"")
         buildConfigField("String", "TASTY_API_KEY", "\"${localProperties.getProperty("tasty.api.key")}\"")
+        buildConfigField("String", "CLOUDINARY_URL", "\"${localProperties.getProperty("cloudinary.url")}\"")
     }
     buildTypes {
         getByName("release") {
@@ -148,5 +149,5 @@ dependencies {
     implementation ("androidx.camera:camera-lifecycle:1.4.2")
     implementation ("androidx.camera:camera-view:1.4.2")
     implementation("com.google.mlkit:object-detection:17.0.2")
-
+    implementation("com.cloudinary:cloudinary-android:3.1.1")
 }
