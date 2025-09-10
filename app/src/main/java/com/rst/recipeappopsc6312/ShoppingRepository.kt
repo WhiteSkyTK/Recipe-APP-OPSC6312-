@@ -42,13 +42,19 @@ class ShoppingRepository(
     fun getAllItemsForUser(userId: String) = shoppingDao.getAllItemsForUser(userId)
 
     suspend fun getFirebaseRecipeCount(): Int {
+        val TAG = "FirebaseRecipeCount" // Define a tag for your logs for easy filtering
         return try {
+            Log.d(TAG, "Attempting to fetch recipe count from Firestore...")
             val documents = firestore.collection("recipes").get().await()
-            documents.size()
+            val count = documents.size()
+            Log.d(TAG, "Successfully fetched recipe count: $count") // Log the count
+            count // Return the count
         } catch (e: Exception) {
-            0
+            Log.e(TAG, "Error fetching recipe count from Firestore", e) // Log the error and the exception
+            0 // Return 0 in case of error
         }
     }
+
     suspend fun seedFirebaseDatabase() {
         // First, check if we even need to seed. If you have enough recipes, we can stop.
 
