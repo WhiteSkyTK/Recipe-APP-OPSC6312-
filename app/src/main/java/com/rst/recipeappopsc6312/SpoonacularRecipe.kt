@@ -46,3 +46,12 @@ data class SpoonacularStep(
     val number: Int,
     val step: String
 )
+
+data class SpoonacularApiResponse(
+    val recipes: List<SpoonacularRecipe>
+)
+
+// This represents the top-level response from the "Complex Search" endpoint
+data class SpoonacularSearchResponse(
+    val results: List<SpoonacularRecipe>
+)

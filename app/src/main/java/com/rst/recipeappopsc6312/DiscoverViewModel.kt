@@ -6,58 +6,71 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(repository) {
-    private val _recipes = MutableLiveData<List<Recipe>>(emptyList())
+    // This holds the full list of all recipes from the Firebase cache.
+    private var masterRecipeList = listOf<Recipe>()
+
+    // This is the list that is actually displayed on the screen (sorted or filtered).
+    private val _recipes = MutableLiveData<List<Recipe>>()
     val recipes: LiveData<List<Recipe>> = _recipes
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    var currentSortOption = "Recommended"
-    private var isFetching = false
-    private var canLoadMore = true
+    private var currentSortOption = "Recommended"
+
+    init {
+        // Start loading the full cache in the background as soon as the screen is opened
+        warmUpCache()
+        // Load the initial view with the "Recommended" list
+        setSortOption("Recommended")
+    }
 
     fun setSortOption(sortOption: String) {
-        if (sortOption == currentSortOption) return // No change
-
         currentSortOption = sortOption
-        // Reset the list and pagination state
-        _recipes.value = emptyList()
-        canLoadMore = true
-        isFetching = false
-        // The repository's last document map will handle the cursor reset
-
-        loadMoreRecipes()
-    }
-
-    fun loadDiscoverData() {
-        // Only load if the list is currently empty
-        if (_recipes.value.isNullOrEmpty()) {
-            loadMoreRecipes()
-        }
-    }
-
-    fun loadMoreRecipes() {
-        if (isFetching || !canLoadMore) return
-
-        isFetching = true
-        // Show the main progress bar only for the first page
-        if (_recipes.value.isNullOrEmpty()) {
-            _isLoading.value = true
-        }
-
+        _isLoading.value = true
         viewModelScope.launch {
-            val newRecipes = repository.getDiscoverPage(currentSortOption, 10)
-
-            if (newRecipes.isNotEmpty()) {
-                val currentList = _recipes.value ?: emptyList()
-                _recipes.postValue(currentList + newRecipes)
-            } else {
-                // If we get an empty list, it means we've reached the end
-                canLoadMore = false
+            val sortedList = when (sortOption) {
+                "A-Z" -> masterRecipeList.sortedBy { it.title }
+                "Recommended" -> repository.getRecommendedForYou()
+                "Popular" -> repository.getPopularRecipes()
+                // These now sort the master list that's already in memory, making them instant.
+                "Cook Time" -> masterRecipeList.sortedBy { it.timeInMins }
+                "Z-A" -> masterRecipeList.sortedByDescending { it.title }
+                else -> masterRecipeList
             }
+            _recipes.postValue(sortedList)
+            _isLoading.postValue(false)
+        }
+    }
+
+    fun search(query: String) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            // Step 1: Search the local master list first for instant results.
+            val localResults = masterRecipeList.filter {
+                it.title.contains(query, ignoreCase = true) ||
+                        it.ingredients.any { i -> i.name.contains(query, ignoreCase = true) }
+            }
+            _recipes.postValue(localResults) // Show local results immediately
+
+            // Step 2: Simultaneously, search the APIs in the background for new recipes.
+            val apiResults = repository.searchRecipesFromApis(query)
+
+            // Step 3: Combine the results, remove duplicates, and update the UI.
+            val finalResults = (localResults + apiResults).distinctBy { it.id }
+            _recipes.postValue(finalResults)
+
+            // Also update the master list so the new recipes are included in future local searches
+            masterRecipeList = (masterRecipeList + apiResults).distinctBy { it.id }
 
             _isLoading.postValue(false)
-            isFetching = false
+        }
+    }
+
+    // This function runs in the background to keep the master list ready.
+    private fun warmUpCache() {
+        viewModelScope.launch {
+            masterRecipeList = repository.getPublicRecipes(forceRefresh = false)
         }
     }
 }

@@ -11,4 +11,6 @@ interface SpoonacularApiService {
         // We can pass a comma-separated list of diets, e.g., "vegetarian,gluten-free"
         @Query("tags") tags: String?
     ): RandomRecipeResponse
+
 }
+

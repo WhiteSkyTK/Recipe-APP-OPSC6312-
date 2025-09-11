@@ -26,6 +26,7 @@ class DiscoverFragment : Fragment() {
 
     private lateinit var discoverAdapter: DiscoverRecipeAdapter
     private lateinit var mainProgressBar: ProgressBar
+    private lateinit var sortSpinner: Spinner
 
     private val viewModel: DiscoverViewModel by viewModels {
         val db = AppDatabase.getDatabase(requireContext())
@@ -38,11 +39,11 @@ class DiscoverFragment : Fragment() {
         DiscoverViewModelFactory(repo)
     }
 
-    private val shoppingViewModel: ShoppingViewModel by viewModels {
-        val db = AppDatabase.getDatabase(requireContext())
-        val repo = ShoppingRepository(db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(), FirebaseFirestore.getInstance(), FirebaseStorage.getInstance())
-        ShoppingViewModelFactory(repo)
-    }
+   // private val shoppingViewModel: ShoppingViewModel by viewModels {
+     //   val db = AppDatabase.getDatabase(requireContext())
+       // val repo = ShoppingRepository(db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(), FirebaseFirestore.getInstance(), FirebaseStorage.getInstance())
+        //ShoppingViewModelFactory(repo)
+    //}
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,31 +59,35 @@ class DiscoverFragment : Fragment() {
         setupSortSpinner(sortSpinner)
         observeViewModel()
 
-        // Initial data load
-        shoppingViewModel.loadHomeScreenData()
-
-        // Add the search listener
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                discoverAdapter.filter.filter(query)
-                return false
+                if (!query.isNullOrBlank()) {
+                    viewModel.search(query)
+                }
+                searchView.clearFocus() // Hide the keyboard
+                return true // Consume the event
             }
+
             override fun onQueryTextChange(newText: String?): Boolean {
-                discoverAdapter.filter.filter(newText)
+                if (newText.isNullOrBlank()) {
+                    // If the search bar is cleared, go back to the default sorted list.
+                    viewModel.setSortOption(sortSpinner.selectedItem.toString())
+                }
                 return false
             }
         })
+
         return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    //override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+      //  super.onViewCreated(view, savedInstanceState)
 
-        viewModel.loadDiscoverData()
-    }
+        //viewModel.loadDiscoverData()
+    //}
 
     private fun setupSortSpinner(spinner: Spinner) {
-        val sortOptions = listOf("Recommended", "Popular", "Cook Time", "A-Z", "Z-A")
+        val sortOptions = listOf("A-Z", "Recommended", "Popular", "Cook Time", "Z-A")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, sortOptions)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
@@ -114,14 +119,14 @@ class DiscoverFragment : Fragment() {
         recyclerView.adapter = discoverAdapter
 
         // Add scroll listener for pagination
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (!recyclerView.canScrollVertically(1)) {
-                    viewModel.loadMoreRecipes()
-                }
-            }
-        })
+        //recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+          //  override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            //    super.onScrolled(recyclerView, dx, dy)
+              //  if (!recyclerView.canScrollVertically(1)) {
+                 //   viewModel.loadMoreRecipes()
+                //}
+            //}
+        //})
     }
 
 
