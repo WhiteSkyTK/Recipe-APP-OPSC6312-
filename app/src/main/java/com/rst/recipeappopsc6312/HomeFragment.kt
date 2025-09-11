@@ -55,8 +55,6 @@ class HomeFragment : Fragment() {
             viewModel.refreshHomeScreenData()
         }
 
-        // Tell the ViewModel to start loading data
-        viewModel.loadHomeScreenData()
         return view
     }
 
@@ -103,8 +101,14 @@ class HomeFragment : Fragment() {
     }
     private fun observeViewModel(view: View) {
         val timeOfDayTitle = view.findViewById<TextView>(R.id.textViewTimeOfDayTitle)
-        setupTimeOfDaySection(timeOfDayTitle)
-        // Observer for Featured Recipes
+
+        viewModel.timeOfDayTitle.observe(viewLifecycleOwner) { title ->
+            timeOfDayTitle.text = title
+        }
+        viewModel.timeOfDayRecipes.observe(viewLifecycleOwner) { recipes ->
+            timeOfDayAdapter.updateData(recipes)
+        }
+
         viewModel.featuredRecipes.observe(viewLifecycleOwner) { recipes ->
             featuredAdapter.updateData(recipes)
         }
@@ -134,32 +138,6 @@ class HomeFragment : Fragment() {
             swipeRefreshLayout.isRefreshing = isLoading
         }
 
-        setupTimeOfDaySection(timeOfDayTitle)
     }
 
-    private fun setupTimeOfDaySection(titleView: TextView) {
-        val calendar = Calendar.getInstance()
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-
-        titleView.text = GreetingManager.getRandomGreetingForCurrentTime()
-
-        lifecycleScope.launch {
-            val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-            val recipeList = getRecipesForTimeOfDay(hour)
-            Log.d("HomeFragment", "Time of Day section fetched ${recipeList.size} recipes.")
-            if (recipeList.isNotEmpty()) {
-                timeOfDayAdapter.updateData(recipeList)
-            }
-        }
-    }
-
-    private suspend fun getRecipesForTimeOfDay(hour: Int): List<Recipe> {
-        return when (hour) {
-            in 5..10 -> viewModel.repository.getBreakfastRecipes()
-            in 11..13 -> viewModel.repository.getLunchRecipes()
-            in 14..17 -> viewModel.repository.getSnackRecipes()
-            in 18..21 -> viewModel.repository.getDinnerRecipes()
-            else -> viewModel.repository.getSnackRecipes()
-        }
-    }
 }

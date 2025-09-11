@@ -1,8 +1,10 @@
 package com.rst.recipeappopsc6312
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import java.util.UUID
 
 class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(repository) {
@@ -13,7 +15,8 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     }
 
     private val currentUser = FirebaseAuth.getInstance().currentUser
-    private val userId = MutableLiveData<String>() // Replace with actual logged-in user ID from Firebase Auth
+    private val userId =
+        MutableLiveData<String>() // Replace with actual logged-in user ID from Firebase Auth
 
     private val databaseShoppingLists: LiveData<List<ShoppingList>> = userId.switchMap { id ->
         repository.getAllShoppingListsForUser(id)
@@ -36,8 +39,29 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _timeOfDayRecipes = MutableLiveData<List<Recipe>>()
+    val timeOfDayRecipes: LiveData<List<Recipe>> = _timeOfDayRecipes
+
+    private val _timeOfDayTitle = MutableLiveData<String>()
+    val timeOfDayTitle: LiveData<String> = _timeOfDayTitle
+
+    init {
+        currentUser?.let { user ->
+            userId.value = user.uid
+            viewModelScope.launch {
+                // First, sync the user's data from Firebase
+                repository.syncFirebaseToRoom(user.uid)
+                // ++ THIS IS THE MISSING LINE ++
+                repository.syncFavoritesFromFirebase(user.uid)
+
+                // After syncing, load the initial data for the home screen.
+                loadInitialData()
+            }
+        }
+    }
+
     val currentShoppingItems: LiveData<List<ShoppingItem>> = _selectedListId.switchMap { listId ->
-        when(listId) {
+        when (listId) {
             ALL_ITEMS_ID -> repository.getAllItemsForUser(userId.value!!)
             MY_LIST_ID -> repository.getItemsForList(MY_LIST_ID)
             else -> repository.getItemsForList(listId)
@@ -57,17 +81,6 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     private val _selectedItems = MutableLiveData<MutableSet<ShoppingItem>>(mutableSetOf())
     val selectedItemsCount: LiveData<Int> = _selectedItems.map { it.size }
 
-
-    init {
-        // When the ViewModel is created, check if a user is logged in.
-        currentUser?.let { user ->
-            // If logged in, set the userId and sync data from Firebase.
-            userId.value = user.uid
-            viewModelScope.launch {
-                repository.syncFirebaseToRoom(user.uid)
-            }
-        }
-    }
 
     fun onItemClicked(item: ShoppingItem) {
         if (_isInSelectionMode.value == true) {
@@ -159,7 +172,7 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     }
 
     fun onListSelected(position: Int) {
-        when(position) {
+        when (position) {
             0 -> _selectedListId.value = ALL_ITEMS_ID
             1 -> _selectedListId.value = MY_LIST_ID
             else -> {
@@ -204,29 +217,47 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
         }
     }
 
-    fun loadHomeScreenData() {
-        _isLoading.value = true
+    fun refreshHomeScreenData() {
         viewModelScope.launch {
-            // ++ THIS IS THE FIX ++
-            // We now call with forceRefresh = false. This will use the data
-            // that the splash screen just loaded into the cache.
-            val publicRecipes = repository.getPublicRecipes(forceRefresh = false)
-            _featuredRecipes.postValue(publicRecipes.shuffled().take(5))
-            _recommendedRecipes.postValue(publicRecipes)
-            _categories.postValue(repository.getAllCategories(forceRefresh = false))
-            _isLoading.postValue(false)
+            _isLoading.value = true
+            try {
+                // Step 1: Force the repository to get fresh data for everything.
+                repository.preloadHomeScreenData(forceRefresh = true)
+
+                // Step 2: Reload all data into the LiveData from the updated cache.
+                loadInitialData()
+
+            } catch (e: Exception) {
+                Log.e("Refresh", "Failed to refresh home screen data", e)
+            } finally {
+                _isLoading.postValue(false)
+            }
         }
     }
 
-    fun refreshHomeScreenData() {
-        _isLoading.value = true
-        viewModelScope.launch {
-            // This correctly forces a new API call.
-            val freshPublicRecipes = repository.getPublicRecipes(forceRefresh = true)
-            _featuredRecipes.postValue(freshPublicRecipes.shuffled().take(5))
-            _recommendedRecipes.postValue(freshPublicRecipes)
-            _categories.postValue(repository.getAllCategories(forceRefresh = true))
-            _isLoading.postValue(false)
+    private suspend fun loadInitialData() {
+        val featured = repository.getFeaturedRecipes()
+        Log.d("DataFlow", "Step 4 (ViewModel): Posting ${featured.size} featured recipes to LiveData.")
+
+        // These will be instant because the data is already in the repository's cache.
+        _featuredRecipes.postValue(featured)
+        _recommendedRecipes.postValue(repository.getRecommendedForYou())
+        _categories.postValue(repository.getAllCategories())
+
+        // Load the Time of Day data here using the correct function.
+        _timeOfDayTitle.postValue(GreetingManager.getRandomGreetingForCurrentTime()) // <-- Corrected Line
+
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        _timeOfDayRecipes.postValue(getRecipesForTimeOfDay(hour))
+    }
+
+    private suspend fun getRecipesForTimeOfDay(hour: Int): List<Recipe> {
+        return when (hour) {
+            in 5..10 -> repository.getBreakfastRecipes()
+            in 11..13 -> repository.getLunchRecipes()
+            in 14..17 -> repository.getSnackRecipes()
+            in 18..21 -> repository.getDinnerRecipes()
+            else -> repository.getSnackRecipes() // Default
         }
     }
 }

@@ -61,7 +61,6 @@ class SplashActivity : AppCompatActivity() {
         }
 
         // --- Smart Loading Logic ---
-
         // Observe the navigation target LiveData from the ViewModel
         viewModel.navigationTarget.observe(this) { target ->
             // When the ViewModel tells us it's ready, we navigate

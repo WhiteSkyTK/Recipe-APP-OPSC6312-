@@ -119,16 +119,15 @@ class DiscoverFragment : Fragment() {
         recyclerView.adapter = discoverAdapter
 
         // Add scroll listener for pagination
-        //recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-          //  override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            //    super.onScrolled(recyclerView, dx, dy)
-              //  if (!recyclerView.canScrollVertically(1)) {
-                 //   viewModel.loadMoreRecipes()
-                //}
-            //}
-        //})
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (!recyclerView.canScrollVertically(1)) {
+                    viewModel.loadMoreRecipes()
+                }
+            }
+        })
     }
-
 
     private fun observeViewModel() {
         viewModel.recipes.observe(viewLifecycleOwner) { recipes ->

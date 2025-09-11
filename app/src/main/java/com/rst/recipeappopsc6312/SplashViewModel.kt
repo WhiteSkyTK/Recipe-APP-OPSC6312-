@@ -20,7 +20,7 @@ class SplashViewModel(private val repository: ShoppingRepository) : ViewModel() 
 
             if (user != null) {
                 // If the user IS logged in, pre-load the recipes...
-                repository.getPublicRecipes(forceRefresh = false)
+                repository.preloadHomeScreenData()
                 // ...and then navigate to the main app.
                 _navigationTarget.postValue(NavigationTarget.MAIN_ACTIVITY)
             } else {
