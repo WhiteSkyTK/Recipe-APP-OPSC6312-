@@ -1,19 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:background="?android:attr/windowBackground"
+    tools:context=".MainActivity"
+    android:id="@+id/main_content_layout">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:id="@+id/main_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_above="@id/bottomNavigationView">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Top Bar -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:paddingHorizontal="24dp">
+            <TextView
+                android:id="@+id/textViewGreeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="☀️ Good Morning\nEBMTС"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary"/>
+            <ImageView
+                android:id="@+id/buttonFavorites"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_heart_outline"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                app:tint="?android:attr/textColor" />
+            <ImageView
+                android:id="@+id/buttonNotifications"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_notification"
+                android:layout_toStartOf="@id/buttonFavorites"
+                android:layout_marginEnd="16dp"
+                app:tint="?android:attr/textColor"
+                android:layout_centerVertical="true"/>
+            <ImageView
+                android:id="@+id/buttonAddRecipe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_add_circle"
+                android:layout_toStartOf="@id/buttonNotifications"
+                android:layout_marginEnd="16dp"
+                app:tint="?android:attr/textColor"
+                android:layout_centerVertical="true"/>
+        </RelativeLayout>
+
+        <!-- FRAGMENT CONTAINER -->
+        <!-- This is where HomeFragment and DiscoverFragment will be displayed -->
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+    android:id="@+id/bottomNavigationView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:background="@drawable/bottom_nav_background"
+    app:itemIconTint="@color/bottom_nav_item_color"
+    app:itemTextColor="@color/bottom_nav_item_color"
+    app:labelVisibilityMode="selected"
+    app:menu="@menu/bottom_nav_menu"/>
+</RelativeLayout>

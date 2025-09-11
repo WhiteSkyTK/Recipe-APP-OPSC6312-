@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- Uses a theme color that will be light grey in light mode and dark grey in dark mode -->
+    <solid android:color="?attr/colorSurfaceContainerLowest" />
+    <corners android:radius="16dp"/>
+    <!-- Uses the theme's primary color for the dashed border -->
+    <stroke android:width="2dp" android:color="?attr/colorPrimary" android:dashWidth="10dp" android:dashGap="10dp"/>
+</shape>

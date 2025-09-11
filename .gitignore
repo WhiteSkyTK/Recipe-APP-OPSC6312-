@@ -13,3 +13,13 @@
 .externalNativeBuild
 .cxx
 local.properties
+gradle.properties
+/.properties
+# Keystore file
+*.jks
+/gradle.properties
+# Local properties with secrets
+gradle.properties
+# Google Services file (contains API keys)
+/app/google-services.json
+/app/release-keystore

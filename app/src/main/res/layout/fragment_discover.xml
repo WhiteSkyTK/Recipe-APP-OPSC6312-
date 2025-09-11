@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/windowBackground"
+    android:padding="24dp"
+    tools:context=".DiscoverFragment">
+
+    <TextView
+        android:id="@+id/textViewTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Discover Recipes 🌍"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"/>
+
+    <SearchView
+        android:id="@+id/searchViewRecipes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewTitle"
+        android:layout_marginTop="16dp"
+        android:queryHint="Search desserts 🍦..."
+        android:iconifiedByDefault="false"
+        android:background="@drawable/search_bar_background"/>
+
+    <Spinner
+        android:id="@+id/spinnerSort"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/searchViewRecipes"
+        android:layout_marginTop="12dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewDiscover"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/spinnerSort"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="12dp"
+        android:clipToPadding="false"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="2"
+        tools:listitem="@layout/item_recipe_recommended" />
+
+    <ProgressBar
+        android:id="@+id/mainProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+</RelativeLayout >

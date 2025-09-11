@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shopping_item_selector">
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/shopping_item_checkbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="12dp"
+        android:textSize="18sp"
+        android:textColor="?android:attr/textColorPrimary"
+        tools:text="1. Brown Rice" />
+</FrameLayout>

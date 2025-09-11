@@ -1,9 +1,79 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.RecipeAPPOPSC6312" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="colorSecondary">@color/light_card_background</item>"
+
+        <!-- Other theme attributes -->
+        <item name="android:windowBackground">@color/light_background</item>
+        <item name="android:textColor">@color/light_text</item>
+        <item name="fontFamily">@font/inter</item>
+
+        <item name="chipSelectedBackgroundColor">#90B5BB</item>
+        <item name="chipDefaultBackgroundColor">#F0F0F0</item>
+
+        <item name="welcomebackground">@color/welcome_background</item>
     </style>
 
+    <style name="Widget.App.TextInputLayout.Underlined" parent="Widget.Material3.TextInputLayout.FilledBox">
+        <item name="boxBackgroundColor">@color/transparent_blue</item>
+    </style>
+
+    <style name="Widget.App.TextInputLayout.Underlined.ExposedDropdownMenu" parent="Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu">
+        <item name="boxBackgroundColor">@color/transparent_blue</item>
+    </style>
+
+    <style name="PopupAnimation">
+        <item name="android:windowEnterAnimation">@anim/bubble_in</item>
+    </style>
+
+    <style name="OtpEditTextStyle" parent="Widget.AppCompat.EditText">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@drawable/otp_box_background</item>
+        <item name="android:gravity">center</item>
+        <item name="android:inputType">number</item>
+        <item name="android:maxLength">1</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:layout_margin">4dp</item>
+    </style>
+
+    <style name="ShapeAppearance.App.Corner.Right" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopRight">32dp</item>
+        <item name="cornerSizeBottomRight">32dp</item>
+        <item name="cornerSizeTopLeft">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+    </style>
+
+    <style name="ShapeAppearance.App.Corner.All" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">24dp</item>
+    </style>
+
+    <style name="Widget.App.Card" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/light_card_stroke</item>
+        <item name="cardBackgroundColor">@color/light_card_background</item> <!-- Add this line -->
+    </style>
+
+    <style name="CustomShowcaseTheme" parent="ShowcaseView.Light">
+        <item name="sv_backgroundColor">#C8000000</item>
+        <item name="sv_showcaseColor">?attr/colorPrimary</item>
+        <item name="sv_buttonText">OK</item>
+        <item name="sv_tintButtonColor">false</item>
+        <item name="sv_titleTextAppearance">@style/CustomTitle</item>
+        <item name="sv_detailTextAppearance">@style/CustomText</item>
+    </style>
+
+    <style name="CustomTitle" parent="TextAppearance.ShowcaseView.Title.Light">
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="CustomText" parent="TextAppearance.ShowcaseView.Detail.Light">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">16sp</item>
+    </style>
     <style name="Theme.RecipeAPPOPSC6312" parent="Base.Theme.RecipeAPPOPSC6312" />
 </resources>

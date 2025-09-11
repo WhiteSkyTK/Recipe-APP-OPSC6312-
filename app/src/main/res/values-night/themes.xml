@@ -1,7 +1,23 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme. NIGHT -->
     <style name="Base.Theme.RecipeAPPOPSC6312" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="colorSecondary">@color/dark_card_background</item>"
+
+        <!-- Other theme attributes -->
+        <item name="android:windowBackground">@color/dark_background</item>
+        <item name="android:textColor">@color/dark_text</item>
+
+        <item name="chipSelectedBackgroundColor">#507A8A</item>
+        <item name="chipDefaultBackgroundColor">#3A3A3A</item>
+
+        <item name="welcomebackground">@color/dark_background</item>
+    </style>
+
+    <style name="Widget.App.Card" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/dark_card_stroke</item>
+        <item name="cardBackgroundColor">@color/dark_card_background</item> <!-- Change this line -->
     </style>
 </resources>
