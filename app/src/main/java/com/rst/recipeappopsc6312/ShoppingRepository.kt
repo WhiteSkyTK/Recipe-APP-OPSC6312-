@@ -98,7 +98,9 @@ class ShoppingRepository(
             BuildConfig.SPOONACULAR_API_KEY_3,
             BuildConfig.SPOONACULAR_API_KEY_4,
             BuildConfig.SPOONACULAR_API_KEY_5,
-            BuildConfig.TASTY_API_KEY
+            BuildConfig.SPOONACULAR_API_KEY_6,
+            BuildConfig.TASTY_API_KEY,
+            BuildConfig.TASTY_API_KEY1
         )
 
         // 2. Define the types of recipes you want
@@ -242,9 +244,14 @@ class ShoppingRepository(
             launch {
                 try {
                     val apiKeys = listOf(
-                        BuildConfig.SPOONACULAR_API_KEY_1, BuildConfig.SPOONACULAR_API_KEY_2,
-                        BuildConfig.SPOONACULAR_API_KEY_3, BuildConfig.SPOONACULAR_API_KEY_4,
-                        BuildConfig.SPOONACULAR_API_KEY_5, BuildConfig.TASTY_API_KEY
+                        BuildConfig.SPOONACULAR_API_KEY_1,
+                        BuildConfig.SPOONACULAR_API_KEY_2,
+                        BuildConfig.SPOONACULAR_API_KEY_3,
+                        BuildConfig.SPOONACULAR_API_KEY_4,
+                        BuildConfig.SPOONACULAR_API_KEY_5,
+                        BuildConfig.SPOONACULAR_API_KEY_6,
+                        BuildConfig.TASTY_API_KEY,
+                        BuildConfig.TASTY_API_KEY1
                     )
                     val response = apiService.getRandomRecipes(apiKeys.random(), 25, finalSpoonacularTags.joinToString(","))
                     spoonacularRecipes = response.recipes.map { it.toAppRecipe() }

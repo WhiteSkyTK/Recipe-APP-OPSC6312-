@@ -54,7 +54,9 @@ android {
         buildConfigField("String", "SPOONACULAR_API_KEY_3", "\"${localProperties.getProperty("spoonacular.api.key3")}\"")
         buildConfigField("String", "SPOONACULAR_API_KEY_4", "\"${localProperties.getProperty("spoonacular.api.key4")}\"")
         buildConfigField("String", "SPOONACULAR_API_KEY_5", "\"${localProperties.getProperty("spoonacular.api.key5")}\"")
+        buildConfigField("String", "SPOONACULAR_API_KEY_6", "\"${localProperties.getProperty("spoonacular.api.key6")}\"")
         buildConfigField("String", "TASTY_API_KEY", "\"${localProperties.getProperty("tasty.api.key")}\"")
+        buildConfigField("String", "TASTY_API_KEY1", "\"${localProperties.getProperty("tasty.api.key1")}\"")
         buildConfigField("String", "CLOUDINARY_URL", "\"${localProperties.getProperty("cloudinary.url")}\"")
     }
     buildTypes {
@@ -144,10 +146,10 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
     implementation("com.squareup.okhttp3:logging-interceptor:5.1.0")
-    implementation ("androidx.camera:camera-core:1.4.2")
-    implementation ("androidx.camera:camera-camera2:1.4.2")
-    implementation ("androidx.camera:camera-lifecycle:1.4.2")
-    implementation ("androidx.camera:camera-view:1.4.2")
+    implementation ("androidx.camera:camera-core:1.5.0")
+    implementation ("androidx.camera:camera-camera2:1.5.0")
+    implementation ("androidx.camera:camera-lifecycle:1.5.0")
+    implementation ("androidx.camera:camera-view:1.5.0")
     implementation("com.google.mlkit:object-detection:17.0.2")
     implementation("com.cloudinary:cloudinary-android:3.1.1")
 }
