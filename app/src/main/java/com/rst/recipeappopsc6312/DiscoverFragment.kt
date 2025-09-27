@@ -118,7 +118,7 @@ class DiscoverFragment : Fragment() {
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = discoverAdapter
 
-        // Add scroll listener for pagination
+        // Add scroll listener for pagination.
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
