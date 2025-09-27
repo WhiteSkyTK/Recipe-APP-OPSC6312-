@@ -204,7 +204,6 @@ class ShoppingRepository(
         val cachedRecipes = cachedRecipesQuery.toObjects(Recipe::class.java)
         Log.d("DataFlow", "Step 1 (Repo/Public): Firestore query for public recipes returned ${cachedRecipes.size} documents.")
 
-
         // The rest of this function can be simplified.
         // We will now handle fetching new recipes in the ViewModel.
         if (!forceRefresh && cachedRecipes.isNotEmpty()) {
@@ -315,7 +314,6 @@ class ShoppingRepository(
             .whereEqualTo("public", true)
 
         // Apply strict dietary filters
-
         if (userDiets.contains("Vegan")) query = query.whereEqualTo("vegan", true)
         if (userDiets.contains("Vegetarian")) query = query.whereEqualTo("vegetarian", true)
         if (userDiets.contains("Gluten-Free")) query = query.whereEqualTo("glutenFree", true)
@@ -331,16 +329,44 @@ class ShoppingRepository(
             return getPopularRecipes() // Fallback on error
         }
 
-        var filteredRecipes = candidateRecipes
-        if (userDiets.contains("Pescetarian")) {
-            // Pescetarian: a vegetarian who eats fish. Exclude non-seafood meat.
-            val redMeat = listOf("beef", "pork", "lamb", "steak")
-            filteredRecipes = filteredRecipes.filter { recipe ->
-                recipe.ingredients.none { ingredient -> redMeat.contains(ingredient.name.lowercase()) }
+        // === Step 3: Apply our new, smarter SOFT filters in Kotlin ===
+        val filteredRecipes = candidateRecipes.filter { recipe ->
+            val ingredientsLower = recipe.ingredients.map { it.name.lowercase() }.toSet()
+            val titleLower = recipe.title.lowercase()
+
+            // Helper to check if any keyword from a given list is present.
+            fun matchesAny(text: String, keywords: Set<String>) = keywords.any { text.contains(it) }
+            fun ingredientsMatchAny(keywords: Set<String>) = ingredientsLower.any { matchesAny(it, keywords) }
+            fun titleMatchesAny(keywords: Set<String>) = matchesAny(titleLower, keywords)
+
+            // A recipe is valid if it passes ALL the user's selected diet filters.
+            userDiets.all { diet ->
+                when (diet) {
+                    "Vegan" -> {
+                        val blocklist = DietaryKeywords.meatKeywords + DietaryKeywords.seafoodKeywords + DietaryKeywords.dairyKeywords + DietaryKeywords.eggKeywords
+                        !ingredientsMatchAny(blocklist) && !titleMatchesAny(blocklist)
+                    }
+                    "Vegetarian" -> {
+                        val blocklist = DietaryKeywords.meatKeywords + DietaryKeywords.seafoodKeywords
+                        !ingredientsMatchAny(blocklist) && !titleMatchesAny(blocklist)
+                    }
+                    "Pescetarian" -> !ingredientsMatchAny(DietaryKeywords.meatKeywords)
+                    "Nut Allergy" -> !ingredientsMatchAny(DietaryKeywords.nutKeywords) && !titleMatchesAny(DietaryKeywords.nutKeywords)
+                    "Halal" -> !ingredientsMatchAny(DietaryKeywords.haramKeywords) && !titleMatchesAny(DietaryKeywords.haramKeywords)
+                    "Kosher" -> {
+                        val hasNonKosher = ingredientsMatchAny(DietaryKeywords.nonKosherKeywords)
+                        val hasMeat = ingredientsMatchAny(DietaryKeywords.meatKeywords)
+                        val hasDairy = ingredientsMatchAny(DietaryKeywords.dairyKeywords)
+                        !hasNonKosher && !(hasMeat && hasDairy)
+                    }
+                    "Low-Carb" -> !ingredientsMatchAny(DietaryKeywords.highCarbKeywords)
+                    // Other simple diets are already handled by the Firestore query, so they pass automatically.
+                    else -> true
+                }
             }
         }
 
-        // === Step 3: Score the remaining recipes based on SOFT preferences ===
+        // === Step 4: Score the remaining recipes based on SOFT preferences ===
         val scoredRecipes = filteredRecipes.associateWith { recipe ->
             var score = 0.0
 
@@ -379,7 +405,7 @@ class ShoppingRepository(
             score
         }
 
-        // === Step 4: Sort the recipes by score and return the top results ===
+        // === Step 5: Sort the recipes by score and return the top results ===
         val recommended = scoredRecipes.toList()
             .sortedByDescending { (_, score) -> score }
             .map { (recipe, _) -> recipe }
@@ -404,6 +430,53 @@ class ShoppingRepository(
         return if (popularRecipes.isNotEmpty()) popularRecipes else getPublicRecipes().shuffled().take(20)
     }
 
+    private fun applySoftDietFilters(recipes: List<Recipe>, userDiets: List<String>): List<Recipe> {
+        if (userDiets.isEmpty()) return recipes
+
+        return recipes.filter { recipe ->
+            userDiets.all { diet ->
+                val ingredientsLower = recipe.ingredients.map { it.name.lowercase() }.toSet()
+                val titleLower = recipe.title.lowercase()
+
+                fun ingredientsMatchAny(keywords: Set<String>) = ingredientsLower.any { ing -> keywords.any { kw -> ing.contains(kw) } }
+                fun titleMatchesAny(keywords: Set<String>) = keywords.any { titleLower.contains(it) }
+
+                when (diet) {
+                    "Pescetarian" -> !ingredientsMatchAny(DietaryKeywords.meatKeywords)
+                    "Nut Allergy" -> !ingredientsMatchAny(DietaryKeywords.nutKeywords) && !titleMatchesAny(DietaryKeywords.nutKeywords)
+                    "Halal" -> !ingredientsMatchAny(DietaryKeywords.haramKeywords) && !titleMatchesAny(DietaryKeywords.haramKeywords)
+                    "Kosher" -> {
+                        val hasNonKosher = ingredientsMatchAny(DietaryKeywords.nonKosherKeywords)
+                        val hasMeat = ingredientsMatchAny(DietaryKeywords.meatKeywords)
+                        val hasDairy = ingredientsMatchAny(DietaryKeywords.dairyKeywords)
+                        !hasNonKosher && !(hasMeat && hasDairy)
+                    }
+                    else -> true // Already handled by the hard filter
+                }
+            }
+        }
+    }
+
+    suspend fun searchRecipes(queryText: String, userDiets: List<String>): List<Recipe> {
+        // 1. Fetch all public recipes from the cache
+        val allCachedRecipes = getPublicRecipes(forceRefresh = false)
+
+        // 2. Filter the cached recipes by the search query
+        var localResults = allCachedRecipes.filter {
+            it.title.contains(queryText, ignoreCase = true) || it.ingredients.any { i -> i.name.contains(queryText, ignoreCase = true)}
+        }
+
+        // 3. Apply dietary filters to the local results
+        localResults = applySoftDietFilters(localResults, userDiets)
+
+        // 4. If the cache search finds results, return them. Otherwise, call the APIs.
+        return if (localResults.isNotEmpty()) {
+            localResults
+        } else {
+            searchRecipesFromApis(queryText)
+        }
+    }
+
     suspend fun searchRecipesFromApis(query: String): List<Recipe> {
         Log.d("API_SEARCH", "No results in cache for '$query'. Searching APIs...")
         var spoonacularRecipes = emptyList<Recipe>()
@@ -415,8 +488,8 @@ class ShoppingRepository(
                     val apiKeys = listOf(
                         BuildConfig.SPOONACULAR_API_KEY_1, BuildConfig.SPOONACULAR_API_KEY_2,
                         BuildConfig.SPOONACULAR_API_KEY_3, BuildConfig.SPOONACULAR_API_KEY_4,
-                        BuildConfig.SPOONACULAR_API_KEY_5, BuildConfig.TASTY_API_KEY).random()
-                    // IMPORTANT: You'll need to add a 'searchRecipes' endpoint to your ApiService interface
+                        BuildConfig.SPOONACULAR_API_KEY_5, BuildConfig.SPOONACULAR_API_KEY_6,
+                        BuildConfig.TASTY_API_KEY, BuildConfig.TASTY_API_KEY1).random()
                     val response = apiService.searchRecipes(apiKeys, query, 10)
                     spoonacularRecipes = response.results.map { it.toAppRecipe() }
                 } catch (e: Exception) { Log.e("API_SEARCH", "Spoonacular search failed.") }
@@ -704,10 +777,9 @@ class ShoppingRepository(
         val snacks = getPublicRecipesByMealType("Snack")
         val desserts = getPublicRecipesByMealType("Dessert")
         val result = (snacks + desserts).shuffled()
-        cachedLunch = result
+        cachedSnack = result
         return result
     }
-
 
     private suspend fun getPublicRecipesByMealType(mealType: String): List<Recipe> {
         return try {
@@ -909,12 +981,22 @@ class ShoppingRepository(
         }
     }
 
-    suspend fun getDiscoverPage(sortOption: String, pageSize: Int): List<Recipe> {
+    suspend fun getDiscoverPage(sortOption: String, pageSize: Int, userDiets: List<String>): List<Recipe> {
         if (sortOption == "Recommended") return getRecommendedForYou()
 
         return try {
             var query: com.google.firebase.firestore.Query = firestore.collection("recipes").whereEqualTo("public", true)
 
+            // Step 1: Apply HARD filters from user's diet preferences
+            if (userDiets.contains("Vegan")) query = query.whereEqualTo("vegan", true)
+            if (userDiets.contains("Vegetarian")) query = query.whereEqualTo("vegetarian", true)
+            if (userDiets.contains("Gluten-Free")) query = query.whereEqualTo("glutenFree", true)
+            if (userDiets.contains("Dairy-Free")) query = query.whereEqualTo("dairyFree", true)
+            if (userDiets.contains("Keto")) query = query.whereEqualTo("keto", true)
+            if (userDiets.contains("Paleo")) query = query.whereEqualTo("paleo", true)
+            if (userDiets.contains("Low-FODMAP")) query = query.whereEqualTo("lowFodmap", true)
+
+            // Step 2: Apply Sorting
             when (sortOption) {
                 "Popular" -> query = query.orderBy("isPopular", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 "Cook Time" -> query = query.orderBy("timeInMins", com.google.firebase.firestore.Query.Direction.ASCENDING)
@@ -922,21 +1004,37 @@ class ShoppingRepository(
                 "Z-A" -> query = query.orderBy("title", com.google.firebase.firestore.Query.Direction.DESCENDING)
             }
 
+            // Step 3: Handle Pagination
             val lastDoc = lastDocumentSnapshots[sortOption]
             if (lastDoc != null) {
                 query = query.startAfter(lastDoc)
             }
-
             val documents = query.limit(pageSize.toLong()).get().await()
             if (documents.size() > 0) {
                 lastDocumentSnapshots[sortOption] = documents.documents[documents.size() - 1]
             }
-            documents.toObjects(Recipe::class.java)
+
+            val candidateRecipes = documents.toObjects(Recipe::class.java)
+
+            // Step 4: Apply SOFT keyword-based filters
+            return applySoftDietFilters(candidateRecipes, userDiets)
+
         } catch (e: Exception) {
             Log.e("Firestore", "Error getting discover page for sort: $sortOption", e)
             emptyList()
         }
     }
+
+    suspend fun getUserDiets(userId: String): List<String> {
+        return try {
+            val userProfileDoc = firestore.collection("users").document(userId).get().await()
+            userProfileDoc.get("selected_diets") as? List<String> ?: emptyList()
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error fetching user diets for $userId", e)
+            emptyList()
+        }
+    }
+
 
     // ++ ADD THIS POWERFUL UPSCALING FUNCTION ++
     suspend fun upscaleAllRecipeImages() {

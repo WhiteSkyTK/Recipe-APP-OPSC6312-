@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(repository) {
-    // This is the list that is actually displayed on the screen (sorted or filtered).
     private val _recipes = MutableLiveData<List<Recipe>>()
     val recipes: LiveData<List<Recipe>> = _recipes
 
@@ -15,10 +14,28 @@ class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
 
     private var isFetchingMore = false
     private var currentSortOption = "A-Z"
+    private var userDiets: List<String> = emptyList()
 
     init {
-        // Load the very first page when the ViewModel is created
-        setSortOption(currentSortOption)
+        // Load user preferences first, which will then trigger the initial recipe load.
+        loadUserPreferencesAndInitialRecipes()
+    }
+
+    private fun loadUserPreferencesAndInitialRecipes() {
+        _isLoading.value = true
+        viewModelScope.launch {
+            // Step 1: Get the user's dietary filters
+            val userId = FirebaseManager.auth.currentUser?.uid
+            if (userId != null) {
+                userDiets = repository.getUserDiets(userId)
+            }
+
+            // Step 2: Now that we have the filters, fetch the initial list
+            repository.resetPagination()
+            val firstPage = repository.getDiscoverPage(currentSortOption, 20, userDiets)
+            _recipes.postValue(firstPage)
+            _isLoading.postValue(false)
+        }
     }
 
     fun setSortOption(sortOption: String) {
@@ -33,8 +50,8 @@ class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
         repository.resetPagination()
 
         viewModelScope.launch {
-            // Fetch the FIRST page for the new sort option
-            val firstPage = repository.getDiscoverPage(sortOption, 20)
+            // Fetch the FIRST page for the new sort option, applying diet filters
+            val firstPage = repository.getDiscoverPage(sortOption, 20, userDiets)
             _recipes.postValue(firstPage) // Replace the current list
             _isLoading.postValue(false)
             isFetchingMore = false
@@ -49,23 +66,23 @@ class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
         isFetchingMore = true
 
         viewModelScope.launch {
-            // Fetch the NEXT page
-            val nextPage = repository.getDiscoverPage(currentSortOption, 20)
+            // Fetch the NEXT page, applying diet filters
+            val nextPage = repository.getDiscoverPage(currentSortOption, 20, userDiets)
             if (nextPage.isNotEmpty()) {
                 // Append the new recipes to the existing list
                 val currentList = _recipes.value ?: emptyList()
                 _recipes.postValue(currentList + nextPage)
             }
             isFetchingMore = false
-            _isLoading.postValue(false) // You might want a different progress indicator for "loading more"
+            _isLoading.postValue(false)
         }
     }
 
     fun search(query: String) {
         _isLoading.value = true
         viewModelScope.launch {
-            // Search no longer uses the master list. It goes straight to the repository.
-            val results = repository.searchRecipesFromApis(query)
+            // Use the more robust search function that checks the cache first and applies diet filters.
+            val results = repository.searchRecipes(query, userDiets)
             _recipes.postValue(results)
             _isLoading.postValue(false)
         }

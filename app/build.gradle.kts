@@ -105,12 +105,6 @@ dependencies {
 
     // Glide for loading images from a URL
     implementation(libs.glide)
-
-    // Supabase for authentication, database, and storage
-    implementation(platform(libs.supabase.bom))
-    implementation(libs.supabase.gotrue.kt)
-    implementation(libs.supabase.postgrest.kt)
-    implementation(libs.supabase.storage.kt)
     implementation(libs.ktor.client.android)
 
     // Ktor dependencies
@@ -151,5 +145,5 @@ dependencies {
     implementation ("androidx.camera:camera-lifecycle:1.5.0")
     implementation ("androidx.camera:camera-view:1.5.0")
     implementation("com.google.mlkit:object-detection:17.0.2")
-    implementation("com.cloudinary:cloudinary-android:3.1.1")
+    implementation("com.cloudinary:cloudinary-android:3.1.2")
 }

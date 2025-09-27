@@ -1,9 +1,9 @@
 [versions]
 agp = "8.13.0"
-firebaseBom = "34.2.0"
+firebaseBom = "34.3.0"
 fragmentKtx = "1.8.9"
-gson = "2.13.1"
-kotlin = "2.2.10"
+gson = "2.13.2"
+kotlin = "2.2.20"
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -11,23 +11,22 @@ espressoCore = "3.7.0"
 appcompat = "1.7.1"
 kotlinxDatetime = "0.7.1"
 material = "1.13.0"
-activity = "1.10.1"
+activity = "1.11.0"
 constraintlayout = "2.2.1"
-lottie = "6.6.7"
+lottie = "6.6.9"
 circleimageview = "3.1.0"
 retrofit = "3.0.0"
-glide = "5.0.4"
+glide = "5.0.5"
 
 # --- LATEST VERSIONS ---
-roomRuntime = "2.7.2"
-roomTesting = "2.7.2"
+roomRuntime = "2.8.1"
+roomTesting = "2.8.1"
 
-supabase = "3.2.2" # Latest stable Supabase BOM
-ktor = "3.2.3"
+ktor = "3.3.0"
 firebaseAuth = "24.0.1"
 media3CommonKtx = "1.8.0"    # Latest stable Ktor
 textRecognition = "16.0.1"
-uiText = "1.9.0"
+uiText = "1.9.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -57,13 +56,6 @@ circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circ
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
-
-# Supabase Libraries (now correctly defined)
-showcaseview = { module = "com.github.getkeepsafe:showcaseview" }
-supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabase" }
-supabase-gotrue-kt = { module = "io.github.jan-tennert.supabase:gotrue-kt", version = "2.6.1" }
-supabase-postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
-supabase-storage-kt = { module = "io.github.jan-tennert.supabase:storage-kt" }
 
 # Ktor Networking Engine (required by Supabase)
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }

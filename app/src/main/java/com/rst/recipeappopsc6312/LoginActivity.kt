@@ -17,10 +17,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import androidx.lifecycle.lifecycleScope
-import io.github.jan.supabase.gotrue.auth
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.gotrue.providers.builtin.Email
-import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.launch
 import com.google.firebase.auth.FirebaseAuth
 class LoginActivity : AppCompatActivity() {
@@ -40,7 +36,6 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
         enableEdgeToEdge()
 
         val emailLayout = findViewById<TextInputLayout>(R.id.textInputLayoutEmail)
