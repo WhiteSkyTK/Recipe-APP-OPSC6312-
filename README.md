@@ -5,7 +5,7 @@ Welcome to the official repository for Harmony Kitchen, a smart recipe and meal 
 **Team Members:**
 * Tokollo Nonyane (ST10296818)
 * Sagwadi Mashimbye (ST10168528)
-* Rinae Magadagela (ST10361117)
+* Rinae Magadagela (ST10361117) 
 
 A special thank you to the **JB Marks Education Trust Fund** and **Rosebank College** for their invaluable support throughout our studies.
 
