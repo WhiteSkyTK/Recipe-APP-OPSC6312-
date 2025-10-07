@@ -5,7 +5,7 @@ Welcome to the official repository for Harmony Kitchen, a smart recipe and meal 
 **Team Members:**
 * Tokollo Nonyane (ST10296818)
 * Sagwadi Mashimbye (ST10168528)
-* Rinae Magadagela (ST10361117)
+* Rinae Magadagela (ST10361117) 
 
 A special thank you to the **JB Marks Education Trust Fund** and **Rosebank College** for their invaluable support throughout our studies.
 
@@ -13,7 +13,7 @@ A special thank you to the **JB Marks Education Trust Fund** and **Rosebank Coll
 
 ## 🚀 Live Demo
 
-YouTube Link: []()
+YouTube Link: [https://www.youtube.com/watch?v=pjlWdR9VlOU](https://www.youtube.com/watch?v=pjlWdR9VlOU)
 
 Check out our live recipe generator app hosted on Hugging Face Spaces!
 
