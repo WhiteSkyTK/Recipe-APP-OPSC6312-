@@ -68,7 +68,6 @@ android {
                 "proguard-rules.pro"
             )
 
-            // ++ THIS IS THE FIX ++
             // Only try to apply the signing config if the property exists.
             if (localProperties.getProperty("RELEASE_STORE_FILE") != null) {
                 signingConfig = signingConfigs.getByName("release")
@@ -120,6 +119,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.crashlytics)
+    implementation(libs.play.services.auth)
 
     // Room
     implementation(libs.androidx.room.runtime)

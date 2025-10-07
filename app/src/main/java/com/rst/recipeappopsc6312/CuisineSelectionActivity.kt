@@ -127,21 +127,7 @@ class CuisineSelectionActivity : AppCompatActivity() {
     }
 
     private fun prepareCuisineData() {
-        // Here is a comprehensive list. You will need to add corresponding
-        cuisineList.add(Cuisine("Italian", R.drawable.ic_italian))
-        cuisineList.add(Cuisine("Mexican", R.drawable.ic_mexican))
-        cuisineList.add(Cuisine("Chinese", R.drawable.ic_chinese))
-        cuisineList.add(Cuisine("Japanese", R.drawable.ic_japanese))
-        cuisineList.add(Cuisine("Indian", R.drawable.ic_indian))
-        cuisineList.add(Cuisine("Thai", R.drawable.ic_thai))
-        cuisineList.add(Cuisine("French", R.drawable.ic_french))
-        cuisineList.add(Cuisine("Spanish", R.drawable.ic_spanish))
-        cuisineList.add(Cuisine("Greek", R.drawable.ic_greek))
-        cuisineList.add(Cuisine("American", R.drawable.ic_american))
-        cuisineList.add(Cuisine("Korean", R.drawable.ic_korean))
-        cuisineList.add(Cuisine("Vietnamese", R.drawable.ic_vietnamese))
-        cuisineList.add(Cuisine("Mediterranean", R.drawable.ic_mediterranean))
-        cuisineList.add(Cuisine("Caribbean", R.drawable.ic_caribbean))
-        cuisineList.add(Cuisine("African", R.drawable.ic_african))
+        // It now gets the data from our single source of truth.
+        cuisineList = ArrayList(CuisineData.getAllCuisines())
     }
 }
