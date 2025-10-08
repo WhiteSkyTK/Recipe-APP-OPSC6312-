@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var notificationButton: ImageView
     private lateinit var addRecipeButton: ImageView
     private lateinit var offlineBanner: TextView
+    private lateinit var notificationDotIcon: View
     private var currentFragmentId = R.id.nav_home
     private var hasFavorites = false
     private var lastBottomNavFragmentId = R.id.nav_home
@@ -57,7 +58,7 @@ class MainActivity : AppCompatActivity() {
             db.scanHistoryDao(),
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance())
-        MainViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
 
     private lateinit var connectivityObserver: NetworkConnectivityObserver
@@ -81,6 +82,7 @@ class MainActivity : AppCompatActivity() {
         notificationButton = findViewById(R.id.buttonNotifications)
         addRecipeButton = findViewById(R.id.buttonAddRecipe)
         offlineBanner = findViewById(R.id.offlineBanner)
+        notificationDotIcon = findViewById(R.id.notificationDotIcon)
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
         // Set the dynamic greeting
@@ -90,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         handleIncomingIntent(intent)
 
         setupNetworkObserver()
-
+        mainViewModel.logUserLogin()
         mainViewModel.syncUserData()
 
         // Load the HomeFragment by default when the app starts
@@ -113,7 +115,6 @@ class MainActivity : AppCompatActivity() {
                 showOnboardingTour()
             }, 500) // 500 milliseconds
         }
-
 
         bottomNav.setOnItemSelectedListener { item ->
             if (item.itemId == currentFragmentId) return@setOnItemSelectedListener false
@@ -185,14 +186,20 @@ class MainActivity : AppCompatActivity() {
 
         notificationButton.setOnClickListener {
             val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
-            // If the NotificationsFragment is already showing, go back.
+            // If the full notifications screen is already open, just go back.
             if (currentFragment is NotificationsFragment) {
                 supportFragmentManager.popBackStack()
             } else {
-                // Otherwise, just show the popup as before.
-                // The popup's "View All" button will handle opening the full fragment.
+                // Otherwise, mark notifications as read and show the popup.
+                mainViewModel.markAllNotificationsAsRead()
                 showNotificationsPopup()
             }
+        }
+
+        // ++ ADDED LOGGING to the observer to help debug ++
+        mainViewModel.hasUnreadNotifications.observe(this) { hasUnread ->
+            Log.d(TAG, "Observer notified: hasUnreadNotifications is now $hasUnread")
+            notificationDotIcon.visibility = if (hasUnread) View.VISIBLE else View.GONE
         }
     }
 
@@ -322,10 +329,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showNotificationsPopup() {
-
-        val recentNotifications = DummyData.getNotifications() // Get fake data
-        val notificationButton = findViewById<ImageView>(R.id.buttonNotifications)
-
         val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val popupView = inflater.inflate(R.layout.popup_notifications, null)
         val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
@@ -335,18 +338,24 @@ class MainActivity : AppCompatActivity() {
         val viewAll = popupView.findViewById<TextView>(R.id.textViewViewAll)
         val noItemsTextView = popupView.findViewById<TextView>(R.id.textViewNoItems)
 
-        if (recentNotifications.isEmpty()) {
-            noItemsTextView.visibility = View.VISIBLE
-            recyclerView.visibility = View.GONE
-            viewAll.visibility = View.GONE
-            noItemsTextView.text = "No new notifications"
-        } else {
-            recyclerView.layoutManager = LinearLayoutManager(this)
-            recyclerView.adapter = NotificationAdapter(recentNotifications.take(2))
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        mainViewModel.notifications.observe(this) { notifications ->
+            if (notifications.isNullOrEmpty()) {
+                noItemsTextView.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+                viewAll.visibility = View.GONE
+                noItemsTextView.text = getString(R.string.no_new_notifications)
+            } else {
+                noItemsTextView.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+                viewAll.visibility = View.VISIBLE
+                recyclerView.adapter = NotificationAdapter(notifications.take(3)) // Show up to 3 in the popup
+            }
         }
 
         viewAll.setOnClickListener {
-            loadFragment(NotificationsFragment(), -1)
+            loadFragment(NotificationsFragment(), -3)
             popupWindow.dismiss()
         }
 

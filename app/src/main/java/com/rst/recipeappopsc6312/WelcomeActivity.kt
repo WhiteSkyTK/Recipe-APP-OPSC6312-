@@ -31,7 +31,7 @@ class WelcomeActivity : AppCompatActivity() {
             db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
             FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
         )
-        ShoppingViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
 
     // This is the modern way to handle the result of the Google Sign-In intent

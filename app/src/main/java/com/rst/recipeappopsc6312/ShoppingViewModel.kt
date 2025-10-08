@@ -36,45 +36,61 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     }
 
     fun loadHomeScreenData() {
-        _isInitiallyLoading.value = true // Trigger the full-screen loader
+        _isInitiallyLoading.value = true
         viewModelScope.launch {
-            // Fetch all data in parallel
-            _featuredRecipes.postValue(repository.getFeaturedRecipes())
-            _recommendedRecipes.postValue(repository.getPublicRecipes())
-            _categories.postValue(repository.getAllCategories())
-
-            // Time of day logic
-            _timeOfDayTitle.postValue(GreetingManager.getRandomGreetingForCurrentTime())
-            val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-            _timeOfDayRecipes.postValue(when (hour) {
-                in 5..10 -> repository.getBreakfastRecipes()
-                in 11..13 -> repository.getLunchRecipes()
-                in 18..21 -> repository.getDinnerRecipes()
-                else -> repository.getSnackRecipes()
-            })
-
-            _isInitiallyLoading.postValue(false) // Hide the loader
+            try {
+                repository.preloadHomeScreenData(forceRefresh = false)
+                populateLiveDataFromCache()
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Failed to load home screen data", e)
+            } finally {
+                _isInitiallyLoading.postValue(false)
+            }
         }
     }
 
     fun refreshHomeScreenData() {
-        _isRefreshing.value = true // Trigger the pull-to-refresh loader
+        _isRefreshing.value = true
         viewModelScope.launch {
-            // Re-fetch all data with forceRefresh = true
-            _featuredRecipes.postValue(repository.getFeaturedRecipes(true))
-            _recommendedRecipes.postValue(repository.getPublicRecipes(true))
-            _categories.postValue(repository.getAllCategories(true))
+            try {
+                repository.preloadHomeScreenData(forceRefresh = true)
+                populateLiveDataFromCache()
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Failed to refresh home screen data", e)
+            } finally {
+                _isRefreshing.postValue(false)
+            }
+        }
+    }
 
-            _timeOfDayTitle.postValue(GreetingManager.getRandomGreetingForCurrentTime())
-            val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-            _timeOfDayRecipes.postValue(when (hour) {
-                in 5..10 -> repository.getBreakfastRecipes(true)
-                in 11..13 -> repository.getLunchRecipes(true)
-                in 18..21 -> repository.getDinnerRecipes(true)
-                else -> repository.getSnackRecipes(true)
-            })
+    private suspend fun populateLiveDataFromCache() {
+        _featuredRecipes.postValue(repository.getFeaturedRecipes())
+        _recommendedRecipes.postValue(repository.getRecommendedForYou())
+        _categories.postValue(repository.getAllCategories())
+        _timeOfDayTitle.postValue(GreetingManager.getRandomGreetingForCurrentTime())
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        _timeOfDayRecipes.postValue(getRecipesForTimeOfDay(hour))
+    }
 
-            _isRefreshing.postValue(false) // Hide the loader
+    fun onCategorySelected(categoryName: String) {
+        viewModelScope.launch {
+            _isInitiallyLoading.value = true // You can use a separate loading state for this if you prefer
+
+            // Re-fetch recommended recipes with the selected category filter
+            val filteredRecommendations = repository.getRecommendedForYou(forceRefresh = true, category = categoryName)
+            _recommendedRecipes.postValue(filteredRecommendations)
+
+            _isInitiallyLoading.postValue(false)
+        }
+    }
+
+    private suspend fun getRecipesForTimeOfDay(hour: Int): List<Recipe> {
+        return when (hour) {
+            in 5..10 -> repository.getBreakfastRecipes()
+            in 11..13 -> repository.getLunchRecipes()
+            in 14..17 -> repository.getSnackRecipes()
+            in 18..21 -> repository.getDinnerRecipes()
+            else -> repository.getSnackRecipes()
         }
     }
 }

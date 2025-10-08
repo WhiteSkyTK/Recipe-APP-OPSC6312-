@@ -56,7 +56,7 @@ class RecipeDetailActivity : AppCompatActivity() {
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance() // <-- This was the missing part
         )
-        ShoppingViewModelFactory(repository)
+        ViewModelFactory(repository)
     }
 
     private val recipeDetailViewModel: RecipeDetailViewModel by viewModels {
@@ -68,7 +68,7 @@ class RecipeDetailActivity : AppCompatActivity() {
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance()
         )
-        RecipeDetailViewModelFactory(repository)
+        ViewModelFactory(repository)
     }
 
 

@@ -6,8 +6,10 @@
     <string name="add">Add</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
+    <string name="save_changes">Save Changes</string>
     <string name="coming_soon">Coming Soon...</string>
     <string name="permission_needed_title">Permission Needed</string>
+    <string name="select_language">🌍 Select Language</string>
 
     <!-- RecipeDetailActivity -->
     <string name="recipe_detail_error_missing_id">Recipe ID missing</string>
@@ -33,12 +35,12 @@
     <string name="undo">UNDO</string>
 
     <!-- AddRecipeFragment & ProfileCompletionActivity -->
-    <string name="permission_camera_required">Camera permission is required.</string>
+    <string name="permission_camera_required">Camera permission is required.😥</string>
     <string name="dialog_set_photo_title">Set Cover Photo</string>
     <string name="dialog_option_take_photo">Take Photo</string>
     <string name="dialog_option_choose_gallery">Choose from Gallery</string>
-    <string name="dialog_option_remove_photo">Remove Photo</string>
-    <string name="permission_camera_rationale">Camera access is required to take a photo for your recipe.</string>
+    <string name="dialog_option_remove_photo">Remove Photo😥</string>
+    <string name="permission_camera_rationale">Camera access is required to take a photo for your recipe.😥</string>
     <string name="delete_recipe_dialog_title">Delete Recipe 🗑️</string>
     <string name="delete_recipe_dialog_message">Are you sure you want to permanently delete this recipe? 😥</string>
 
@@ -46,6 +48,13 @@
     <string name="google_sign_in_failed">Google Sign-In failed: %1$s</string>
     <string name="firebase_auth_failed">Firebase Auth failed: %1$s</string>
     <string name="auth_failed">Authentication failed: %1$s</string>
+
+    <!-- ProfileFragment -->
+    <string name="profile_logout_title">Log Out</string>
+    <string name="profile_logout_message">Are you sure you want to log out and clear all local data?</string>
+    <string name="profile_logout_button">Log Out</string>
+    <string name="profile_version">Version %1$s</string>
+    <string name="profile_default_name">Your Name</string>
 
     <!--About-->
     <string name="about_harmony_kitchen">About Harmony Kitchen 🍲</string>
@@ -96,7 +105,6 @@
     <string name="full_name">Full Name</string>
     <string name="phone_number">Phone Number</string>
     <string name="change_password">Change Password</string>
-    <string name="save_changes">Save Changes</string>
 
     <!--Forgot Password-->
     <string name="forgot_password">Forgot Password 🔒</string>
@@ -109,6 +117,7 @@
     <string name="email_username">Email / Username</string>
     <string name="log_in">Log in</string>
     <string name="or_continue_with">Or continue with</string>
+    <string name="forgot_passwordbtn">Forgot Password</string>
 
     <!--Main-->
     <string name="offline_mode">Offline Mode 🛡️</string>
@@ -163,7 +172,7 @@
 
     <!--Welcome-->
     <string name="welcome_to_nharmony_kitchen">Welcome to\nHarmony Kitchen</string>
-    <string name="WelcomeEmoji">👋</string>
+    <string name="welcome_emoji">👋</string>
     <string name="your_daily_dose_of_delicious">Your daily dose of delicious</string>
     <string name="continue_with_google">Continue with Google</string>
     <string name="get_started">Get Started</string>
@@ -270,4 +279,202 @@
     <string name="publish_recipe">Publish Recipe</string>
     <string name="make_private">Make Private</string>
     <string name="edit_recipe">Edit Recipe</string>
+
+    <string name="no_new_notifications">No new notifications</string>
+    <string name="no_notifications_yet">No Notifications Yet</string>
+    <string name="my_badges_achievements"><![CDATA[My Badges & Achievements 🏆]]></string>
+    <string name="my_badges_achievementsbtn"><![CDATA[My Badges & Achievements]]></string>
+
+    <!-- Report-->
+    <string name="report_issue_email_address">whiteshytk@gmail.com</string>
+    <string name="report_issue_subject">Hamory Kitchen - Bug Report / Feedback</string>
+    <string name="report_issue_body">
+        \n\n--- Please Do Not Edit Below This Line ---\n
+        App Version: %1$s\n
+        Device: %2$s\n
+        Android Version: %3$s\n
+        User ID: %4$s\n
+        --- PLease Explain Here ---\n
+    </string>
+    <string name="report_issue_error">No email app found.</string>
+
+    <!-- Greeting message-->
+    <string-array name="morning_greetings">
+        <item>☀️ Good Morning!</item>
+        <item>Rise and shine! 🌅</item>
+        <item>Time for some breakfast? 🍳</item>
+        <item>What\'s cooking this morning? 🥞</item>
+        <item>A great day starts with a great meal!</item>
+        <item>Hello, sunshine! ☀️</item>
+        <item>New day, new flavors! 🍯</item>
+        <item>Coffee first, then conquer the day! ☕</item>
+        <item>Morning vibes only! 🌸</item>
+        <item>Breakfast is served! 🍞🥓</item>
+        <item>Wake up and smell the coffee! ☕🌄</item>
+        <item>Good morning, food explorer! 🥐</item>
+        <item>Fuel up for the day ahead! 🍌</item>
+        <item>Bright mornings, tasty mornings! 🌞</item>
+        <item>A morning without pancakes is just sad. 🥞</item>
+        <item>Start your day deliciously! 🍯🥖</item>
+        <item>Hello, early bird! 🐦</item>
+        <item>Eggs, toast, coffee… repeat! 🍳☕</item>
+        <item>Smiles and breakfast all around! 😄🥯</item>
+        <item>Rise, shine, and dine! 🍴</item>
+        <item>Let\'s get this bread! (Literally) 🍞</item>
+        <item>Today\'s forecast: 100% chance of delicious.🌧️ </item>
+        <item>Sip, sip, hooray! It\'s a new day! 🍊</item>
+    </string-array>
+
+    <string-array name="lunch_greetings">
+        <item>🥗 Lunchtime!</item>
+        <item>Ready for a midday meal? 🥪</item>
+        <item>Refuel for the afternoon! 💪</item>
+        <item>What\'s on the menu for lunch? 🍱</item>
+        <item>Time for a delicious break.</item>
+        <item>Midday munchies? 🍛</item>
+        <item>Keep your energy up! 🌯</item>
+        <item>Lunch o\'clock! ⏰🍴</item>
+        <item>A tasty break for a busy day! 🥗</item>
+        <item>Fuel your afternoon adventures! 🥙</item>
+        <item>Bon appétit! 😋</item>
+        <item>Sandwiches, salads, or soup? 🥗🥪🍜</item>
+        <item>Time to power up! ⚡🥪</item>
+        <item>Lunch with a side of smiles! 😊</item>
+        <item>Eat well, work well! 🍛💻</item>
+        <item>Take a break and enjoy your food! 🍲</item>
+        <item>Midday delight for the foodie soul! 🥙</item>
+        <item>Refuel like a champ! 🏆🍱</item>
+        <item>Lunch never looked this good! 🍣</item>
+        <item>Healthy, tasty, satisfying! 🥗✨</item>
+        <item>Halfway through the day! You deserve this. 🎉</item>
+        <item>Let\'s taco \'bout lunch! 🌮</item>
+        <item>Soup-er to see you! 🍲</item>
+    </string-array>
+
+    <string-array name="afternoon_greetings">
+        <item>☕ Afternoon Snack?</item>
+        <item>A little treat to get you through the day? 🍪</item>
+        <item>Feeling peckish? 🍎</item>
+        <item>Time for a coffee break! ☕</item>
+        <item>Need a little pick-me-up? ✨</item>
+        <item>Snack attack time! 🍫</item>
+        <item>Afternoon cravings? 🍩</item>
+        <item>Take five and enjoy a bite! 🍇</item>
+        <item>Sweet or savory? You decide! 🥨🍪</item>
+        <item>A tasty pause to power through! ⚡</item>
+        <item>Fuel your afternoon! 🥜</item>
+        <item>Snack smart, stay happy! 🥯</item>
+        <item>Cookies or fruits? 🍏🍪</item>
+        <item>Time for a little indulgence! 🍫</item>
+        <item>Bite-sized happiness! 🥨</item>
+        <item>Keep your energy flowing! ⚡🍎</item>
+        <item>A treat to brighten your day! 🌞🍫</item>
+        <item>Snack o\'clock is the best o\'clock! ⏰</item>
+        <item>Refuel, recharge, repeat! 🥜</item>
+        <item>Afternoon vibes and delicious bites! 🍪</item>
+        <item>Donut worry, be happy! 🍩</item>
+        <item>You\'re one snack away from a good mood. 😉</item>
+        <item>A little something to keep you going. 🍓</item>
+    </string-array>
+
+    <string-array name="dinner_greetings">
+        <item>🌙 Dinner is Served</item>
+        <item>What\'s for dinner tonight? 🍝</item>
+        <item>Hope you\'re hungry! 🍲</item>
+        <item>Time to unwind with a good meal. 🍷</item>
+        <item>Let\'s make something amazing for dinner!</item>
+        <item>Evening delights await! 🍛</item>
+        <item>Cook, eat, repeat! 🍽️</item>
+        <item>Dinner vibes only! 🌟</item>
+        <item>A cozy dinner for a cozy night. 🕯️</item>
+        <item>Gather \'round, food is ready! 🥘</item>
+        <item>Time for flavors that soothe the soul! 🍲</item>
+        <item>Delicious evening ahead! 😋</item>
+        <item>Dinner and chill! 🍷</item>
+        <item>Savor every bite! 🥗</item>
+        <item>Evening meals, happy feels! 🌙</item>
+        <item>End the day on a tasty note! 🍝</item>
+        <item>Family dinner time! 🥘👨‍👩‍👧‍👦</item>
+        <item>Cook up some magic tonight! ✨🍛</item>
+        <item>A plate full of happiness! 🍽️</item>
+        <item>Cheers to a tasty evening! 🥂</item>
+        <item>Let\'s eat, drink, and be merry! 🥳</item>
+        <item>Dinner is better when we eat together. ❤️</item>
+        <item>Time to feast! 🍗</item>
+    </string-array>
+
+    <string-array name="night_greetings">
+        <item>😋 Midnight Snack?</item>
+        <item>Craving something sweet? 🍰</item>
+        <item>A late-night bite? 🍕</item>
+        <item>Something cozy for the evening? 🍿</item>
+        <item>Sweet dreams are made of cheese... and this! 🧀</item>
+        <item>Late-night cravings? 🌙</item>
+        <item>Snack o\'clock! ⏳🍫</item>
+        <item>Nighttime nibbles? 🍩</item>
+        <item>Moonlight munchies! 🌌</item>
+        <item>A tiny treat before bed? 🥛🍪</item>
+        <item>Quiet night, tasty bites. 🛌🍫</item>
+        <item>Night owl? Treat yourself! 🦉🍫</item>
+        <item>Sweet or salty, you deserve both! 🍿🍫</item>
+        <item>Keep the fridge company! 🥒🥛</item>
+        <item>Snack bliss under the stars! ✨🍪</item>
+        <item>Midnight delight awaits! 🌙🍩</item>
+        <item>A bite for the night warrior! 🥨🌌</item>
+        <item>Nibble, relax, repeat! 🛌🍫</item>
+        <item>Cravings approved! 🍫</item>
+        <item>End the night deliciously! 🌙🍪</item>
+        <item>The kitchen is calling... 🤫</item>
+        <item>Just one more bite... I promise! 😉</item>
+        <item>Shhh... it\'s snack time. 🤫</item>
+    </string-array>
+
+    <!-- Add recipe-->
+    <string name="edit_recipe_title">Edit Your Recipe 🍳</string>
+    <string name="toast_recipe_saved">Recipe saved! ❤️</string>
+    <string name="toast_recipe_deleted">Recipe deleted! 🗑️</string>
+    <string name="toast_operation_failed">Operation failed: %1$s</string>
+    <string name="toast_could_not_load_recipe">Could not load recipe to edit. 😭</string>
+    <string name="toast_login_required">You must be logged in to save a recipe. 😭</string>
+    <string name="toast_failed">Failed to start camera. 😭</string>
+    <string name="toast_profile_error">Could not retrieve user profile: %1$s</string>
+    <string name="toast_photo_error">Photo capture failed: %1$s</string>
+    <string name="toast_object_error">No objects recognized.🥺</string>
+    <string name="toast_classify_error">Could not classify the object.🥺</string>
+    <string name="toast_recognition_error">Object recognition failed.🥺</string>
+
+    <string name="validation_recipe_name_required">Recipe name is required.🥺</string>
+    <string name="validation_category_required">Category is required. 🥺</string>
+    <string name="validation_meal_type_required">Meal Type is required. 🥺</string>
+    <string name="validation_time_required">Time to make is required. 🥺</string>
+    <string name="validation_servings_required">Servings amount is required. 🥺</string>
+    <string name="validation_ingredient_min_required">Please add at least one ingredient. 🥺</string>
+    <string name="validation_ingredient_name_required">All ingredient names are required. 🥺</string>
+    <string name="validation_ingredient_qty_required">All ingredient quantities are required. 🥺</string>
+    <string name="validation_step_min_required">Please add at least one step. 🥺</string>
+    <string name="validation_step_desc_required">All step descriptions are required. 🥺</string>
+
+    <string name="notification_upload_success_title">Upload Successful! 🎉</string>
+    <string name="notification_upload_success_body">Your new recipe \'%1$s\' is now available. 😉</string>
+
+    <string name="nutrition_fat">Fat</string>
+    <string name="nutrition_carbs">Carbs</string>
+    <string name="nutrition_salts">Salts</string>
+    <string name="unit_grams">%1$sg</string>
+
+    <string-array name="meal_types">
+        <item>Breakfast</item>
+        <item>Lunch</item>
+        <item>Dinner</item>
+        <item>Snack</item>
+        <item>Dessert</item>
+    </string-array>
+
+    <string-array name="dialog_cover_photo_options">
+        <item>@string/dialog_option_take_photo</item>
+        <item>@string/dialog_option_choose_gallery</item>
+        <item>@string/dialog_option_remove_photo</item>
+    </string-array>
+
+    <string name="category_all">All</string>
 </resources>

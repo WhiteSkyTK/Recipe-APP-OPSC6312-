@@ -6,8 +6,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import java.text.SimpleDateFormat
+import java.util.Locale
 
-class NotificationAdapter(private val notifications: List<Notification>) :
+class NotificationAdapter(private var notifications: List<Notification>) :
     RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
     // This class holds the views for each individual item in the list.
@@ -25,15 +27,33 @@ class NotificationAdapter(private val notifications: List<Notification>) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        // This binds the data from your list to the views in the ViewHolder.
         val notification = notifications[position]
-        holder.icon.setImageResource(notification.iconResId)
+
+        // ++ FIX 1: Convert the icon name (String) to a drawable resource ID (Int) ++
+        val iconResId = holder.itemView.context.resources.getIdentifier(
+            notification.iconName, "drawable", holder.itemView.context.packageName
+        )
+        // Use a fallback icon if the name doesn't match any drawable
+        holder.icon.setImageResource(if (iconResId != 0) iconResId else R.drawable.ic_alert)
+
         holder.title.text = notification.title
-        holder.timestamp.text = notification.timestamp
+
+        // ++ FIX 2: Format the Date object into a readable String ++
+        holder.timestamp.text = if (notification.timestamp != null) {
+            val formatter = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault())
+            formatter.format(notification.timestamp)
+        } else {
+            "Just now"
+        }
     }
 
     override fun getItemCount(): Int {
         // This tells the RecyclerView how many items are in the list.
         return notifications.size
+    }
+
+    fun updateData(newNotifications: List<Notification>) {
+        this.notifications = newNotifications
+        notifyDataSetChanged()
     }
 }

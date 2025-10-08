@@ -7,7 +7,10 @@ import com.cloudinary.Transformation
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -19,24 +22,30 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.net.URL
 import java.util.Calendar
+import java.util.Date
 
 class ShoppingRepository(
     private val shoppingDao: ShoppingDao,
     private val recipeDao: RecipeDao,
     private val scanHistoryDao: ScanHistoryDao,
-    private val firestore: FirebaseFirestore,
+    val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage
 ) {
     private val foodEmojis = listOf("🥞", "🍕", "🍔", "🍣", "🌮", "🥗", "🍜", "🍰", "🍩", "🥐", "🍝", "カレー", "🍲")
     private var lastVisibleRecipeDocument: com.google.firebase.firestore.DocumentSnapshot? = null
     private val apiService = RetrofitClient.instance
     private val tastyApiService = RetrofitClient.tastyInstance
+
+    private val gamificationEngine = GamificationEngine(firestore, this)
     private val lastDocumentSnapshots = mutableMapOf<String, com.google.firebase.firestore.DocumentSnapshot?>()
 
     // Get lists directly from Room. Room is the source of truth for the UI.
     fun getAllShoppingListsForUser(userId: String) = shoppingDao.getAllShoppingListsForUser(userId)
     fun getItemsForList(listId: String) = shoppingDao.getItemsForList(listId)
     fun getAllItemsForUser(userId: String) = shoppingDao.getAllItemsForUser(userId)
+    fun getAllBadges(): List<Badge> {
+        return gamificationEngine.allBadges
+    }
 
     private var cachedFeatured: List<Recipe>? = null
     private var cachedRecommended: List<Recipe>? = null
@@ -47,6 +56,16 @@ class ShoppingRepository(
     private var cachedDinner: List<Recipe>? = null
 
     suspend fun preloadHomeScreenData(forceRefresh: Boolean = false) = coroutineScope {
+        if (forceRefresh) {
+            cachedFeatured = null
+            cachedRecommended = null
+            cachedCategories = null
+            cachedBreakfast = null
+            cachedLunch = null
+            cachedSnack = null
+            cachedDinner = null
+        }
+
         // We use async to run all these network calls at the same time
         val featuredJob = async { getFeaturedRecipes(forceRefresh) }
         val recommendedJob = async { getRecommendedForYou(forceRefresh) }
@@ -56,15 +75,10 @@ class ShoppingRepository(
         val snackJob = async { getSnackRecipes(forceRefresh) }
         val dinnerJob = async { getDinnerRecipes(forceRefresh) }
 
-        // Wait for all of them to complete
-        featuredJob.await()
-        recommendedJob.await()
-        categoriesJob.await()
-        breakfastJob.await()
-        lunchJob.await()
-        snackJob.await()
-        dinnerJob.await()
+        // Await all jobs to ensure data is ready
+        listOf(featuredJob, recommendedJob, categoriesJob, breakfastJob, lunchJob, snackJob, dinnerJob).forEach { it.await() }
     }
+
     suspend fun getFirebaseRecipeCount(): Int {
         val TAG = "FirebaseRecipeCount" // Define a tag for your logs for easy filtering
         return try {
@@ -268,6 +282,70 @@ class ShoppingRepository(
         return upscaleAndCacheRecipes(combinedNewRecipes)
     }
 
+    // --- Gamification Triggers ---
+    suspend fun getUserProgress(userId: String): UserProgress? {
+        return try {
+            firestore.collection("users").document(userId)
+                .collection("progress").document("main")
+                .get().await().toObject(UserProgress::class.java)
+        } catch (e: Exception) {
+            Log.e("Gamification", "Failed to get user progress for $userId", e)
+            null // Return null if the document doesn't exist or an error occurs
+        }
+    }
+
+    suspend fun logUserLogin(userId: String) {
+        val progressRef = firestore.collection("users").document(userId).collection("progress").document("main")
+        val progressDoc = progressRef.get().await()
+        val progress = progressDoc.toObject(UserProgress::class.java) ?: UserProgress(userId = userId)
+
+        val today = Calendar.getInstance()
+        val lastLogin = Calendar.getInstance()
+        if (progress.lastLogin != null) {
+            lastLogin.time = progress.lastLogin!!
+        } else {
+            // If they've never logged in, this is their first day
+            lastLogin.add(Calendar.DAY_OF_YEAR, -1)
+        }
+
+        val isConsecutiveDay = today.get(Calendar.DAY_OF_YEAR) == lastLogin.get(Calendar.DAY_OF_YEAR) + 1 &&
+                today.get(Calendar.YEAR) == lastLogin.get(Calendar.YEAR)
+
+        val isSameDay = today.get(Calendar.DAY_OF_YEAR) == lastLogin.get(Calendar.DAY_OF_YEAR) &&
+                today.get(Calendar.YEAR) == lastLogin.get(Calendar.YEAR)
+
+        val newStreak = if (isSameDay) {
+            progress.loginStreak // Don't increment if they already logged in today
+        } else if (isConsecutiveDay) {
+            progress.loginStreak + 1
+        } else {
+            1 // Reset streak
+        }
+
+        val updatedProgress = mapOf(
+            "loginStreak" to newStreak,
+            "lastLogin" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+        )
+        // Use .set with merge to create the document if it doesn't exist
+        progressRef.set(updatedProgress, com.google.firebase.firestore.SetOptions.merge()).await()
+
+        // After updating progress, check for new badges
+        gamificationEngine.checkAndAwardBadges(userId)
+    }
+
+    suspend fun logRecipeCreated(userId: String) {
+        val progressRef = firestore.collection("users").document(userId).collection("progress").document("main")
+        progressRef.set(mapOf("recipesCreated" to com.google.firebase.firestore.FieldValue.increment(1)), com.google.firebase.firestore.SetOptions.merge()).await()
+        gamificationEngine.checkAndAwardBadges(userId)
+    }
+
+    suspend fun logFavoriteToggled(userId: String, isFavoriting: Boolean) {
+        val progressRef = firestore.collection("users").document(userId).collection("progress").document("main")
+        val increment = if (isFavoriting) 1L else -1L
+        progressRef.set(mapOf("recipesFavorited" to com.google.firebase.firestore.FieldValue.increment(increment)), com.google.firebase.firestore.SetOptions.merge()).await()
+        gamificationEngine.checkAndAwardBadges(userId)
+    }
+
     private suspend fun upscaleAndCacheRecipes(recipes: List<Recipe>): List<Recipe> {
         if (recipes.isEmpty()) return emptyList()
         Log.d("Cloudinary", "Upscaling ${recipes.size} new images...")
@@ -287,10 +365,10 @@ class ShoppingRepository(
         lastDocumentSnapshots.clear()
     }
 
-    suspend fun getRecommendedForYou(forceRefresh: Boolean = false): List<Recipe> {
-        if (cachedRecommended != null && !forceRefresh) return cachedRecommended!!
+    suspend fun getRecommendedForYou(forceRefresh: Boolean = false, category: String? = null): List<Recipe> {
+        if (category == null && cachedRecommended != null && !forceRefresh) return cachedRecommended!!
         val userId = FirebaseManager.auth.currentUser?.uid
-        if (userId == null) return getPublicRecipes() // Fallback for logged-out users
+        if (userId == null) return getPopularRecipes(category)
 
         // === Step 1: Gather all user preference and activity data ===
         val userProfileDoc = firestore.collection("users").document(userId).get().await()
@@ -313,6 +391,10 @@ class ShoppingRepository(
         var query: com.google.firebase.firestore.Query = firestore.collection("recipes")
             .whereEqualTo("public", true)
 
+        if (category != null && category != "All") {
+            query = query.whereEqualTo("category", category)
+        }
+
         // Apply strict dietary filters
         if (userDiets.contains("Vegan")) query = query.whereEqualTo("vegan", true)
         if (userDiets.contains("Vegetarian")) query = query.whereEqualTo("vegetarian", true)
@@ -326,7 +408,7 @@ class ShoppingRepository(
             query.limit(100).get().await().toObjects(Recipe::class.java) // Fetch a pool of 100 candidates
         } catch (e: Exception) {
             Log.e("Firestore", "Error getting recommended candidates", e)
-            return getPopularRecipes() // Fallback on error
+            return getPopularRecipes(category) // Fallback on error
         }
 
         // === Step 3: Apply our new, smarter SOFT filters in Kotlin ===
@@ -411,23 +493,37 @@ class ShoppingRepository(
             .map { (recipe, _) -> recipe }
             .take(20)
 
-        val result = if (recommended.isNotEmpty()) recommended else getPopularRecipes()
+        val result = if (recommended.isNotEmpty()) recommended else getPopularRecipes(category)
 
-        // ++ ADD THIS LINE AT THE VERY END ++
-        cachedRecommended = result // Save the final result to the cache
+        if (category == null) {
+            cachedRecommended = result // Only cache the main "All" recommendations
+        }
         return result
     }
 
-    suspend fun getPopularRecipes(): List<Recipe> {
-        val popularRecipes = try {
-            firestore.collection("recipes")
+    suspend fun getPopularRecipes(category: String? = null): List<Recipe> {
+        return try {
+            var query: com.google.firebase.firestore.Query = firestore.collection("recipes")
                 .whereEqualTo("public", true)
                 .whereEqualTo("isPopular", true)
-                .limit(20).get().await().toObjects(Recipe::class.java)
-        } catch (e: Exception) { emptyList() }
 
-        // If there are no "popular" recipes, return a random selection from the cache.
-        return if (popularRecipes.isNotEmpty()) popularRecipes else getPublicRecipes().shuffled().take(20)
+            // Apply the category filter if one is provided
+            if (category != null && category != "All") {
+                query = query.whereEqualTo("category", category)
+            }
+
+            val documents = query.limit(20).get().await()
+            val popularRecipes = documents.toObjects(Recipe::class.java)
+
+            // If we still get no results (e.g., no popular recipes in that category), fall back to random.
+            if (popularRecipes.isNotEmpty()) {
+                popularRecipes
+            } else {
+                getPublicRecipes(forceRefresh = false).shuffled().take(20)
+            }
+        } catch (e: Exception) {
+            getPublicRecipes(forceRefresh = false).shuffled().take(20)
+        }
     }
 
     private fun applySoftDietFilters(recipes: List<Recipe>, userDiets: List<String>): List<Recipe> {
@@ -651,28 +747,19 @@ class ShoppingRepository(
 
     suspend fun saveNewRecipe(recipe: Recipe, imageUri: Uri?) {
         var recipeToSave = recipe
-
-        // 1. Save to Room immediately (without the final image URL)
-        // This makes the UI feel instant for the user.
         recipeDao.insertRecipe(recipeToSave)
-
-        // 2. If there's an image, upload it to Firebase Storage
         if (imageUri != null) {
             val userId = FirebaseManager.auth.currentUser?.uid ?: "unknown_user"
             val storageRef = storage.reference.child("recipe_images/$userId/${recipe.id}.jpg")
-
-            // Upload the file and get the download URL
             val downloadUrl = storageRef.putFile(imageUri).await().storage.downloadUrl.await()
             recipeToSave = recipe.copy(imageUrl = downloadUrl.toString())
-
-            // 3. Update the recipe in Room again, this time with the image URL
             recipeDao.insertRecipe(recipeToSave)
         }
-
-        // 4. Finally, save the complete recipe to Firestore
         firestore.collection("recipes").document(recipeToSave.id).set(recipeToSave).await()
-    }
 
+        // ++ TRIGGER for creating a recipe ++
+        logRecipeCreated(recipeToSave.userId)
+    }
 
     suspend fun getNotifications(): List<Notification> {
         return try {
@@ -697,16 +784,12 @@ class ShoppingRepository(
                 .whereEqualTo("public", true)
                 .whereEqualTo("isPopular", true)
                 .limit(10).get().await()
-
             val popularRecipes = popularDocs.toObjects(Recipe::class.java)
 
             val publicRecipes = getPublicRecipes(forceRefresh)
-
-            // ++ ADD THIS LOG ++
             Log.d("DataFlow", "Step 2 (Repo/Featured): Received ${publicRecipes.size} public recipes to generate featured list.")
 
             val result = publicRecipes.shuffled().take(5)
-
             Log.d("DataFlow", "Step 3 (Repo/Featured): Returning ${result.size} featured recipes.")
 
             if (popularRecipes.isNotEmpty()) {
@@ -716,10 +799,8 @@ class ShoppingRepository(
             } else {
                 // STEP 2: ROBUST BACKUP PLAN
                 Log.w("FeaturedLogic", "No popular recipes found. Using smart random fallback.")
-
                 // First, get a large pool of ANY public recipes.
                 val randomPool = getPublicRecipes(forceRefresh, limit = 50)
-
                 // Second, determine the current meal type.
                 val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
                 val desiredMealType = when (hour) {
@@ -732,7 +813,6 @@ class ShoppingRepository(
 
                 // Third, TRY to filter the random pool for time-appropriate recipes.
                 val timeBasedList = randomPool.filter { it.mealType.equals(desiredMealType, ignoreCase = true) }
-
                 // FINALLY, decide what to show.
                 finalFeaturedList = if (timeBasedList.size >= 5) {
                     // If we found enough time-based ones, use them.
@@ -811,12 +891,24 @@ class ShoppingRepository(
 
     suspend fun getAllCategories(forceRefresh: Boolean = false): List<Category> {
         if (cachedCategories != null && !forceRefresh) return cachedCategories!!
-        val publicRecipes = getPublicRecipes(forceRefresh)
-        val categories = publicRecipes.map { Category(it.category) }
-            .distinctBy { it.name }.sortedBy { it.name }.toMutableList()
-        categories.add(0, Category("All", isSelected = true))
-        cachedCategories = categories
-        return categories
+
+        return try {
+            val documents = firestore.collection("recipes").whereEqualTo("public", true).get().await()
+            val allRecipes = documents.toObjects(Recipe::class.java)
+            val categories = allRecipes
+                .map { it.category }
+                .distinct()
+                .sorted()
+                .map { Category(it) }
+                .toMutableList()
+
+            categories.add(0, Category("All", isSelected = true))
+            cachedCategories = categories
+            categories
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error getting all categories", e)
+            emptyList()
+        }
     }
 
     suspend fun getDiscoverRecipes(pageSize: Int): List<Recipe> {
@@ -865,30 +957,57 @@ class ShoppingRepository(
     suspend fun isFavoriteNow(recipeId: String): Boolean = recipeDao.isFavoriteNow(recipeId) ?: false
 
     suspend fun toggleFavorite(recipe: Recipe) {
-        val userId = FirebaseManager.auth.currentUser?.uid ?: return // Can't favorite if not logged in
-        val favoriteRef = firestore.collection("users").document(userId)
-            .collection("favorites").document(recipe.id)
-
-        // 1. Get the REAL current status from the local database.
+        val userId = FirebaseManager.auth.currentUser?.uid ?: return
+        val favoriteRef = firestore.collection("users").document(userId).collection("favorites").document(recipe.id)
         val isCurrentlyFavorite = isFavoriteNow(recipe.id)
         val newFavoriteState = !isCurrentlyFavorite
 
         if (newFavoriteState) {
-            // --- ADDING to favorites ---
-            // Save the full recipe to Room first to ensure it's available offline immediately.
-            recipeDao.insertRecipe(recipe.copy(isFavorite = true))
-            // Then, try to sync this addition to Firebase.
             favoriteRef.set(recipe).await()
+            recipeDao.insertRecipe(recipe.copy(isFavorite = true))
             logActivity("FAVORITE_RECIPE", recipe.id)
+            // ++ TRIGGER for favoriting a recipe ++
+            logFavoriteToggled(userId, true)
         } else {
-            // --- REMOVING from favorites ---
-            // Update the local status immediately for a fast UI response.
-            recipeDao.updateFavoriteStatus(recipe.id, false)
-            // Then, try to sync this deletion to Firebase.
             favoriteRef.delete().await()
             logActivity("UNFAVORITE_RECIPE", recipe.id)
+            // ++ TRIGGER for un-favoriting a recipe ++
+            logFavoriteToggled(userId, false)
+        }
+        recipeDao.updateFavoriteStatus(recipe.id, newFavoriteState)
+    }
+
+    // ++ ADD THIS FUNCTION to mark notifications as read in Firestore ++
+    suspend fun markAllNotificationsAsRead() {
+        val userId = FirebaseManager.auth.currentUser?.uid ?: return
+        try {
+            val notificationsRef = firestore.collection("users").document(userId).collection("notifications")
+            val unreadNotifications = notificationsRef.whereEqualTo("isRead", false).get().await()
+
+            if (unreadNotifications.isEmpty) return // Nothing to do
+
+            val batch = firestore.batch()
+            for (doc in unreadNotifications.documents) {
+                batch.update(doc.reference, "isRead", true)
+            }
+            batch.commit().await()
+            Log.d("Notifications", "Marked ${unreadNotifications.size()} notifications as read.")
+        } catch (e: Exception) {
+            Log.e("Notifications", "Error marking notifications as read", e)
         }
     }
+
+    // --- Notification Subscription ---
+    fun updateNotificationSubscription(isEnabled: Boolean) {
+        if (isEnabled) {
+            FirebaseMessaging.getInstance().subscribeToTopic("new_recipes")
+                .addOnSuccessListener { Log.d("FCM", "Subscribed to new_recipes topic") }
+        } else {
+            FirebaseMessaging.getInstance().unsubscribeFromTopic("new_recipes")
+                .addOnSuccessListener { Log.d("FCM", "Unsubscribed from new_recipes topic") }
+        }
+    }
+
 
     private fun logActivity(type: String, value: String) {
         val userId = FirebaseManager.auth.currentUser?.uid ?: return
@@ -1105,6 +1224,22 @@ class ShoppingRepository(
             null // Return null if the download fails
         }
     }
+
+    suspend fun createNotification(title: String, message: String, iconName: String) {
+        try {
+            val notification = mapOf(
+                "title" to title,
+                "message" to message, // Using 'message' to match your likely data model
+                "iconName" to iconName, // Storing the name of the icon
+                "timestamp" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+            )
+            firestore.collection("notifications").add(notification).await()
+            Log.d("Notifications", "Successfully created notification: $title")
+        } catch (e: Exception) {
+            Log.e("Notifications", "Error creating notification", e)
+        }
+    }
+
 
     suspend fun syncFavoritesFromFirebase(userId: String) {
         try {

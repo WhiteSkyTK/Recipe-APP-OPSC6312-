@@ -36,7 +36,7 @@ class ShoppingListFragment : Fragment() {
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance() // <-- This was the missing part
         )
-        ShoppingViewModelFactory(repository)
+        ViewModelFactory(repository)
     }
     private lateinit var shoppingListAdapter: ShoppingListAdapter
     private lateinit var deleteListButton: ImageButton

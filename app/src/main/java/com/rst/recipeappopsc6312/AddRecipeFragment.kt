@@ -55,7 +55,7 @@ class AddRecipeFragment : Fragment() {
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance() // Pass storage instance
         )
-        AddRecipeViewModelFactory(repository)
+        ViewModelFactory(repository)
     }
 
     // ++ NEW LAUNCHER for taking a picture
@@ -81,7 +81,7 @@ class AddRecipeFragment : Fragment() {
         if (isGranted) {
             openCamera()
         } else {
-            Toast.makeText(requireContext(), "Camera permission is required.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.permission_camera_required, Toast.LENGTH_SHORT).show()
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,9 +109,7 @@ class AddRecipeFragment : Fragment() {
         val mealTypeAutoComplete = view.findViewById<AutoCompleteTextView>(R.id.autoCompleteMealType)
         loadingOverlayContainer = view.findViewById(R.id.loadingOverlayContainer) // Find the FrameLayout
 
-
-        // ++ POPULATE THE NEW MEAL TYPE DROPDOWN
-        val mealTypes = listOf("Breakfast", "Lunch", "Dinner", "Snack", "Dessert")
+        val mealTypes = resources.getStringArray(R.array.meal_types)
         val mealTypeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, mealTypes)
         mealTypeAutoComplete.setAdapter(mealTypeAdapter)
 
@@ -123,13 +121,13 @@ class AddRecipeFragment : Fragment() {
         deleteButton.setOnClickListener {
             recipeToEdit?.let { recipe ->
                 AlertDialog.Builder(requireContext())
-                    .setTitle("Delete Recipe 🗑️")
-                    .setMessage("Are you sure you want to permanently delete this recipe? 😥")
-                    .setPositiveButton("Delete") { _, _ ->
+                    .setTitle(R.string.delete_recipe_dialog_title)
+                    .setMessage(R.string.delete_recipe_dialog_message)
+                    .setPositiveButton(R.string.delete) { _, _ ->
                         viewModel.deleteRecipe(recipe)
                         showLoading(true)
                     }
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -137,9 +135,9 @@ class AddRecipeFragment : Fragment() {
     }
 
     private fun showImagePickerDialog() {
-        val options = arrayOf("Take Photo", "Choose from Gallery", "Remove Photo")
+        val options = resources.getStringArray(R.array.dialog_cover_photo_options)
         AlertDialog.Builder(requireContext())
-            .setTitle("Set Cover Photo")
+            .setTitle(R.string.dialog_set_photo_title)
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> checkCameraPermissionAndOpen()
@@ -164,12 +162,12 @@ class AddRecipeFragment : Fragment() {
             }
             shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
                 AlertDialog.Builder(requireContext())
-                    .setTitle("Permission Needed")
-                    .setMessage("Camera access is required to take a photo for your recipe.")
-                    .setPositiveButton("OK") { _, _ ->
+                    .setTitle(R.string.permission_needed_title)
+                    .setMessage(R.string.permission_camera_rationale)
+                    .setPositiveButton(R.string.ok) { _, _ ->
                         permissionLauncher.launch(Manifest.permission.CAMERA)
                     }
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
             else -> {
@@ -187,14 +185,25 @@ class AddRecipeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ++ REPLACE the old observer with this new, complete one ++
+        // ++ THIS IS THE NEW LOGIC: Observe the saveStatus LiveData from the ViewModel ++
         viewModel.saveStatus.observe(viewLifecycleOwner) { result ->
             showLoading(false)
             if (result.success) {
-                val message = if (result.isDelete) "Recipe deleted!" else "Recipe saved!"
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                val messageResId = if (result.isDelete) R.string.toast_recipe_deleted else R.string.toast_recipe_saved
+                Toast.makeText(context, messageResId, Toast.LENGTH_SHORT).show()
 
-                // If deleting, just go back. If saving, go to MyRecipes.
+                // Trigger a notification for successful uploads
+                if (!result.isDelete) {
+                    val recipeName = view.findViewById<TextInputLayout>(R.id.textInputLayoutRecipeName).editText?.text.toString()
+                    lifecycleScope.launch {
+                        viewModel.repository.createNotification(
+                            getString(R.string.notification_upload_success_title),
+                            getString(R.string.notification_upload_success_body, recipeName), // Pass recipeName as placeholder
+                            "ic_new_recipe"
+                        )
+                    }
+                }
+
                 if (result.isDelete) {
                     parentFragmentManager.popBackStack()
                 } else {
@@ -202,7 +211,7 @@ class AddRecipeFragment : Fragment() {
                     parentFragmentManager.popBackStack()
                 }
             } else {
-                Toast.makeText(context, "Operation failed: ${result.error}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, getString(R.string.toast_operation_failed, result.error), Toast.LENGTH_LONG).show()
             }
         }
 
@@ -216,8 +225,8 @@ class AddRecipeFragment : Fragment() {
 
         // If we are in edit mode, fetch the recipe and populate the form
         if (editRecipeId != null) {
-            view.findViewById<TextView>(R.id.textViewAddRecipeTitle).text = "Edit Your Recipe 🍳"
-            view.findViewById<Button>(R.id.buttonSaveRecipe).text = "Save Changes"
+            view.findViewById<TextView>(R.id.textViewAddRecipeTitle).text = getString(R.string.edit_recipe_title)
+            view.findViewById<Button>(R.id.buttonSaveRecipe).text = getString(R.string.save_changes)
             deleteButton.visibility = View.VISIBLE // Show delete button in edit mode
             loadRecipeForEditing(editRecipeId!!)
         } else {
@@ -233,7 +242,7 @@ class AddRecipeFragment : Fragment() {
             if (recipeToEdit != null) {
                 populateForm(recipeToEdit!!)
             } else {
-                Toast.makeText(context, "Could not load recipe to edit.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.toast_could_not_load_recipe, Toast.LENGTH_SHORT).show()
             }
             showLoading(false)
         }
@@ -318,26 +327,23 @@ class AddRecipeFragment : Fragment() {
         if (!validateInputs(requireView())) return
         showLoading(true)
 
-        // ++ NEW: Fetch the user's name from Firestore first ++
         val userId = FirebaseManager.auth.currentUser?.uid
         if (userId == null) {
-            Toast.makeText(context, "You must be logged in to save a recipe.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.toast_login_required, Toast.LENGTH_SHORT).show()
             showLoading(false)
             return
         }
 
         FirebaseManager.firestore.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
-                // Get the author's name from their profile
                 val authorUsername = document.getString("username") ?: "Unknown Author"
-
-                // Now that we have the name, proceed with collecting and saving
                 val recipe = collectRecipeDataFromView(requireView(), authorUsername)
+
                 viewModel.saveRecipe(recipe, coverImageUri)
             }
             .addOnFailureListener { e ->
                 showLoading(false)
-                Toast.makeText(context, "Could not retrieve user profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.toast_profile_error, Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -349,30 +355,30 @@ class AddRecipeFragment : Fragment() {
         val mealType = view.findViewById<AutoCompleteTextView>(R.id.autoCompleteMealType).text.toString()
 
         if (recipeName.isBlank()) {
-            Toast.makeText(context, "Recipe name is required.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.validation_recipe_name_required, Toast.LENGTH_SHORT).show()
             return false
         }
         if (category.isBlank()) {
-            Toast.makeText(context, "Category is required.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.validation_category_required, Toast.LENGTH_SHORT).show()
             return false
         }
         if (time.isBlank()) {
-            Toast.makeText(context, "Time to make is required.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.validation_time_required, Toast.LENGTH_SHORT).show()
             return false
         }
         if (servings.isBlank()) {
-            Toast.makeText(context, "Servings amount is required.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.validation_servings_required, Toast.LENGTH_SHORT).show()
             return false
         }
 
         if (mealType.isBlank()) {
-            Toast.makeText(context, "Meal Type is required.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.validation_meal_type_required, Toast.LENGTH_SHORT).show()
             return false
         }
 
         // Validate ingredients
         if (ingredientsContainer.childCount == 0) {
-            Toast.makeText(context, "Please add at least one ingredient.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.validation_ingredient_min_required, Toast.LENGTH_SHORT).show()
             return false
         }
         for (child in ingredientsContainer.children) {
@@ -381,24 +387,24 @@ class AddRecipeFragment : Fragment() {
             val qty = child.findViewById<TextInputLayout>(R.id.textInputLayoutIngredientQty).editText?.text.toString()
 
             if (name.isBlank()) {
-                Toast.makeText(context, "All ingredient names are required.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.validation_ingredient_name_required, Toast.LENGTH_SHORT).show()
                 return false
             }
             if (qty.isBlank()) { // ++ NEW CHECK
-                Toast.makeText(context, "All ingredient quantities are required.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.validation_ingredient_qty_required, Toast.LENGTH_SHORT).show()
                 return false
             }
         }
 
         // Validate steps
         if (stepsContainer.childCount == 0) {
-            Toast.makeText(context, "Please add at least one step.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.validation_step_min_required, Toast.LENGTH_SHORT).show()
             return false
         }
         for (child in stepsContainer.children) {
             val step = child.findViewById<TextInputLayout>(R.id.textInputLayoutStep).editText?.text.toString()
             if (step.isBlank()) {
-                Toast.makeText(context, "All step descriptions are required.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.validation_step_desc_required, Toast.LENGTH_SHORT).show()
                 return false
             }
         }
@@ -440,11 +446,11 @@ class AddRecipeFragment : Fragment() {
         val carbs = view.findViewById<TextInputLayout>(R.id.textInputLayoutCarbs).editText?.text.toString()
         val salts = view.findViewById<TextInputLayout>(R.id.textInputLayoutSalts).editText?.text.toString()
 
-        if (calories.isNotBlank()) nutritionList.add(NutritionFact("Calories", calories))
-        if (fat.isNotBlank()) nutritionList.add(NutritionFact("Fat", "${fat}g"))
-        if (carbs.isNotBlank()) nutritionList.add(NutritionFact("Carbs", "${carbs}g"))
-        if (salts.isNotBlank()) nutritionList.add(NutritionFact("Salts", "${salts}g"))
-
+        // Use string resources for nutrition fact names and units
+        if (calories.isNotBlank()) nutritionList.add(NutritionFact(getString(R.string.calories), calories))
+        if (fat.isNotBlank()) nutritionList.add(NutritionFact(getString(R.string.nutrition_fat), getString(R.string.unit_grams, fat)))
+        if (carbs.isNotBlank()) nutritionList.add(NutritionFact(getString(R.string.nutrition_carbs), getString(R.string.unit_grams, carbs)))
+        if (salts.isNotBlank()) nutritionList.add(NutritionFact(getString(R.string.nutrition_salts), getString(R.string.unit_grams, salts)))
 
         return Recipe(
             id = recipeId,

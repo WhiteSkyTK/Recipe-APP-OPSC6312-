@@ -46,7 +46,7 @@ class LoginActivity : AppCompatActivity() {
             db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
             FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
         )
-        ShoppingViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
 
     private val TAG = "LoginActivity"

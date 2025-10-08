@@ -24,7 +24,7 @@ class FavoritesFragment : Fragment() {
             db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
             FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
         )
-        FavoritesViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
 
     override fun onCreateView(

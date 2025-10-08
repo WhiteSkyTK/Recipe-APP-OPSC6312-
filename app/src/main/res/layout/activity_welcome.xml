@@ -39,7 +39,7 @@
             android:id="@+id/textViewEmoji"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/WelcomeEmoji"
+            android:text="@string/welcome_emoji"
             android:textSize="32sp"
             android:layout_marginTop="8dp"/>
 

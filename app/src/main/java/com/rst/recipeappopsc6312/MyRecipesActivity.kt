@@ -39,7 +39,7 @@ class MyRecipesActivity : AppCompatActivity() {
             db.scanHistoryDao(),
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance())
-        ShoppingViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

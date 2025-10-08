@@ -34,7 +34,7 @@ class DiscoverFragment : Fragment() {
             db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
             FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
         )
-        DiscoverViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
 
     // Get the shared MainViewModel from the MainActivity to know the network status

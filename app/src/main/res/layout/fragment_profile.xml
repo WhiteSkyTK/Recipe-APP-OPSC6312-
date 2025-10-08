@@ -85,6 +85,15 @@
                     android:textSize="16sp"/>
 
                 <TextView
+                    android:id="@+id/textViewBadges"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/my_badges_achievementsbtn"
+                    android:drawablePadding="16dp"
+                    android:paddingVertical="12dp"
+                    app:drawableStartCompat="@drawable/ic_badge" />
+
+                <TextView
                     android:id="@+id/textViewPreferences"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

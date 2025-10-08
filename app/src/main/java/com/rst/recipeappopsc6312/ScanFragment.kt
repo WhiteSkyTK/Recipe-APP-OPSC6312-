@@ -59,7 +59,7 @@ class ScanFragment : Fragment() {
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance()
         )
-        ScanViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
 
     // ++ LAUNCHER FOR VOICE INPUT ++

@@ -16,9 +16,23 @@ class MainViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(reposi
     private val _networkStatus = MutableLiveData<Boolean>()
     val networkStatus: LiveData<Boolean> = _networkStatus
 
+    private val _hasUnreadNotifications = MutableLiveData<Boolean>()
+    val hasUnreadNotifications: LiveData<Boolean> = _hasUnreadNotifications
+
     fun fetchNotifications() {
         viewModelScope.launch {
-            _notifications.postValue(repository.getNotifications())
+            val fetchedNotifications = repository.getNotifications()
+            _notifications.postValue(fetchedNotifications)
+            // Check if any of the fetched notifications are unread
+            _hasUnreadNotifications.postValue(fetchedNotifications.any { !it.isRead })
+        }
+    }
+
+    fun markAllNotificationsAsRead() {
+        viewModelScope.launch {
+            repository.markAllNotificationsAsRead()
+            // After updating, fetch the list again to update the UI state
+            fetchNotifications()
         }
     }
 
@@ -37,11 +51,24 @@ class MainViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(reposi
         }
     }
 
+    fun logUserLogin() {
+        val userId = Firebase.auth.currentUser?.uid
+        if (userId != null) {
+            viewModelScope.launch {
+                repository.logUserLogin(userId)
+            }
+        }
+    }
+
+    fun updateNotificationSubscription(isEnabled: Boolean) {
+        repository.updateNotificationSubscription(isEnabled)
+    }
+
     init {
-        // This will run once when the app starts.
-        // It will check Firestore and only fetch new recipes if needed.
         viewModelScope.launch {
             repository.seedFirebaseDatabase()
         }
+        // Fetch notifications once when the ViewModel is created
+        fetchNotifications()
     }
 }

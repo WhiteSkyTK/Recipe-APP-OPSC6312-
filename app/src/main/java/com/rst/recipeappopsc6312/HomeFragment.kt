@@ -34,9 +34,16 @@ class HomeFragment : Fragment() {
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance()
         )
-        ShoppingViewModelFactory(repository)
+        ViewModelFactory(repository)
     }
-    private val mainViewModel: MainViewModel by activityViewModels()
+    private val mainViewModel: MainViewModel by activityViewModels {
+        val database = AppDatabase.getDatabase(requireContext())
+        val repository = ShoppingRepository(
+            database.shoppingDao(), database.recipeDao(), database.scanHistoryDao(),
+            FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
+        )
+        ViewModelFactory(repository)
+    }
     private lateinit var featuredAdapter: FeaturedRecipeAdapter
     private lateinit var timeOfDayAdapter: HomeRecipeAdapter
     private lateinit var categoryAdapter: CategoryAdapter
@@ -58,7 +65,7 @@ class HomeFragment : Fragment() {
         loadingOverlay = view.findViewById(R.id.loadingOverlayContainer)
 
         setupRecyclerViews(view)
-        observeViewModel()
+        observeViewModel(view)
 
         swipeRefreshLayout.setOnRefreshListener {
             shoppingViewModel.refreshHomeScreenData()
@@ -102,26 +109,20 @@ class HomeFragment : Fragment() {
             adapter = recommendedAdapter
         }
     }
-    private fun observeViewModel() {
+    private fun observeViewModel(view: View) {
+        val timeOfDayTitle = view.findViewById<TextView>(R.id.textViewTimeOfDayTitle)
+
         mainViewModel.networkStatus.observe(viewLifecycleOwner) { isConnected ->
-            if (isConnected) {
-                offlineContainer.visibility = View.GONE
-                contentScrollView.visibility = View.VISIBLE
-            } else {
-                offlineContainer.visibility = View.VISIBLE
-                contentScrollView.visibility = View.GONE
-                loadingOverlay.visibility = View.GONE
-                swipeRefreshLayout.isRefreshing = false
-            }
+            contentScrollView.visibility = if (isConnected) View.VISIBLE else View.GONE
+            offlineContainer.visibility = if (isConnected) View.GONE else View.VISIBLE
+            swipeRefreshLayout.isEnabled = isConnected
         }
 
         shoppingViewModel.isInitiallyLoading.observe(viewLifecycleOwner) { isLoading ->
             loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
             if (!isLoading) {
-                contentScrollView.animate().alpha(1f).setDuration(300).start()
-                contentScrollView.visibility = View.VISIBLE
-            } else {
                 contentScrollView.alpha = 0f
+                contentScrollView.animate().alpha(1f).setDuration(500).start()
             }
         }
 
@@ -129,16 +130,24 @@ class HomeFragment : Fragment() {
             swipeRefreshLayout.isRefreshing = isRefreshing
         }
 
+        // --- Data Observers ---
+        shoppingViewModel.timeOfDayTitle.observe(viewLifecycleOwner) { title -> timeOfDayTitle.text = title }
         shoppingViewModel.timeOfDayRecipes.observe(viewLifecycleOwner) { recipes -> timeOfDayAdapter.updateData(recipes) }
         shoppingViewModel.featuredRecipes.observe(viewLifecycleOwner) { recipes -> featuredAdapter.updateData(recipes) }
-        shoppingViewModel.recommendedRecipes.observe(viewLifecycleOwner) { allRecipes ->
-            recommendedAdapter.updateData(allRecipes)
+
+        // ++ THIS IS THE NEW LOGIC ++
+        // Observer for Recommended Recipes (the list that changes)
+        shoppingViewModel.recommendedRecipes.observe(viewLifecycleOwner) { recipes ->
+            recommendedAdapter.updateData(recipes)
+        }
+
+        // Observer for Categories (the list that triggers the change)
+        shoppingViewModel.categories.observe(viewLifecycleOwner) { categories ->
+            categoryAdapter.updateData(categories)
+            // The onCategoryClick lambda now tells the ViewModel to fetch new, filtered data.
             categoryAdapter.onCategoryClick = { category ->
-                val filteredList = if (category.name.equals("All", ignoreCase = true)) allRecipes
-                else allRecipes.filter { it.category.equals(category.name, ignoreCase = true) }
-                recommendedAdapter.updateData(filteredList)
+                shoppingViewModel.onCategorySelected(category.name)
             }
         }
-        shoppingViewModel.categories.observe(viewLifecycleOwner) { categories -> categoryAdapter.updateData(categories) }
     }
 }

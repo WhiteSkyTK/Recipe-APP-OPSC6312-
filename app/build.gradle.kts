@@ -89,7 +89,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.firebase.auth)
     implementation(libs.androidx.media3.common.ktx)
     implementation(libs.androidx.ui.text)
     testImplementation(libs.junit)
@@ -115,11 +114,13 @@ dependencies {
     implementation(platform(libs.firebase.bom))
 
     // Add the dependencies for Firebase products you want to use
+    implementation(libs.firebase.auth)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.crashlytics)
     implementation(libs.play.services.auth)
+    implementation("com.google.firebase:firebase-messaging-ktx:24.1.2")
 
     // Room
     implementation(libs.androidx.room.runtime)

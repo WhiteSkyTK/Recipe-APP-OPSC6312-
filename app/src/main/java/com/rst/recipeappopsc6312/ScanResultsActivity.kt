@@ -26,7 +26,7 @@ class ScanResultsActivity : AppCompatActivity() {
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance()
         )
-        ScanViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

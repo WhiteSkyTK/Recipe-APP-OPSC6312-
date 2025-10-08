@@ -3,20 +3,21 @@ package com.rst.recipeappopsc6312
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-// This ViewModel takes the repository to handle data operations
-class AddRecipeViewModel(val repository: ShoppingRepository) : ViewModel() {
+// This is the data class to hold the result of a save or delete operation.
+data class SaveResult(val success: Boolean, val error: String? = null, val isDelete: Boolean = false)
 
-    // LiveData to notify the Fragment when saving is complete
+class AddRecipeViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(repository) {
+
     private val _saveStatus = MutableLiveData<SaveResult>()
     val saveStatus: LiveData<SaveResult> = _saveStatus
 
     private val _categories = MutableLiveData<List<Category>>()
     val categories: LiveData<List<Category>> = _categories.map { allCats ->
+        // This correctly filters out the "All" category so users can't assign it to a new recipe.
         allCats.filter { !it.name.equals("All", ignoreCase = true) }
     }
 
@@ -41,7 +42,8 @@ class AddRecipeViewModel(val repository: ShoppingRepository) : ViewModel() {
                 repository.deleteRecipe(recipe)
                 _saveStatus.postValue(SaveResult(success = true, isDelete = true))
             } catch (e: Exception) {
-                _saveStatus.postValue(SaveResult(success = false, error = e.message))
+                // Correctly includes the error message on failure
+                _saveStatus.postValue(SaveResult(success = false, error = e.message, isDelete = true))
             }
         }
     }
@@ -53,5 +55,3 @@ class AddRecipeViewModel(val repository: ShoppingRepository) : ViewModel() {
     }
 }
 
-// Also, update the SaveResult to track if it was a deletion
-data class SaveResult(val success: Boolean, val error: String? = null, val isDelete: Boolean = false)

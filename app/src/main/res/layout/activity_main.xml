@@ -15,7 +15,6 @@
         android:orientation="vertical"
         android:layout_above="@id/bottomNavigationView">
 
-        <!-- ++ ADD THIS OFFLINE BANNER ++ -->
         <TextView
             android:id="@+id/offlineBanner"
             android:layout_width="match_parent"
@@ -53,23 +52,38 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 app:tint="?android:attr/textColor" />
-            <ImageView
-                android:id="@+id/buttonNotifications"
+            <FrameLayout
+                android:id="@+id/notificationButtonContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/todo"
-                android:src="@drawable/ic_notification"
                 android:layout_toStartOf="@id/buttonFavorites"
                 android:layout_marginEnd="16dp"
-                app:tint="?android:attr/textColor"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true">
+
+                <ImageView
+                    android:id="@+id/buttonNotifications"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/todo"
+                    android:src="@drawable/ic_notification"
+                    app:tint="?android:attr/textColor" />
+
+                <View
+                    android:id="@+id/notificationDotIcon"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_gravity="top|end"
+                    android:background="@drawable/notification_dot_background"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+            </FrameLayout>
             <ImageView
                 android:id="@+id/buttonAddRecipe"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/todo"
                 android:src="@drawable/ic_add_circle"
-                android:layout_toStartOf="@id/buttonNotifications"
+                android:layout_toStartOf="@id/notificationButtonContainer"
                 android:layout_marginEnd="16dp"
                 app:tint="?android:attr/textColor"
                 android:layout_centerVertical="true"/>
