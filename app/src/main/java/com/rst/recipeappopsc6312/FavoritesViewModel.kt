@@ -1,10 +1,8 @@
 package com.rst.recipeappopsc6312
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.switchMap
-
-class FavoritesViewModel(repository: ShoppingRepository) : ViewModel() {
-    // This is now very simple and directly gets the list of full Recipe objects
-    val favoriteRecipes: LiveData<List<Recipe>> = repository.getAllFavorites()
+class FavoritesViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(repository) {
+    // This is simple: it just exposes the LiveData of all favorite recipes
+    // directly from the repository, which gets them from the local Room database.
+    val favoriteRecipes = repository.getAllFavorites()
 }
+

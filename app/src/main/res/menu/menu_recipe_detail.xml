@@ -3,34 +3,34 @@
     <item
         android:id="@+id/action_add_to_shopping_list"
         android:icon="@drawable/ic_add_shopping_cart"
-        android:title="Add to Shopping List"
+        android:title="@string/add_to_shopping_list"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_confirm_selection"
         android:icon="@drawable/ic_check"
-        android:title="Confirm"
+        android:title="@string/confirm"
         app:showAsAction="ifRoom"
         android:visible="false" />
 
     <item
         android:id="@+id/action_publish_recipe"
         android:icon="@drawable/ic_publish"
-        android:title="Publish Recipe"
+        android:title="@string/publish_recipe"
         app:showAsAction="ifRoom"
         android:visible="false" />
 
     <item
         android:id="@+id/action_unpublish_recipe"
         android:icon="@drawable/ic_unpublish"
-        android:title="Make Private"
+        android:title="@string/make_private"
         app:showAsAction="ifRoom"
         android:visible="false" />
 
     <item
         android:id="@+id/action_edit_recipe"
         android:icon="@drawable/ic_edit"
-        android:title="Edit Recipe"
+        android:title="@string/edit_recipe"
         app:showAsAction="ifRoom"
         android:visible="false" />
 </menu>

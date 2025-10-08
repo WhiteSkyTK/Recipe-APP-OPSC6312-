@@ -9,11 +9,15 @@ class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     private val _recipes = MutableLiveData<List<Recipe>>()
     val recipes: LiveData<List<Recipe>> = _recipes
 
-    private val _isLoading = MutableLiveData(false)
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val _isInitiallyLoading = MutableLiveData(true)
+    val isInitiallyLoading: LiveData<Boolean> = _isInitiallyLoading
 
-    private var isFetchingMore = false
+    private val _isFetchingMore = MutableLiveData(false)
+    val isFetchingMore: LiveData<Boolean> = _isFetchingMore
+
     private var currentSortOption = "A-Z"
+    private var canLoadMore = true
+    private var lastQuery = ""
     private var userDiets: List<String> = emptyList()
 
     init {
@@ -22,7 +26,7 @@ class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     }
 
     private fun loadUserPreferencesAndInitialRecipes() {
-        _isLoading.value = true
+        _isInitiallyLoading.value = true
         viewModelScope.launch {
             // Step 1: Get the user's dietary filters
             val userId = FirebaseManager.auth.currentUser?.uid
@@ -34,7 +38,7 @@ class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
             repository.resetPagination()
             val firstPage = repository.getDiscoverPage(currentSortOption, 20, userDiets)
             _recipes.postValue(firstPage)
-            _isLoading.postValue(false)
+            _isInitiallyLoading.postValue(false)
         }
     }
 
@@ -43,48 +47,44 @@ class DiscoverViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
         if (sortOption == currentSortOption && _recipes.value?.isNotEmpty() == true) return
 
         currentSortOption = sortOption
-        _isLoading.value = true
-        isFetchingMore = true // Block loading more while we do a fresh load
+        lastQuery = ""
+        _recipes.value = emptyList()
+        canLoadMore = true
+        _isInitiallyLoading.value = true
 
         // Reset pagination in the repository before fetching
         repository.resetPagination()
 
         viewModelScope.launch {
-            // Fetch the FIRST page for the new sort option, applying diet filters
             val firstPage = repository.getDiscoverPage(sortOption, 20, userDiets)
-            _recipes.postValue(firstPage) // Replace the current list
-            _isLoading.postValue(false)
-            isFetchingMore = false
+            _recipes.postValue(firstPage)
+            _isInitiallyLoading.postValue(false)
         }
     }
 
     fun loadMoreRecipes() {
-        // Prevent loading if we are already loading or if the list is empty
-        if (isFetchingMore || _recipes.value.isNullOrEmpty()) return
+        if (_isFetchingMore.value == true || !canLoadMore || lastQuery.isNotEmpty()) return
 
-        _isLoading.value = true
-        isFetchingMore = true
-
+        _isFetchingMore.value = true
         viewModelScope.launch {
-            // Fetch the NEXT page, applying diet filters
-            val nextPage = repository.getDiscoverPage(currentSortOption, 20, userDiets)
+            val nextPage = repository.getDiscoverPage(currentSortOption, 10, userDiets)
             if (nextPage.isNotEmpty()) {
-                // Append the new recipes to the existing list
                 val currentList = _recipes.value ?: emptyList()
                 _recipes.postValue(currentList + nextPage)
+            } else {
+                canLoadMore = false
             }
-            isFetchingMore = false
-            _isLoading.postValue(false)
+            _isFetchingMore.postValue(false)
         }
     }
-
     fun search(query: String) {
-        _isLoading.value = true
+        lastQuery = query
+        _isInitiallyLoading.value = true
         viewModelScope.launch {
-            // Use the more robust search function that checks the cache first and applies diet filters.
             val results = repository.searchRecipes(query, userDiets)
             _recipes.postValue(results)
-            _isLoading.postValue(false)
+            _isInitiallyLoading.postValue(false)
+            canLoadMore = false // Disable pagination for search results
         }
     }
 }

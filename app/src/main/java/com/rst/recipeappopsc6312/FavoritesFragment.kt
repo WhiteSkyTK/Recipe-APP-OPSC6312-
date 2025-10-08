@@ -15,14 +15,15 @@ import com.google.firebase.storage.FirebaseStorage
 
 class FavoritesFragment : Fragment() {
 
+    private lateinit var favoritesAdapter: HomeRecipeAdapter
+    private lateinit var noFavoritesTextView: TextView
+
     private val viewModel: FavoritesViewModel by viewModels {
         val db = AppDatabase.getDatabase(requireContext())
         val repo = ShoppingRepository(
-            db.shoppingDao(),
-            db.recipeDao(),
-            db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance())
+            db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
+            FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
+        )
         FavoritesViewModelFactory(repo)
     }
 
@@ -31,23 +32,43 @@ class FavoritesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_favorites, container, false)
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerViewFavorites)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewFavorites)
+        noFavoritesTextView = view.findViewById(R.id.textViewNoFavorites)
 
-        // Use the same RecipeAdapter you use elsewhere
-        val favoriteAdapter = FavoriteRecipeAdapter(emptyList()) { recipe ->
+        setupRecyclerView(recyclerView)
+        observeViewModel()
+
+        return view
+    }
+
+    private fun setupRecyclerView(recyclerView: RecyclerView) {
+        val onRecipeClicked = { recipe: Recipe ->
             val intent = Intent(activity, RecipeDetailActivity::class.java)
             intent.putExtra("RECIPE_ID", recipe.id)
             startActivity(intent)
         }
 
+        favoritesAdapter = HomeRecipeAdapter(
+            emptyList(),
+            onRecipeClicked,
+            onFavoriteClick = { recipe -> viewModel.toggleFavorite(recipe) },
+            favoritesLiveData = viewModel.allFavorites,
+            lifecycleOwner = viewLifecycleOwner
+        )
+
         recyclerView.layoutManager = GridLayoutManager(context, 2)
-        recyclerView.adapter = favoriteAdapter
+        recyclerView.adapter = favoritesAdapter
+    }
 
-        // Observe the list of favorite recipes from the ViewModel
+    private fun observeViewModel() {
         viewModel.favoriteRecipes.observe(viewLifecycleOwner) { favorites ->
-            favoriteAdapter.updateData(favorites)
+            if (favorites.isNullOrEmpty()) {
+                noFavoritesTextView.visibility = View.VISIBLE
+            } else {
+                noFavoritesTextView.visibility = View.GONE
+            }
+            favoritesAdapter.updateData(favorites)
         }
-
-        return view
     }
 }
+

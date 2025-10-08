@@ -13,6 +13,7 @@
         android:id="@+id/imageViewDiet"
         android:layout_width="80dp"
         android:layout_height="80dp"
+        android:contentDescription="@string/todo"
         android:scaleType="centerInside"
         tools:src="@tools:sample/avatars"
         android:layout_marginBottom="8dp"/>

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -24,13 +22,14 @@
                 android:id="@+id/imageViewBack"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/todo"
                 android:src="@drawable/ic_arrow_back"
                 android:layout_centerVertical="true"
                 android:layout_alignParentStart="true"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Preferences ⚙️"
+                android:text="@string/preferences"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary"
@@ -51,26 +50,26 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="👤 Personal"
+                    android:text="@string/personal"
                     android:textStyle="bold"
                     android:textSize="16sp"/>
                 <TextView
                     android:id="@+id/textViewEditCountry"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Country"
+                    android:text="@string/country"
                     android:paddingVertical="12dp"/>
                 <TextView
                     android:id="@+id/textViewEditCuisines"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Cuisines"
+                    android:text="@string/cuisines"
                     android:paddingVertical="12dp"/>
                 <TextView
                     android:id="@+id/textViewEditDiets"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Dietary Preferences"
+                    android:text="@string/dietary_preferences"
                     android:paddingVertical="12dp"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -89,7 +88,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🎨 Appearance"
+                    android:text="@string/appearance"
                     android:textStyle="bold"
                     android:textSize="16sp"/>
                 <RadioGroup
@@ -97,9 +96,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp">
-                    <RadioButton android:id="@+id/radioLight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Light Mode"/>
-                    <RadioButton android:id="@+id/radioDark" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dark Mode"/>
-                    <RadioButton android:id="@+id/radioSystem" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Follow System"/>
+                    <RadioButton android:id="@+id/radioLight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/light_mode"/>
+                    <RadioButton android:id="@+id/radioDark" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/dark_mode"/>
+                    <RadioButton android:id="@+id/radioSystem" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/follow_system"/>
 
                 </RadioGroup>
 
@@ -112,7 +111,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🔢 Unit System"
+                    android:text="@string/unit_system"
                     android:textStyle="bold"/>
 
                 <RadioGroup
@@ -120,15 +119,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp">
-                    <RadioButton android:id="@+id/radioMetric" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Metric (grams, ml)"/>
-                    <RadioButton android:id="@+id/radioImperial" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Imperial (ounces, cups)"/>
+                    <RadioButton android:id="@+id/radioMetric" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/metric_grams_ml"/>
+                    <RadioButton android:id="@+id/radioImperial" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/imperial_ounces_cups"/>
                 </RadioGroup>
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/switchAllCaps"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Display name in ALL CAPS"
+                    android:text="@string/display_name_in_all_caps"
                     android:checked="true"
                     android:layout_marginTop="8dp"/>
             </LinearLayout>

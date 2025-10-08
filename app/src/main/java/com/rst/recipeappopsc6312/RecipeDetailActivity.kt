@@ -46,7 +46,7 @@ class RecipeDetailActivity : AppCompatActivity() {
     private var missingIngredients: List<String>? = null
 
 
-    private val shoppingViewModel: ShoppingViewModel by viewModels {
+    private val shoppingListViewModel: ShoppingListViewModel by viewModels {
         val database = AppDatabase.getDatabase(application)
         // Provide the missing FirebaseStorage instance as the fourth argument
         val repository = ShoppingRepository(
@@ -150,7 +150,7 @@ class RecipeDetailActivity : AppCompatActivity() {
             val viewEndTime = System.currentTimeMillis()
             val durationSeconds = (viewEndTime - viewStartTime) / 1000
             if (durationSeconds > 1) { // Only log if they spent more than a second
-                shoppingViewModel.repository.logRecipeView(recipeId!!, durationSeconds)
+                recipeDetailViewModel.repository.logRecipeView(recipeId!!, durationSeconds)
             }
         }
     }
@@ -210,7 +210,7 @@ class RecipeDetailActivity : AppCompatActivity() {
         if (selected.isNotEmpty()) {
             val recipeTitle = currentRecipe!!.title
             val ingredientNames = selected.map { it.name }
-            shoppingViewModel.createListFromRecipe(recipeTitle, ingredientNames)
+            shoppingListViewModel.createListFromRecipe(recipeTitle, ingredientNames)
             Toast.makeText(this, "${selected.size} ingredients added to new list", Toast.LENGTH_LONG).show()
         }
 
@@ -260,7 +260,7 @@ class RecipeDetailActivity : AppCompatActivity() {
                         0 -> { // "Add all ingredients" was clicked
                             val recipeTitle = recipe.title
                             val ingredients = recipe.ingredients.map { it.name }
-                            shoppingViewModel.createListFromRecipe(recipeTitle, ingredients)
+                            shoppingListViewModel.createListFromRecipe(recipeTitle, ingredients)
                             Toast.makeText(
                                 this,
                                 "Added ingredients from $recipeTitle to a new list",

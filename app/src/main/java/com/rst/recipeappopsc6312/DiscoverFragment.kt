@@ -12,48 +12,56 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.SearchView
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
 class DiscoverFragment : Fragment() {
 
-    private lateinit var discoverAdapter: DiscoverRecipeAdapter
-    private lateinit var mainProgressBar: ProgressBar
-    private lateinit var sortSpinner: Spinner
-
+    // Use the DiscoverViewModel for this screen's specific logic
     private val viewModel: DiscoverViewModel by viewModels {
         val db = AppDatabase.getDatabase(requireContext())
         val repo = ShoppingRepository(
-            db.shoppingDao(),
-            db.recipeDao(),
-            db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance())
+            db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
+            FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
+        )
         DiscoverViewModelFactory(repo)
     }
 
-   // private val shoppingViewModel: ShoppingViewModel by viewModels {
-     //   val db = AppDatabase.getDatabase(requireContext())
-       // val repo = ShoppingRepository(db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(), FirebaseFirestore.getInstance(), FirebaseStorage.getInstance())
-        //ShoppingViewModelFactory(repo)
-    //}
+    // Get the shared MainViewModel from the MainActivity to know the network status
+    private val mainViewModel: MainViewModel by activityViewModels()
+
+    // --- Views ---
+    private lateinit var discoverAdapter: DiscoverRecipeAdapter
+    private lateinit var sortSpinner: Spinner
+    private lateinit var contentLayout: View
+    private lateinit var offlineContainer: View
+    private lateinit var loadingOverlay: FrameLayout
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_discover, container, false)
+
+        // Find all views
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewDiscover)
-        val searchView = view.findViewById<SearchView>(R.id.searchViewRecipes) // ++ USE CORRECT ID
-        val sortSpinner = view.findViewById<Spinner>(R.id.spinnerSort)
-        mainProgressBar = view.findViewById(R.id.mainProgressBar)
+        val searchView = view.findViewById<SearchView>(R.id.searchViewRecipes)
+        sortSpinner = view.findViewById(R.id.spinnerSort)
+        contentLayout = view.findViewById(R.id.discoverContentLayout)
+        offlineContainer = view.findViewById(R.id.offlineContainer)
+        loadingOverlay = view.findViewById(R.id.loadingOverlayContainer)
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayoutDiscover)
 
         setupRecyclerView(recyclerView)
         setupSortSpinner(sortSpinner)
@@ -64,27 +72,25 @@ class DiscoverFragment : Fragment() {
                 if (!query.isNullOrBlank()) {
                     viewModel.search(query)
                 }
-                searchView.clearFocus() // Hide the keyboard
-                return true // Consume the event
+                searchView.clearFocus()
+                return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (newText.isNullOrBlank()) {
-                    // If the search bar is cleared, go back to the default sorted list.
                     viewModel.setSortOption(sortSpinner.selectedItem.toString())
                 }
                 return false
             }
         })
 
+        swipeRefreshLayout.setOnRefreshListener {
+            // When user pulls to refresh, reset and reload the current sorted list
+            viewModel.setSortOption(sortSpinner.selectedItem.toString())
+        }
+
         return view
     }
-
-    //override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-      //  super.onViewCreated(view, savedInstanceState)
-
-        //viewModel.loadDiscoverData()
-    //}
 
     private fun setupSortSpinner(spinner: Spinner) {
         val sortOptions = listOf("A-Z", "Recommended", "Popular", "Cook Time", "Z-A")
@@ -130,12 +136,39 @@ class DiscoverFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        mainViewModel.networkStatus.observe(viewLifecycleOwner) { isConnected ->
+            if (isConnected) {
+                offlineContainer.visibility = View.GONE
+            } else {
+                offlineContainer.visibility = View.VISIBLE
+                contentLayout.visibility = View.GONE
+                loadingOverlay.visibility = View.GONE
+                swipeRefreshLayout.isRefreshing = false
+            }
+        }
+
+        viewModel.isInitiallyLoading.observe(viewLifecycleOwner) { isLoading ->
+            loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
+
+            if (!isLoading && mainViewModel.networkStatus.value == true) {
+                contentLayout.animate().alpha(1f).duration = 300
+                contentLayout.visibility = View.VISIBLE
+            } else if (!isLoading) {
+                contentLayout.visibility = View.GONE
+            } else {
+                contentLayout.visibility = View.INVISIBLE
+                contentLayout.alpha = 0f
+            }
+        }
+
+        viewModel.isFetchingMore.observe(viewLifecycleOwner) { isFetching ->
+            // Update SwipeRefreshLayout based on this, NOT the initial loading state
+            swipeRefreshLayout.isRefreshing = isFetching
+        }
+
         viewModel.recipes.observe(viewLifecycleOwner) { recipes ->
             discoverAdapter.updateData(recipes)
-        }
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            // This now controls the main, centered progress bar
-            mainProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            swipeRefreshLayout.isRefreshing = false // Always stop refreshing when new data arrives
         }
     }
 }

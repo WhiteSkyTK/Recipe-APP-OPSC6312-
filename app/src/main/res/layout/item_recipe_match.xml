@@ -17,6 +17,7 @@
             android:id="@+id/imageViewRecipe"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:contentDescription="@string/todo"
             android:scaleType="centerCrop"/>
 
         <LinearLayout
@@ -30,7 +31,7 @@
                 android:id="@+id/textViewRecipeTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Recipe Title"
+                android:text="@string/recipe_title"
                 android:textStyle="bold"
                 android:textSize="16sp"/>
 
@@ -39,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="You need 2 more ingredients"
+                android:text="@string/you_need_2_more_ingredients"
                 android:textColor="?attr/colorPrimary"/>
         </LinearLayout>
     </LinearLayout>

@@ -862,7 +862,6 @@ class ShoppingRepository(
 
     fun getAllFavorites(): LiveData<List<Recipe>> = recipeDao.getAllFavorites()
     fun isFavorite(recipeId: String): LiveData<Boolean> = recipeDao.isFavorite(recipeId)
-
     suspend fun isFavoriteNow(recipeId: String): Boolean = recipeDao.isFavoriteNow(recipeId) ?: false
 
     suspend fun toggleFavorite(recipe: Recipe) {
@@ -870,32 +869,25 @@ class ShoppingRepository(
         val favoriteRef = firestore.collection("users").document(userId)
             .collection("favorites").document(recipe.id)
 
-        // First, check the local Room DB for the current status
+        // 1. Get the REAL current status from the local database.
         val isCurrentlyFavorite = isFavoriteNow(recipe.id)
         val newFavoriteState = !isCurrentlyFavorite
 
         if (newFavoriteState) {
             // --- ADDING to favorites ---
-            // Save the full recipe to the user's favorites in Firebase
-            favoriteRef.set(recipe).await()
-
-            // Save the full recipe to Room to ensure it's available offline
+            // Save the full recipe to Room first to ensure it's available offline immediately.
             recipeDao.insertRecipe(recipe.copy(isFavorite = true))
-
-            // Log this action for the recommendation engine
+            // Then, try to sync this addition to Firebase.
+            favoriteRef.set(recipe).await()
             logActivity("FAVORITE_RECIPE", recipe.id)
-
         } else {
             // --- REMOVING from favorites ---
-            // Delete the recipe from the user's favorites in Firebase
+            // Update the local status immediately for a fast UI response.
+            recipeDao.updateFavoriteStatus(recipe.id, false)
+            // Then, try to sync this deletion to Firebase.
             favoriteRef.delete().await()
-
-            // Log this action
             logActivity("UNFAVORITE_RECIPE", recipe.id)
         }
-
-        // Finally, update the status in the local Room database for the UI to react
-        recipeDao.updateFavoriteStatus(recipe.id, newFavoriteState)
     }
 
     private fun logActivity(type: String, value: String) {
@@ -1127,9 +1119,8 @@ class ShoppingRepository(
             val recipesToSave = favoriteRecipes.map { it.copy(isFavorite = true) }
 
             // Step 4: Save the list of favorited recipes into the local Room database.
-            // This will make them available offline and update the UI.
             if (recipesToSave.isNotEmpty()) {
-                recipeDao.insertAllRecipes(recipesToSave) // Assuming you have a bulk insert method.
+                recipeDao.insertAllRecipes(recipesToSave)
                 Log.d("Sync", "Successfully synced ${recipesToSave.size} favorites from Firebase.")
             }
         } catch (e: Exception) {

@@ -2,11 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_content_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/windowBackground"
-    tools:context=".MainActivity"
-    android:id="@+id/main_content_layout">
+    tools:context=".MainActivity">
 
     <LinearLayout
         android:id="@+id/main_content"
@@ -14,6 +14,20 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_above="@id/bottomNavigationView">
+
+        <!-- ++ ADD THIS OFFLINE BANNER ++ -->
+        <TextView
+            android:id="@+id/offlineBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFC107"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="@string/offline_mode"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <!-- Top Bar -->
         <RelativeLayout
@@ -34,6 +48,7 @@
                 android:id="@+id/buttonFavorites"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/todo"
                 android:src="@drawable/ic_heart_outline"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
@@ -42,6 +57,7 @@
                 android:id="@+id/buttonNotifications"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/todo"
                 android:src="@drawable/ic_notification"
                 android:layout_toStartOf="@id/buttonFavorites"
                 android:layout_marginEnd="16dp"
@@ -51,6 +67,7 @@
                 android:id="@+id/buttonAddRecipe"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/todo"
                 android:src="@drawable/ic_add_circle"
                 android:layout_toStartOf="@id/buttonNotifications"
                 android:layout_marginEnd="16dp"

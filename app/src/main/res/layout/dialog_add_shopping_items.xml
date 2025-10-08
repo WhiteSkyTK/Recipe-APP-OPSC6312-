@@ -9,7 +9,7 @@
         android:id="@+id/editTextItems"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter items, one per line..."
+        android:hint="@string/enter_items_one_per_line"
         android:inputType="textMultiLine"
         android:minLines="5"
         android:gravity="top"/>

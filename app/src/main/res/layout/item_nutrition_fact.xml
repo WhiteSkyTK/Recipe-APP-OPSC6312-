@@ -14,7 +14,7 @@
         android:id="@+id/textViewNutritionValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="278.4"
+        android:text="@string/_278_4"
         android:textStyle="bold"
         android:tint="?android:attr/textColorPrimary"/>
 
@@ -22,6 +22,6 @@
         android:id="@+id/textViewNutritionLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Calories"
+        android:text="@string/calories"
         android:textSize="12sp"/>
 </LinearLayout>

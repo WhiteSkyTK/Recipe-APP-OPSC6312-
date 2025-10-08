@@ -14,6 +14,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:background="@drawable/notification_icon_background"
+        android:contentDescription="@string/todo"
         android:padding="8dp"
         tools:src="@drawable/ic_notification" />
 

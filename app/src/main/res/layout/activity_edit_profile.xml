@@ -27,13 +27,14 @@
                     android:id="@+id/imageViewBack"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:contentDescription="@string/todo"
                     android:src="@drawable/ic_arrow_back"
                     android:layout_centerVertical="true"
                     android:layout_alignParentStart="true"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Edit Profile ✏️"
+                    android:text="@string/edit_profile"
                     android:textSize="22sp"
                     android:textStyle="bold"
                     android:textColor="?android:attr/textColorPrimary"
@@ -52,7 +53,7 @@
                 android:id="@+id/textViewChangePhoto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Change Photo"
+                android:text="@string/change_photo"
                 android:textColor="?attr/colorPrimary"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="8dp"/>
@@ -69,7 +70,7 @@
                     android:orientation="vertical"
                     android:padding="16dp">
                     <com.google.android.material.textfield.TextInputLayout
-                        android:hint="Full Name"
+                        android:hint="@string/full_name"
                         style="@style/Widget.App.TextInputLayout.Underlined"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
@@ -79,7 +80,7 @@
                             android:layout_height="wrap_content"/>
                     </com.google.android.material.textfield.TextInputLayout>
                     <com.google.android.material.textfield.TextInputLayout
-                        android:hint="Username"
+                        android:hint="@string/username"
                         style="@style/Widget.App.TextInputLayout.Underlined"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -90,7 +91,7 @@
                             android:layout_height="wrap_content"/>
                     </com.google.android.material.textfield.TextInputLayout>
                     <com.google.android.material.textfield.TextInputLayout
-                        android:hint="Phone Number"
+                        android:hint="@string/phone_number"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         style="@style/Widget.App.TextInputLayout.Underlined"
@@ -119,7 +120,7 @@
                         android:id="@+id/textViewChangePassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Change Password"
+                        android:text="@string/change_password"
                         android:textStyle="bold"
                         android:textSize="16sp"/>
                 </LinearLayout>
@@ -129,7 +130,7 @@
                 android:id="@+id/buttonSaveChanges"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Save Changes"
+                android:text="@string/save_changes"
                 android:paddingVertical="14dp"
                 android:layout_marginTop="32dp"
                 android:backgroundTint="?attr/colorPrimary"

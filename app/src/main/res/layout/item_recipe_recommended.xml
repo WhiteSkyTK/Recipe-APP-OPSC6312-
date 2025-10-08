@@ -31,6 +31,7 @@
                     android:id="@+id/imageViewRecipe"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:contentDescription="@string/todo"
                     android:scaleType="centerCrop"
                     tools:src="@tools:sample/backgrounds/scenic[1]"/>
 
@@ -40,6 +41,7 @@
                 android:id="@+id/imageViewFavorite"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/todo"
                 android:src="@drawable/ic_heart_outline"
                 android:layout_gravity="top|end"
                 android:padding="8dp"
@@ -51,7 +53,7 @@
             android:id="@+id/textViewRecipeTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Blueberry muffins"
+            android:text="@string/blueberry_muffins"
             android:tint="?android:attr/textColorPrimary"
             android:textStyle="bold"
             android:textSize="16sp"
@@ -61,8 +63,8 @@
             android:id="@+id/textViewTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="40 Min"
-            android:drawableStart="@drawable/ic_time"
+            android:text="@string/_40_min"
+            app:drawableStartCompat="@drawable/ic_time"
             app:tint="?android:attr/textColorPrimary"
             android:drawablePadding="2dp"
             android:layout_marginTop="4dp"/>

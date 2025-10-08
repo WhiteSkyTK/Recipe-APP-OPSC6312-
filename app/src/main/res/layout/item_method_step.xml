@@ -3,6 +3,6 @@
     android:id="@+id/methodStepCheckBox"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="1. Halve the vanilla pod and scrape out the seeds..."
+    android:text="@string/_1_halve_the_vanilla_pod_and_scrape_out_the_seeds"
     android:textSize="16sp"
     android:lineSpacingMultiplier="1.2"/>

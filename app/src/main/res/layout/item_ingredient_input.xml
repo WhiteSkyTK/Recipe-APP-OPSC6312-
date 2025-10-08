@@ -11,7 +11,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="3"
-        android:hint="Ingredient Name">
+        android:hint="@string/ingredient_name">
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_marginStart="8dp"
-        android:hint="Qty">
+        android:hint="@string/qty">
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="2"
         android:layout_marginStart="8dp"
-        android:hint="Unit">
+        android:hint="@string/unit">
         <AutoCompleteTextView
             android:id="@+id/autoCompleteUnit"
             android:layout_width="match_parent"
@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Remove Ingredient"
+        android:contentDescription="@string/remove_ingredient"
         android:src="@drawable/ic_delete" />
 
 </LinearLayout>
