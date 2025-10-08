@@ -76,7 +76,9 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        view?.findViewById<TextView>(R.id.textViewTimeOfDayTitle)?.text = GreetingManager.getRandomGreetingForCurrentTime()
+        // ++ FIX: Set the greeting text here, correctly passing the context ++
+        val timeOfDayTitle = view?.findViewById<TextView>(R.id.textViewTimeOfDayTitle)
+        timeOfDayTitle?.text = GreetingManager.getRandomGreetingForCurrentTime(requireContext())
     }
 
     private fun setupRecyclerViews(view: View) {

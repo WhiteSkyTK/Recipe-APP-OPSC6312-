@@ -1,6 +1,7 @@
 package com.rst.recipeappopsc6312
 
 import android.util.Log
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -67,7 +68,7 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
         _featuredRecipes.postValue(repository.getFeaturedRecipes())
         _recommendedRecipes.postValue(repository.getRecommendedForYou())
         _categories.postValue(repository.getAllCategories())
-        _timeOfDayTitle.postValue(GreetingManager.getRandomGreetingForCurrentTime())
+
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         _timeOfDayRecipes.postValue(getRecipesForTimeOfDay(hour))
     }
