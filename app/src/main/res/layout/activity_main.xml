@@ -35,14 +35,18 @@
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:paddingHorizontal="24dp">
+
             <TextView
                 android:id="@+id/textViewGreeting"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="☀️ Good Morning\nEBMTС"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="0dp"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="?android:attr/textColorPrimary"/>
+                android:layout_toStartOf="@id/buttonAddRecipe"
+                tools:text="☀️ Good Morning\nEBMTС" />
             <ImageView
                 android:id="@+id/buttonFavorites"
                 android:layout_width="wrap_content"

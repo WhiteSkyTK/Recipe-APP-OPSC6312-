@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Harmony Kitchen</string>
+
+    <!-- RecipeDetailActivity -->
+    <string name="recipe_detail_error_missing_id">Recipe ID missing</string>
+    <string name="recipe_detail_add_to_list_title">Add to Shopping List</string>
+    <string name="recipe_detail_add_all_ingredients">Add all ingredients</string>
+    <string name="recipe_detail_select_ingredients">Select ingredients to add</string>
+    <string name="recipe_detail_toast_ingredients_added">ingredients added to new list</string>
+    <string name="recipe_detail_toast_recipe_not_loaded">Recipe not loaded yet.</string>
+    <string name="recipe_detail_publish_dialog_title">Publish Recipe</string>
+    <string name="recipe_detail_publish_dialog_message">Are you sure you want to make this recipe public for everyone to see?</string>
+    <string name="recipe_detail_publish_button">Publish</string>
+    <string name="recipe_detail_cancel_button">Cancel</string>
+</resources>
