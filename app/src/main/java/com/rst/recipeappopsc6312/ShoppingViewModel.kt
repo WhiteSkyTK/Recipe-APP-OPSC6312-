@@ -1,7 +1,6 @@
 package com.rst.recipeappopsc6312
 
 import android.util.Log
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -33,35 +32,34 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     val recommendedRecipes: LiveData<List<Recipe>> = _recommendedRecipes
 
     init {
-        loadHomeScreenData()
+        loadHomeScreenData(isInitialLoad = true)
     }
 
-    fun loadHomeScreenData() {
-        _isInitiallyLoading.value = true
+    fun loadHomeScreenData(isInitialLoad: Boolean = false, forceRefresh: Boolean = false) {
+        if (isInitialLoad) _isInitiallyLoading.value = true else _isRefreshing.value = true
+
         viewModelScope.launch {
             try {
-                repository.preloadHomeScreenData(forceRefresh = false)
+                // Step 1: Try to sync data from Firebase. This might fail if offline.
+                if (forceRefresh) {
+                    repository.preloadHomeScreenData(forceRefresh = true)
+                }
+
+                // Step 2: Load all data from the local cache. This will work even if offline.
                 populateLiveDataFromCache()
+
             } catch (e: Exception) {
-                Log.e("ViewModel", "Failed to load home screen data", e)
+                Log.e("ViewModel", "Failed to load home screen data (likely offline): ${e.message}")
+                // Even if the sync fails, we still try to load from the local cache.
+                populateLiveDataFromCache()
             } finally {
-                _isInitiallyLoading.postValue(false)
+                if (isInitialLoad) _isInitiallyLoading.postValue(false) else _isRefreshing.postValue(false)
             }
         }
     }
 
     fun refreshHomeScreenData() {
-        _isRefreshing.value = true
-        viewModelScope.launch {
-            try {
-                repository.preloadHomeScreenData(forceRefresh = true)
-                populateLiveDataFromCache()
-            } catch (e: Exception) {
-                Log.e("ViewModel", "Failed to refresh home screen data", e)
-            } finally {
-                _isRefreshing.postValue(false)
-            }
-        }
+        loadHomeScreenData(isInitialLoad = false, forceRefresh = true)
     }
 
     private suspend fun populateLiveDataFromCache() {
@@ -74,14 +72,11 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
     }
 
     fun onCategorySelected(categoryName: String) {
+        _isRefreshing.value = true
         viewModelScope.launch {
-            _isInitiallyLoading.value = true // You can use a separate loading state for this if you prefer
-
-            // Re-fetch recommended recipes with the selected category filter
             val filteredRecommendations = repository.getRecommendedForYou(forceRefresh = true, category = categoryName)
             _recommendedRecipes.postValue(filteredRecommendations)
-
-            _isInitiallyLoading.postValue(false)
+            _isRefreshing.postValue(false)
         }
     }
 

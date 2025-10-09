@@ -15,7 +15,6 @@ import com.google.firebase.storage.FirebaseStorage
 
 class ScanResultsActivity : AppCompatActivity() {
 
-
     private val viewModel: ScanViewModel by viewModels {
         val db = AppDatabase.getDatabase(application)
         // ++ UPDATE this to match the new constructor
@@ -62,7 +61,7 @@ class ScanResultsActivity : AppCompatActivity() {
         }
 
         if (!ingredients.isNullOrEmpty()) {
-            viewModel.findRecipes(ingredients)
+            viewModel.findRecipesByIngredients(ingredients)
         }
     }
 }

@@ -7,22 +7,19 @@ import com.cloudinary.Transformation
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.net.URL
 import java.util.Calendar
-import java.util.Date
 
 class ShoppingRepository(
     private val shoppingDao: ShoppingDao,
@@ -32,7 +29,6 @@ class ShoppingRepository(
     private val storage: FirebaseStorage
 ) {
     private val foodEmojis = listOf("🥞", "🍕", "🍔", "🍣", "🌮", "🥗", "🍜", "🍰", "🍩", "🥐", "🍝", "カレー", "🍲")
-    private var lastVisibleRecipeDocument: com.google.firebase.firestore.DocumentSnapshot? = null
     private val apiService = RetrofitClient.instance
     private val tastyApiService = RetrofitClient.tastyInstance
 
@@ -210,25 +206,31 @@ class ShoppingRepository(
     }
 
 
-    suspend fun getPublicRecipes(forceRefresh: Boolean = false, limit: Long = 20): List<Recipe> {
-        val cachedRecipesQuery = firestore.collection("recipes")
-            .whereEqualTo("public", true)
-            .limit(limit) // Use the new limit parameter here
-            .get().await()
-        val cachedRecipes = cachedRecipesQuery.toObjects(Recipe::class.java)
-        Log.d("DataFlow", "Step 1 (Repo/Public): Firestore query for public recipes returned ${cachedRecipes.size} documents.")
+    suspend fun getPublicRecipes(forceRefresh: Boolean = false, limit: Long = 100): List<Recipe> {
+        try {
+            val cachedRecipesQuery = firestore.collection("recipes")
+                .whereEqualTo("public", true)
+                .limit(limit) // Use the new limit parameter here
+                .get().await()
+            val cachedRecipes = cachedRecipesQuery.toObjects(Recipe::class.java)
+            Log.d("DataFlow", "Step 1 (Repo/Public): Firestore query for public recipes returned ${cachedRecipes.size} documents.")
 
-        // The rest of this function can be simplified.
-        // We will now handle fetching new recipes in the ViewModel.
-        if (!forceRefresh && cachedRecipes.isNotEmpty()) {
-            Log.d("API_FETCH", "Found ${cachedRecipes.size} recipes in cache. Using them.")
-            return cachedRecipes
+            if (!forceRefresh && cachedRecipes.isNotEmpty()) {
+                Log.d("API_FETCH", "Found ${cachedRecipes.size} recipes in cache. Using them.")
+                return cachedRecipes
+            }
+
+            // Fallback to fetch from API if cache is empty
+            val fetchedRecipes = fetchNewRecipesFromApis()
+            val newRecipes = upscaleAndCacheRecipes(fetchedRecipes)
+            return (newRecipes + cachedRecipes).distinctBy { it.id }.shuffled()
+
+        } catch (e: FirebaseFirestoreException) {
+            // ++ THIS IS THE FIX for offline crashes ++
+            Log.w("Firestore", "Failed to get public recipes (likely offline): ${e.message}")
+            // If we're offline, return an empty list. The UI will handle showing the offline message.
+            return emptyList()
         }
-
-        // Fallback to fetch from API if cache is empty
-        val fetchedRecipes = fetchNewRecipesFromApis()
-        val newRecipes = upscaleAndCacheRecipes(fetchedRecipes)
-        return (newRecipes + cachedRecipes).distinctBy { it.id }.shuffled()
     }
 
     private suspend fun fetchNewRecipesFromApis(): List<Recipe> {
@@ -650,26 +652,6 @@ class ShoppingRepository(
         }
     }
 
-    // A function to pull data from Firebase and store it in Room
-    suspend fun syncFirebaseToRoom(userId: String) {
-        try {
-            val listsSnapshot = firestore.collection("users").document(userId)
-                .collection("shopping_lists").get().await()
-            for (listDoc in listsSnapshot.documents) {
-                val shoppingList = listDoc.toObject(ShoppingList::class.java)
-                if (shoppingList != null) {
-                    shoppingDao.insertShoppingList(shoppingList) // Save list to Room
-                    val itemsSnapshot = listDoc.reference.collection("items").get().await()
-                    val items = itemsSnapshot.toObjects(ShoppingItem::class.java)
-                    shoppingDao.insertItems(items) // Save its items to Room
-                }
-            }
-        } catch (e: Exception) {
-            // Handle exceptions (e.g., no internet)
-            Log.e("FirestoreSync", "Error syncing from Firebase: ${e.message}", e)
-        }
-    }
-
     suspend fun ensureListExists(listId: String, name: String, userId: String) {
         if (shoppingDao.getListById(listId) == null) {
             // Use a fixed emoji for "My List" for consistency
@@ -786,12 +768,6 @@ class ShoppingRepository(
                 .limit(10).get().await()
             val popularRecipes = popularDocs.toObjects(Recipe::class.java)
 
-            val publicRecipes = getPublicRecipes(forceRefresh)
-            Log.d("DataFlow", "Step 2 (Repo/Featured): Received ${publicRecipes.size} public recipes to generate featured list.")
-
-            val result = publicRecipes.shuffled().take(5)
-            Log.d("DataFlow", "Step 3 (Repo/Featured): Returning ${result.size} featured recipes.")
-
             if (popularRecipes.isNotEmpty()) {
                 // SUCCESS: We found popular recipes.
                 Log.d("FeaturedLogic", "Successfully fetched ${popularRecipes.size} popular recipes.")
@@ -800,7 +776,7 @@ class ShoppingRepository(
                 // STEP 2: ROBUST BACKUP PLAN
                 Log.w("FeaturedLogic", "No popular recipes found. Using smart random fallback.")
                 // First, get a large pool of ANY public recipes.
-                val randomPool = getPublicRecipes(forceRefresh, limit = 50)
+                val randomPool = getPublicRecipes(forceRefresh = false, limit = 50)
                 // Second, determine the current meal type.
                 val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
                 val desiredMealType = when (hour) {
@@ -815,17 +791,15 @@ class ShoppingRepository(
                 val timeBasedList = randomPool.filter { it.mealType.equals(desiredMealType, ignoreCase = true) }
                 // FINALLY, decide what to show.
                 finalFeaturedList = if (timeBasedList.size >= 5) {
-                    // If we found enough time-based ones, use them.
                     timeBasedList.shuffled().take(5)
                 } else {
-                    // Otherwise, just use 5 from the original random pool.
                     randomPool.shuffled().take(5)
                 }
             }
         } catch (e: Exception) {
             // EMERGENCY BACKUP: The entire request failed.
             Log.e("FeaturedLogic", "Error fetching featured recipes. Using generic random fallback.", e)
-            finalFeaturedList = getPublicRecipes(forceRefresh, limit = 5).shuffled()
+            finalFeaturedList = getPublicRecipes(forceRefresh = false, limit = 5).shuffled()
         }
 
         cachedFeatured = finalFeaturedList
@@ -876,27 +850,18 @@ class ShoppingRepository(
         }
     }
 
-    private suspend fun getRecipesByMealType(mealType: String): List<Recipe> {
-        return try {
-            val documents = firestore.collection("recipes")
-                .whereEqualTo("public", true)
-                .whereEqualTo("mealType", mealType)
-                .get().await()
-            documents.toObjects(Recipe::class.java)
-        } catch (e: Exception) {
-            Log.e("Firestore", "Error getting recipes by meal type", e)
-            emptyList()
-        }
-    }
-
     suspend fun getAllCategories(forceRefresh: Boolean = false): List<Category> {
         if (cachedCategories != null && !forceRefresh) return cachedCategories!!
 
         return try {
-            val documents = firestore.collection("recipes").whereEqualTo("public", true).get().await()
-            val allRecipes = documents.toObjects(Recipe::class.java)
-            val categories = allRecipes
-                .map { it.category }
+            // ++ THIS IS THE FIX: We fetch the documents, then manually extract only the 'category' field. ++
+            val documents = firestore.collection("recipes")
+                .whereEqualTo("public", true)
+                .get().await()
+
+            val categories = documents.documents // Iterate through the document snapshots
+                .mapNotNull { it.getString("category") } // Safely get the category string from each document
+                .filter { it.isNotBlank() } // Safely ignore any recipes with no category
                 .distinct()
                 .sorted()
                 .map { Category(it) }
@@ -906,25 +871,7 @@ class ShoppingRepository(
             cachedCategories = categories
             categories
         } catch (e: Exception) {
-            Log.e("Firestore", "Error getting all categories", e)
-            emptyList()
-        }
-    }
-
-    suspend fun getDiscoverRecipes(pageSize: Int): List<Recipe> {
-        return try {
-            var query = firestore.collection("recipes")
-                .whereEqualTo("public", true).orderBy("title")
-            if (lastVisibleRecipeDocument != null) {
-                query = query.startAfter(lastVisibleRecipeDocument!!)
-            }
-            val documents = query.limit(pageSize.toLong()).get().await()
-            if (documents.size() > 0) {
-                lastVisibleRecipeDocument = documents.documents[documents.size() - 1]
-            }
-            documents.toObjects(Recipe::class.java)
-        } catch (e: Exception) {
-            Log.e("Firestore", "Error getting discover recipes", e)
+            Log.e("Firestore", "Error getting all categories (likely offline)", e)
             emptyList()
         }
     }
@@ -1017,13 +964,6 @@ class ShoppingRepository(
     }
 
 
-    fun logSearchQuery(query: String) {
-        val userId = FirebaseManager.auth.currentUser?.uid ?: return
-        val activity = UserActivity(type = "SEARCH_QUERY", value = query)
-        firestore.collection("users").document(userId)
-            .collection("activity_log").add(activity)
-    }
-
     fun logRecipeView(recipeId: String, durationSeconds: Long) {
         val userId = FirebaseManager.auth.currentUser?.uid ?: return
         val activity = UserActivity(
@@ -1065,32 +1005,6 @@ class ShoppingRepository(
     // ++ ADD THESE SCAN HISTORY FUNCTIONS ++
     fun getScanHistory(): LiveData<List<ScanHistoryItem>> = scanHistoryDao.getScanHistory()
     suspend fun saveScanToHistory(historyItem: ScanHistoryItem) = scanHistoryDao.insert(historyItem)
-
-    suspend fun getSortedAndFilteredRecipes(sortOption: String, category: String?): List<Recipe> {
-        return try {
-            var query: com.google.firebase.firestore.Query = firestore.collection("recipes")
-                .whereEqualTo("public", true)
-
-            // Apply category filter if one is selected
-            if (category != null && category != "All") {
-                query = query.whereEqualTo("category", category)
-            }
-
-            // Apply sorting
-            when (sortOption) {
-                "A-Z" -> query = query.orderBy("title", com.google.firebase.firestore.Query.Direction.ASCENDING)
-                "Z-A" -> query = query.orderBy("title", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                // "Recommended" will be handled separately, so no sorting here.
-            }
-
-            // For now, we fetch a simple list. Pagination can be added back later if needed.
-            val documents = query.limit(50).get().await()
-            documents.toObjects(Recipe::class.java)
-        } catch (e: Exception) {
-            Log.e("Firestore", "Error getting sorted/filtered recipes", e)
-            emptyList()
-        }
-    }
 
     suspend fun getDiscoverPage(sortOption: String, pageSize: Int, userDiets: List<String>): List<Recipe> {
         if (sortOption == "Recommended") return getRecommendedForYou()
@@ -1158,28 +1072,6 @@ class ShoppingRepository(
             // Note: phone number, gender, and birthday require extra permissions and API setup
         )
         firestore.collection("users").document(user.uid).set(userProfile).await()
-    }
-
-    // ++ ADD THIS POWERFUL UPSCALING FUNCTION ++
-    suspend fun upscaleAllRecipeImages() {
-        Log.d("Cloudinary", "Starting batch image upscaling process...")
-        val allRecipes = getPublicRecipes(forceRefresh = false) // Get from cache
-        for (recipe in allRecipes) {
-            if (recipe.imageUrl.contains("cloudinary")) {
-                Log.d("Cloudinary", "Skipping already upscaled image for: ${recipe.title}")
-                continue
-            }
-            val upscaledUrl = upscaleImageWithCloudinary(recipe.imageUrl, recipe.id)
-            if (upscaledUrl != null) {
-                firestore.collection("recipes").document(recipe.id)
-                    .update("imageUrl", upscaledUrl)
-                    .await()
-                Log.d("Cloudinary", "Successfully updated URL for: ${recipe.title}")
-            } else {
-                Log.e("Cloudinary", "Failed to upscale image for: ${recipe.title}")
-            }
-        }
-        Log.d("Cloudinary", "Batch image upscaling process finished.")
     }
 
     private suspend fun upscaleImageWithCloudinary(sourceUrl: String, publicId: String): String? {
