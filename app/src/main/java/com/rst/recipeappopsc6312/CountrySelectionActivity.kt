@@ -76,7 +76,7 @@ class CountrySelectionActivity : AppCompatActivity() {
             // If editing, hide the progress bar and change the button text
             topProgressBar.visibility = View.GONE
             showLoading(false)
-            continueButton.text = "Save Changes"
+            continueButton.text = getString(R.string.save_changes)
         }
 
         setupContinueButton()
@@ -103,7 +103,7 @@ class CountrySelectionActivity : AppCompatActivity() {
     private fun sortCountries(countries: List<Country>): List<Country> {
         val mutableCountries = countries.toMutableList()
         // Find South Africa in the list
-        val southAfrica = mutableCountries.find { it.nameInfo.common == "South Africa" }
+        val southAfrica = mutableCountries.find { it.nameInfo.common == getString(R.string.country_south_africa) }
 
         // If found, remove it to be added back later
         southAfrica?.let {
@@ -138,13 +138,13 @@ class CountrySelectionActivity : AppCompatActivity() {
                     saveCountriesToCache(countryList)
                     setupRecyclerViewAndSearch()
                 } else {
-                    Toast.makeText(this@CountrySelectionActivity, "Failed to load countries", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@CountrySelectionActivity, getString(R.string.country_toast_load_failed), Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<List<Country>>, t: Throwable) {
                 showLoading(false)
-                Toast.makeText(this@CountrySelectionActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@CountrySelectionActivity, getString(R.string.country_toast_load_error, t.message), Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -181,7 +181,7 @@ class CountrySelectionActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
             } else {
-                Toast.makeText(this, "Please select a country", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.country_toast_selection_required), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -193,12 +193,12 @@ class CountrySelectionActivity : AppCompatActivity() {
             .update("country", newCountry)
             .addOnSuccessListener {
                 showLoading(false)
-                Toast.makeText(this, "Country updated!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.country_toast_update_success), Toast.LENGTH_SHORT).show()
                 finish() // Go back to the preferences screen
             }
             .addOnFailureListener { e ->
                 showLoading(false)
-                Toast.makeText(this, "Failed to update country: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.country_toast_update_failed, e.message), Toast.LENGTH_SHORT).show()
             }
     }
 

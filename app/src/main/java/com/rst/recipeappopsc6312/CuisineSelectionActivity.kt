@@ -49,7 +49,7 @@ class CuisineSelectionActivity : AppCompatActivity() {
 
         if (isEditMode) {
             progressBar.visibility = View.GONE
-            continueButton.text = "Save Changes"
+            continueButton.text = getString(R.string.save_changes)
             skipButton.visibility = View.GONE // Hide skip button in edit mode
             // In edit mode, you would fetch the user's current selections from Firestore
             // and pre-select them in the 'prepareCuisineData' function.
@@ -77,9 +77,9 @@ class CuisineSelectionActivity : AppCompatActivity() {
         continueButton.setOnClickListener {
             val selectedCuisines = cuisineList.filter { it.isSelected }
             if (selectedCuisines.isEmpty()) {
-                Toast.makeText(this, "Please select at least one cuisine", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.cuisine_selection_toast_at_least_one), Toast.LENGTH_SHORT).show()
             } else {
-                val selectedCuisineNames = selectedCuisines.map { it.name }
+                val selectedCuisineNames = selectedCuisines.map { getString(it.name) }
                 if (isEditMode) {
                     updateUserCuisines(selectedCuisineNames)
                 } else {
@@ -102,7 +102,7 @@ class CuisineSelectionActivity : AppCompatActivity() {
             val updatedList = cuisineList.map { it.copy(isSelected = isAllSelected) }
             cuisineList = ArrayList(updatedList)
             cuisineAdapter.submitList(cuisineList) // Submit the updated list
-            (it as Button).text = if (isAllSelected) "Deselect All" else "Select All"
+            (it as Button).text = if (isAllSelected) getString(R.string.deselect_all) else getString(R.string.select_all)
         }
     }
 
@@ -118,11 +118,11 @@ class CuisineSelectionActivity : AppCompatActivity() {
         FirebaseManager.firestore.collection("users").document(userId)
             .update("selected_cuisines", cuisines)
             .addOnSuccessListener {
-                Toast.makeText(this, "Preferences updated!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.cuisine_selection_toast_preferences_updated), Toast.LENGTH_SHORT).show()
                 finish()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Failed to update: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.cuisine_selection_toast_update_failed, e.message), Toast.LENGTH_SHORT).show()
             }
     }
 

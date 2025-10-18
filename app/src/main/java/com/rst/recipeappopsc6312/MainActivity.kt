@@ -13,7 +13,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -179,7 +178,7 @@ class MainActivity : AppCompatActivity() {
                 if (hasFavorites) {
                     loadFragment(FavoritesFragment(), -1)
                 } else {
-                    showEmptyPopup(favoritesButton, "You have no favorites yet!")
+                    showEmptyPopup(favoritesButton, getString(R.string.main_no_favorites_popup))
                 }
             }
         }
@@ -235,9 +234,9 @@ class MainActivity : AppCompatActivity() {
 
                     val calendar = Calendar.getInstance()
                     val greetingText = when (calendar.get(Calendar.HOUR_OF_DAY)) {
-                        in 2..11 -> "☀️ Good Morning"
-                        in 12..17 -> "🌤️ Good Afternoon"
-                        else -> "🌙 Good Evening"
+                        in 2..11 -> getString(R.string.main_greeting_morning)
+                        in 12..17 -> getString(R.string.main_greeting_afternoon)
+                        else -> getString(R.string.main_greeting_evening)
                     }
                     val fullGreeting = "$greetingText\n$fullName"
 
@@ -253,7 +252,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 .addOnFailureListener {
-                    greetingTextView.text = "☀️ Good Morning\nUSER"
+                    greetingTextView.text = getString(R.string.main_greeting_morning) + "\n" + getString(R.string.main_greeting_default_user)
                 }
         }
     }
@@ -420,7 +419,7 @@ class MainActivity : AppCompatActivity() {
         val tourSteps = mutableListOf<() -> ShowcaseView.Builder?>()
 
         // Helper to add steps, ensuring view is not null
-        fun addTourStep(viewId: Int, title: String, text: String, isBottomNavItem: Boolean = true) {
+        fun addTourStep(viewId: Int, title: Int, text: Int, isBottomNavItem: Boolean = true) {
             val targetView: View? = if (isBottomNavItem) {
                 bottomNav.findViewById(viewId)
             } else {
@@ -441,37 +440,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 2. Define the steps using the helper
-        addTourStep(
-            R.id.nav_home, // This is a menu item ID within your bottom_nav_menu.xml
-            "Welcome to Hamory Kitchen!",
-            "This is your Home screen, where you'll find daily inspiration."
-        )
-        addTourStep(
-            R.id.nav_discover,
-            "Discover New Recipes",
-            "Explore a world of public recipes shared by the community."
-        )
-        addTourStep(
-            R.id.buttonAddRecipe, // This is an ImageView ID in your activity_main.xml
-            "Add Your Creations",
-            "Tap the '+' button anytime to add your own recipes.",
-            isBottomNavItem = false // Explicitly state it's not a bottom nav item
-        )
-        addTourStep(
-            R.id.nav_scan,
-            "Scan Ingredients",
-            "Use your camera to find recipes based on what's in your kitchen."
-        )
-        addTourStep(
-            R.id.nav_cart,
-            "Shopping Lists",
-            "Manage your grocery lists for different recipes here."
-        )
-        addTourStep(
-            R.id.nav_profile,
-            "Your Profile",
-            "View your own creations, favorites, and manage app settings."
-        )
+        addTourStep(R.id.nav_home, R.string.onboarding_home_title, R.string.onboarding_home_text)
+        addTourStep(R.id.nav_discover, R.string.onboarding_discover_title, R.string.onboarding_discover_text)
+        addTourStep(R.id.buttonAddRecipe, R.string.onboarding_add_recipe_title, R.string.onboarding_add_recipe_text, isBottomNavItem = false)
+        addTourStep(R.id.nav_scan, R.string.onboarding_scan_title, R.string.onboarding_scan_text)
+        addTourStep(R.id.nav_cart, R.string.onboarding_cart_title, R.string.onboarding_cart_text)
+        addTourStep(R.id.nav_profile, R.string.onboarding_profile_title, R.string.onboarding_profile_text)
+
 
         // 3. Start the sequence if there are any valid steps
         if (tourSteps.isNotEmpty()) {

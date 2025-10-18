@@ -93,14 +93,21 @@ class DiscoverFragment : Fragment() {
     }
 
     private fun setupSortSpinner(spinner: Spinner) {
-        val sortOptions = listOf("A-Z", "Recommended", "Popular", "Cook Time", "Z-A")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, sortOptions)
+        val sortOptions = resources.getStringArray(R.array.discover_sort_options)
+        val adapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, sortOptions)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 viewModel.setSortOption(sortOptions[position])
             }
+
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
@@ -114,7 +121,8 @@ class DiscoverFragment : Fragment() {
         }
 
         // Initialize the adapter correctly with all its listeners
-        discoverAdapter = DiscoverRecipeAdapter(emptyList(), onRecipeClicked,
+        discoverAdapter = DiscoverRecipeAdapter(
+            emptyList(), onRecipeClicked,
             onFavoriteClick = { recipe -> viewModel.toggleFavorite(recipe) },
             favoritesLiveData = viewModel.allFavorites,
             lifecycleOwner = viewLifecycleOwner

@@ -48,7 +48,7 @@ class DietarySelectionActivity : AppCompatActivity() {
 
         if (isEditMode) {
             progressBar.visibility = View.GONE
-            continueButton.text = "Save Changes"
+            continueButton.text = getString(R.string.save_changes)
             skipButton.visibility = View.GONE
         }
 
@@ -77,9 +77,10 @@ class DietarySelectionActivity : AppCompatActivity() {
         continueButton.setOnClickListener {
             val selectedDiets = dietList.filter { it.isSelected }
             if (selectedDiets.isEmpty()) {
-                Toast.makeText(this, "Please select at least one preference", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.diet_selection_toast_at_least_one), Toast.LENGTH_SHORT).show()
             } else {
-                val selectedDietNames = selectedDiets.map { it.name }
+                // Correctly map the resource IDs to actual strings
+                val selectedDietNames = selectedDiets.map { getString(it.name) }
                 if (isEditMode) {
                     updateUserDiets(selectedDietNames)
                 } else {
@@ -106,27 +107,16 @@ class DietarySelectionActivity : AppCompatActivity() {
         FirebaseManager.firestore.collection("users").document(userId)
             .update("selected_diets", diets)
             .addOnSuccessListener {
-                Toast.makeText(this, "Preferences updated!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.cuisine_selection_toast_preferences_updated), Toast.LENGTH_SHORT).show()
                 finish()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Failed to update: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.cuisine_selection_toast_update_failed, e.message), Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun prepareDietData() {
-        // Here is an expanded list of diets.
-        dietList.add(Diet("Vegetarian", R.drawable.ic_vegetarian))
-        dietList.add(Diet("Vegan", R.drawable.ic_vegan))
-        dietList.add(Diet("Gluten-Free", R.drawable.ic_gluten_free))
-        dietList.add(Diet("Keto", R.drawable.ic_keto))
-        dietList.add(Diet("Paleo", R.drawable.ic_paleo))
-        dietList.add(Diet("Pescetarian", R.drawable.ic_pescetarian))
-        dietList.add(Diet("Low-Carb", R.drawable.ic_low_carb))
-        dietList.add(Diet("Dairy-Free", R.drawable.ic_dairy_free))
-        dietList.add(Diet("Nut Allergy", R.drawable.ic_nut_allergy))
-        dietList.add(Diet("Low-FODMAP", R.drawable.ic_low_fodmap))
-        dietList.add(Diet("Halal", R.drawable.ic_halal))
-        dietList.add(Diet("Kosher", R.drawable.ic_kosher))
+        // Now gets data from the central DietData object
+        dietList = ArrayList(DietData.getAllDiets())
     }
 }

@@ -1,15 +1,670 @@
 <resources>
     <string name="app_name">Harmony Kitchen</string>
 
+    <!-- General / Reusable -->
+    <string name="ok">GO LOKILE</string>
+    <string name="add">Oketsa</string>
+    <string name="cancel">Tlogela</string>
+    <string name="delete">Phumola</string>
+    <string name="save_changes">Boloka Diphetogo</string>
+    <string name="coming_soon">E tla kgauswinyane…</string>
+    <string name="permission_needed_title">Tumello e a Hlokega</string>
+    <string name="select_language">🌍 Kgetha Leleme</string>
+
     <!-- RecipeDetailActivity -->
-    <string name="recipe_detail_error_missing_id">Recipe ID missing</string>
-    <string name="recipe_detail_add_to_list_title">Add to Shopping List</string>
-    <string name="recipe_detail_add_all_ingredients">Add all ingredients</string>
-    <string name="recipe_detail_select_ingredients">Select ingredients to add</string>
-    <string name="recipe_detail_toast_ingredients_added">ingredients added to new list</string>
-    <string name="recipe_detail_toast_recipe_not_loaded">Recipe not loaded yet.</string>
-    <string name="recipe_detail_publish_dialog_title">Publish Recipe</string>
-    <string name="recipe_detail_publish_dialog_message">Are you sure you want to make this recipe public for everyone to see?</string>
-    <string name="recipe_detail_publish_button">Publish</string>
-    <string name="recipe_detail_cancel_button">Cancel</string>
+    <string name="recipe_detail_error_missing_id">Boitsibisho bja resipi bo a hloka</string>
+    <string name="recipe_detail_add_to_list_title">Lokela go lenanego la theko</string>
+    <string name="recipe_detail_add_all_ingredients">Lokela ditswako ka moka</string>
+    <string name="recipe_detail_select_ingredients">Kgetha ditswako tseo o tlago di oketsa</string>
+    <string name="recipe_detail_toast_recipe_not_loaded">Resepi ga se ya laodiswa ga bjale.</string>
+    <string name="recipe_detail_publish_dialog_title">Phatlalatsa Resipi</string>
+    <string name="recipe_detail_publish_dialog_message">A o na le bonnete bja gore o nyaka go dira resipi ye phatlalatsa gore e bonwe ke bohle?</string>
+    <string name="recipe_detail_toast_published">Resipi e phatlaladitswe!</string>
+    <string name="recipe_detail_toast_private">Resipi jaanong ke ya lekunutu.</string>
+    <string name="read_less">Bala ka bonyane</string>
+    <string name="recipe_detail_publish_button">Phatlalatsa</string>
+    <string name="recipe_detail_toast_all_ingredients_added">Ditswako go tswa go %1$s di tsentswe lenaneong le lefsa</string>
+    <string name="recipe_detail_author_prefix">ka %1$s</string>
+    <!-- Using <plurals> for better handling of singular/plural cases across different languages -->
+    <plurals name="recipe_detail_toast_ingredients_added">
+        <item quantity="one">%1$d setshegiswana se tsentswe lenaneong le lefsa</item>
+        <item quantity="other">%1$d ditshegiswana di tsentswe lenaneong le lefsa</item>
+    </plurals>
+
+    <!-- ShoppingListFragment -->
+    <string name="shopping_list_default_title">Lenaneo la Theko 🍽️</string>
+    <string name="shopping_list_all_items">Dilo ka Moka 🛒</string>
+    <string name="shopping_list_my_list">Lenaneo laka 📝</string>
+
+    <!-- AddRecipeFragment & ProfileCompletionActivity -->
+    <string name="permission_camera_required">Tumello ya khamera e a hlokega.😥</string>
+    <string name="dialog_set_photo_title">Bea Senepe sa Sekašu</string>
+    <string name="dialog_option_take_photo">Tšea Senepe</string>
+    <string name="dialog_option_choose_gallery">Kgetha go tswa Gallery</string>
+    <string name="dialog_option_remove_photo">Tlosa Senepe😥</string>
+    <string name="permission_camera_rationale">Phihlelelo ya khamera e a hlokega go tšea senepe sa resepi ya gago.😥</string>
+    <string name="delete_recipe_dialog_title">Phumola Resepi 🗑️</string>
+    <string name="delete_recipe_dialog_message">O na le bonnete bja gore o nyaka go phumola resepi ye ka mo go sa felego? 😥</string>
+
+    <!-- Welcome & Login -->
+    <string name="google_sign_in_failed">Go tsena ka Google go paletswe: %1$s</string>
+    <string name="firebase_auth_failed">Netefatšo ya Firebase e paletswe: %1$s</string>
+    <string name="auth_failed">Netefatšo e paletswe: %1$s</string>
+
+    <!-- ProfileFragment -->
+    <string name="profile_logout_title">Tšwa</string>
+    <string name="profile_logout_message">O na le bonnete bja gore o nyaka go tšwa le go hlwekiswa datha ka moka ya selegae?</string>
+    <string name="profile_logout_button">Tšwa</string>
+    <string name="profile_version">Phetolelo %1$s</string>
+    <string name="profile_default_name">Leina la Gago</string>
+
+    <!--About-->
+    <string name="about_harmony_kitchen">Mabapi le Harmony Kitchen 🍲</string>
+    <string name="our_mission">🎯 Morero wa rena</string>
+    <string name="harmony_kitchen_is_a_final_year_project_designed_to_bring_delicious_easy_to_make_recipes_to_your_fingertips_tailored_to_the_ingredients_you_have_and_the_flavors_you_love">Harmony Kitchen ke projeke ya ngwaga wa mafelelo yeo e hlamilwego go go tlisetsa diresipi tsa go natefa le tse bonolo go di dira ka matsogo a gago, di dirilwe go ya ka ditswako tseo o nago le tsona le ditatso tseo o di ratago.</string>
+    <string name="the_team_rst_innovations">👥 Sehlopha: RST Innovations</string>
+    <string name="this_app_was_proudly_developed_by_students_of_rosebank_college_n_tokollo_nonyane_n_sagwadi_mashimbye_n_rinae_magadagela">App ye e hlamilwe ka boikgantšho ke barutwana ba Rosebank College:\n• Tokollo Nonyane\n• Sagwadi Mashimbye\n• Rinae Magadagela</string>
+    <string name="credits_amp_attributions"><![CDATA[©️ Ditebogo le Theto]]></string>
+    <string name="ui_ux_design_figma_nphotos_unsplash_nicons_material_design_icons">UI/UX Design: Figma\nDinepe: Unsplash\nDiaykhone: Material Design Icons</string>
+    <string name="are_you_enjoying_the_app_so_far">Naa o thabela app ye go fihla ga bjale? 😊</string>
+    <string name="VersionNumber">Phetolelo 1.0.0</string>
+
+    <!--Camera Scanner-->
+    <string name="point_at_a_list_of_ingredients">Šupa lenanego la ditswako</string>
+    <string name="scan_text">Skena Mongwalo</string>
+
+    <!--Country Selector-->
+    <string name="back_button">Konopo ya go boela morago</string>
+    <string name="which_country_are_you_from">O tšwa nageng efe 🥰</string>
+    <string name="please_select_your_country_of_origin_for_a_better_recommendation">Hle kgetha naga ya geno gore re go fe ditšhišinyo tše kaone</string>
+    <string name="select_country">Kgetha Naga</string>
+    <string name="continuebtn">Tšwelapele</string>
+
+    <!--Create Account-->
+    <string name="todo">TODO</string>
+    <string name="create_an_account">Hloma Akhaonto 🤝</string>
+    <string name="enter_your_username_email_amp_password_if_you_forgot_it_then_you_have_to_do_forget_password"><![CDATA[Tsenya leina-mošomi, imeile, & lentsu-phihlo. Ge o le lebetše, o ka lebala lentsu-phihlo]]></string>
+    <string name="username">Leina-mošomi</string>
+    <string name="email">Imeile</string>
+    <string name="password">Lentsu-phihlo</string>
+    <string name="confirm_password">Netefatsa Lentsu-phihlo</string>
+    <string name="sign_up">Ingwadise</string>
+
+    <!--Cuisine Selector-->
+    <string name="select_your_cuisines_preferences">Kgetha dikgetho tsa gago tsa dijo 🤔</string>
+    <string name="select_your_cuisines_preferences_for_better_recommendations_or_you_can_skip">Kgetha dikgetho tsa gago tsa dijo bakeng sa ditšhišinyo tše kaone goba o ka feta</string>
+    <string name="select_all">Kgetha ka moka</string>
+    <string name="skip">Feta</string>
+
+    <!--Dietary Selector-->
+    <string name="any_dietary_preferences">A go na le dikgetho tsa dijo? 🥗</string>
+    <string name="select_your_dietary_preferences_for_better_recommendations_or_you_can_skip_it">Kgetha dikgetho tsa gago tsa dijo bakeng sa ditšhišinyo tše kaone goba o ka se di dire</string>
+
+    <!--Edit Profile-->
+    <string name="edit_profile">Fetola Profaele ✏️</string>
+    <string name="change_photo">Fetola Senepe</string>
+    <string name="full_name">Leina le Feletšego</string>
+    <string name="phone_number">Nomoro ya Founo</string>
+    <string name="change_password">Fetola Lentsu-phihlo</string>
+
+    <!--Forgot Password-->
+    <string name="forgot_password">O Lebetše Lentsu-phihlo 🔒</string>
+    <string name="enter_your_email_address_we_will_send_a_link_for_verification">Tsenya aterese ya gago ya imeile. Re tla romela sekgokaganyi sa go netefatša</string>
+    <string name="send_link">Romela Sekgokaganyi</string>
+
+    <!--Login-->
+    <string name="hey_there">Thobela 👋</string>
+    <string name="please_enter_your_username_email_and_password_to_sign_in">Hle, tsenya leina-mošomi/imeile le lentsu-phihlo go tsena</string>
+    <string name="email_username">Imeile / Leina-mošomi</string>
+    <string name="log_in">Tsena</string>
+    <string name="or_continue_with">Goba tšwela pele ka</string>
+    <string name="forgot_passwordbtn">O Lebetše Lentsu-phihlo</string>
+
+    <!--Main-->
+    <string name="offline_mode">Mokgwa wa Offline 🛡️</string>
+
+    <!--My recipe-->
+    <string name="my_creations">Dihlolwa tšaka 🎨</string>
+
+    <!--OTP-->
+    <string name="otp_has_been_sent">OTP e Rometšwe 📲</string>
+    <string name="enter_your_otp_to_verify">Tsenya OTP ya gago go Netefatša.</string>
+    <string name="reset_password">Seta Lentsu-phihlo lefsa</string>
+
+    <!--Preference-->
+    <string name="preferences">Dikgetho ⚙️</string>
+    <string name="personal">👤 Motho ka Nnoši</string>
+    <string name="country">Naga</string>
+    <string name="cuisines">Dijo</string>
+    <string name="dietary_preferences">Dikgetho tsa Dijo</string>
+    <string name="appearance">🎨 Ponagalo</string>
+    <string name="light_mode">Mokgwa wa Seetša</string>
+    <string name="dark_mode">Mokgwa wa Leswiswi</string>
+    <string name="follow_system">Latela Tshepedišo</string>
+    <string name="unit_system">🔢 Tshepedišo ya Diyuniti</string>
+    <string name="metric_grams_ml">Metric (digrama, ml)</string>
+    <string name="imperial_ounces_cups">Imperial (dionse, dikomiki)</string>
+    <string name="display_name_in_all_caps">Bontšha leina ka DITLHAKA TŠE KGOLO</string>
+
+    <!--Profile Completion-->
+    <string name="complete_your_profile">Feleletša Profaele ya gago 🤞</string>
+    <string name="don_t_worry_only_you_can_see_your_personal_data_no_one_else_will_be_able_to_see_it">O se tshwenyege ke wena fela o ka bonago datha ya gago, ga go na motho yo mongwe yo a tlago go e bona.</string>
+    <string name="gender_optional">Bong (boikgethelo)</string>
+    <string name="date_of_birth_optional">Letšatši la Matswalo (boikgethelo)</string>
+
+    <!--Recipe Detail-->
+    <string name="read_more">Bala go feta</string>
+    <string name="nutrition_facts">Dintlha ka Phepo 🍎</string>
+    <string name="nutrition_facts_not_provided_for_this_recipe">Dintlha ka phepo ga di gona go resepi ye. 😔</string>
+    <string name="ingredients">Ditswako 🍋</string>
+    <string name="Minus">-</string>
+    <string name="Size">6</string>
+    <string name="Addition">+</string>
+    <string name="method">Mokgwa 🍳</string>
+    <string name="toggle_favorite">fetola se ratwago</string>
+
+    <!--Rest Password-->
+    <string name="reset_your_password">Seta Lentsu-phihlo la gago lefsa 🔑</string>
+    <string name="enter_your_new_password">Tsenya lentsu-phihlo la gago le lefsa</string>
+
+    <!--Scan Result-->
+    <string name="back">Morago</string>
+    <string name="recipe_matches">Diresepi tše di Swanago 💡</string>
+
+    <!--Welcome-->
+    <string name="welcome_to_nharmony_kitchen">O Amogetšwe go\nHarmony Kitchen</string>
+    <string name="welcome_emoji">👋</string>
+    <string name="your_daily_dose_of_delicious">Tekanyo ya gago ya letsatsi le letsatsi ya monate</string>
+    <string name="continue_with_google">Tšwela pele ka Google</string>
+    <string name="get_started">Thoma</string>
+    <string name="i_already_have_an_account">Ke šetše ke na le Akhaonto</string>
+
+    <!--Add Shopping item-->
+    <string name="enter_items_one_per_line">Tsenya dilo, e tee ka mothaladi…</string>
+
+    <!--Add Recipe-->
+    <string name="add_your_recipe">Oketsa Resepi ya Gago 🍳</string>
+    <string name="recipe_name">Leina la Resepi</string>
+    <string name="category">Karolo</string>
+    <string name="meal_type_e_g_breakfast_snack">Mohuta wa Dijo (mohl., Dijo tsa Mesong, Seneke)</string>
+    <string name="description">Tlhaloso</string>
+    <string name="add_ingredient">Oketsa Setswako</string>
+    <string name="nutrition_facts_optional">Dintlha ka Phepo (Boikgethelo)</string>
+    <string name="calories">Dikhalori</string>
+    <string name="fat_g">Makhura (g)</string>
+    <string name="carbs_g">Dikhabohaetereite (g)</string>
+    <string name="salts_g">Matswai (g)</string>
+    <string name="method_steps">Mokgwa / Dikgato</string>
+    <string name="add_step">Oketsa Kgato</string>
+    <string name="time_to_make_e_g_45_mins">Nako ya go Dira (mohl., 45 mets.)</string>
+    <string name="servings">Diphologo</string>
+    <string name="delete_recipe">Phumola Resepi</string>
+    <string name="save_recipe">Boloka Resepi</string>
+
+    <!--Category-->
+    <string name="all_categories">Dikarolo ka Moka 🏷️</string>
+
+    <!-- CategoryFragment -->
+    <string name="category_toast_selected">E kgethilwe: %1$s</string>
+
+    <!--Discover-->
+    <string name="discover_recipes">Utolla Diresepi 🌍</string>
+    <string name="search_recipes">Nyaka diresepi…</string>
+
+    <!--Favorites-->
+    <string name="my_favorites">Tšeo ke di Ratago ❤️</string>
+    <string name="you_haven_t_saved_any_favorites_yet_tap_the_on_a_recipe_to_add_it_here">Ga o so boloka dilo tšeo o di ratago. Tlanya ❤️ go resepi go e oketsa mo!</string>
+
+    <!--Home Fragment-->
+    <string name="featured">Tše di Ikgethilego 😄</string>
+    <string name="categoryhome">Karolo 🧑‍🍳</string>
+    <string name="recommended_recipes">Diresepi tše di Šišintšwego 📖</string>
+
+    <!--Notification-->
+    <string name="notifications">Ditemošo 🔔</string>
+
+    <!--Offline -->
+    <string name="you_are_offline">O Offline🥺</string>
+    <string name="check_your_connection_and_try_again">Lekola kgokagano ya gago o leke gape.\n Tšeo o di ratago di bolokilwe offline🥹</string>
+
+    <!--Profile-->
+    <string name="edit_profile_setting">Fetola Profaele</string>
+    <string name="my_recipes">Diresepi tšaka</string>
+    <string name="account">👤 Akhaonto</string>
+    <string name="preferences_setting">Dikgetho</string>
+    <string name="language">Leleme</string>
+    <string name="notifications_setting">Ditemošo</string>
+    <string name="support_amp_about"><![CDATA[🛠️ Thekgo & Mabapi]]></string>
+    <string name="about_us">Mabapi le rena</string>
+    <string name="report_an_issue">Bega Taba</string>
+    <string name="log_out">Tšwa</string>
+
+    <!--Scan-->
+    <string name="what_s_in_your_kitchen">Go na le eng ka moraleng wa gago? 🧑‍🍳</string>
+    <string name="type_an_ingredient">Ngwala setshegiswana…</string>
+    <string name="find_recipes">Hwetša Diresepi</string>
+    <string name="your_scan_history">Histori ya Gago ya go Skena ✨</string>
+
+    <!--Shopping-->
+    <string name="shopping_list">Lenaneo la Theko 🍽️</string>
+    <string name="delete_list">Phumola Lenaneo</string>
+
+    <!--Chip-->
+    <string name="breakfast">Dijo tsa Mesong</string>
+
+    <!--Ingredient-->
+    <string name="ingredient_name">Leina la Setswako</string>
+    <string name="_100_g">100 g</string>
+    <string name="sample_ingredient">Sampole ya Setswako</string>
+    <string name="qty">Bontši</string>
+    <string name="unit">Yuniti</string>
+    <string name="remove_ingredient">Tlosa Setswako</string>
+    <string name="_1_halve_the_vanilla_pod_and_scrape_out_the_seeds">1. Segagare phoro ya vanilla o phure dipeu…</string>
+    <string name="_1">1.</string>
+    <string name="step_details">Dintlha ka kgato…</string>
+    <string name="_278_4">278.4</string>
+    <string name="_5_min">5 Mets.</string>
+    <string name="blackberry_fro_yo_with_a_very_long_name">Blackberry fro-yo yeo e nago le leina le letelele</string>
+    <string name="with_bay_sugar_and_some_other_ingredients">Le: swikiri ya bay le ditswako tše dingwe</string>
+    <string name="recipe_title">Thaetlele ya Resepi</string>
+    <string name="you_need_2_more_ingredients">O hloka ditswako tše dingwe tše 2</string>
+    <string name="blueberry_muffins">Dimafene tša Blueberry</string>
+    <string name="_40_min">40 Mets.</string>
+    <string name="view_all">Bona ka Moka</string>
+
+    <!--Menu-->
+    <string name="home">Gae</string>
+    <string name="discover">Utolla</string>
+    <string name="scan">Skena</string>
+    <string name="items">Dilo</string>
+    <string name="profile">Profaele</string>
+    <string name="add_to_shopping_list">Oketsa go Lenaneo la Theko</string>
+    <string name="confirm">Netefatsa</string>
+    <string name="publish_recipe">Phatlalatsa Resepi</string>
+    <string name="make_private">Dira ya Lekunutu</string>
+    <string name="edit_recipe">Fetola Resepi</string>
+
+    <string name="no_new_notifications">Ga go na ditemošo tše difsa</string>
+    <string name="no_notifications_yet">Ga go na Ditemošo Gona Bjale</string>
+    <string name="my_badges_achievements"><![CDATA[Dipetšhe & Diphlenyane tšaka 🏆]]></string>
+    <string name="my_badges_achievementsbtn"><![CDATA[Dipetšhe & Diphlenyane tšaka]]></string>
+
+    <!-- Report-->
+    <string name="report_issue_email_address">whiteshytk@gmail.com</string>
+    <string name="report_issue_subject">Harmony Kitchen - Pego ya Phošo / Mapego</string>
+    <string name="report_issue_body">
+        \n\n--- Hle O se ke wa Fetola Ka Tlase ga Mothaladi Wo ---\n
+        Phetolelo ya App: %1$s\n
+        Sedirišwa: %2$s\n
+        Phetolelo ya Android: %3$s\n
+        Boitsibisho bja Mošomi: %4$s\n
+        --- Hle Hlalosa Fa ---\n
+    </string>
+    <string name="report_issue_error">Ga go na app ya imeile ye e hweditšwego.</string>
+
+    <!-- Greeting message-->
+    <string-array name="morning_greetings">
+        <item>☀️ Thobela!</item>
+        <item>Tsoga o bone! 🌅</item>
+        <item>Nako ya dijo tsa mesong? 🍳</item>
+        <item>Go apewa eng mesong ye? 🥞</item>
+        <item>Letšatši le lebotse le thoma ka dijo tše dibotse!</item>
+        <item>Thobela, letšatši! ☀️</item>
+        <item>Letšatši le lefsa, ditatso tše difsa! 🍯</item>
+        <item>Kofi pele, ke moka o fenye letšatši! ☕</item>
+        <item>Maikutlo a mesong fela! 🌸</item>
+        <item>Dijo tsa mesong di filwe! 🍞🥓</item>
+        <item>Tsoga o nkgele kofi! ☕🌄</item>
+        <item>Thobela, mofuputsi wa dijo! 🥐</item>
+        <item>Hwetša maatla a letšatši! 🍌</item>
+        <item>Mesong e mebotse, dijo tše bose! 🌞</item>
+        <item>Mesong ye e se nago dipanekuku e a nyamiša. 🥞</item>
+        <item>Thoma letšatši la gago ka monate! 🍯🥖</item>
+        <item>Thobela, phakela! 🐦</item>
+        <item>Mae, tosti, kofi… boeletša! 🍳☕</item>
+        <item>Monyenyo le dijo tsa mesong gohle! 😄🥯</item>
+        <item>Tsoga, phadima, o je! 🍴</item>
+        <item>A re hwetšeng borotho bjo! (Ka kgonthe) 🍞</item>
+        <item>Tshekatsheko ya lehono: 100% monate.🌧️ </item>
+        <item>Sip, sip, hurei! Ke letšatši le lefsa! 🍊</item>
+    </string-array>
+
+    <string-array name="lunch_greetings">
+        <item>🥗 Nako ya Dijo tsa Mosegare!</item>
+        <item>O loketše dijo tsa mosegare? 🥪</item>
+        <item>Fahla maatla a thapama! 💪</item>
+        <item>Go na le eng menung ya dijo tsa mosegare? 🍱</item>
+        <item>Nako ya khutšo ya monate.</item>
+        <item>Go lapa ga mosegare? 🍛</item>
+        <item>Boloka maatla a gago! 🌯</item>
+        <item>Nako ya dijo tsa mosegare! ⏰🍴</item>
+        <item>Khutšo ya monate ya letšatši le le maphathaphatha! 🥗</item>
+        <item>Fahla maatla a maitemogelo a gago a thapama! 🥙</item>
+        <item>Thabele dijo! 😋</item>
+        <item>Disamentšhe, disalate, goba sopo? 🥗🥪🍜</item>
+        <item>Nako ya go maatlafatsa! ⚡🥪</item>
+        <item>Dijo tsa mosegare tše di nago le monyenyo! 😊</item>
+        <item>Eja gabotse, šoma gabotse! 🍛💻</item>
+        <item>Tšea khutšo o thabele dijo tsa gago! 🍲</item>
+        <item>Monate wa mosegare wa morati wa dijo! 🥙</item>
+        <item>Fahla maatla bjalo ka mofenyi! 🏆🍱</item>
+        <item>Dijo tsa mosegare ga se tša ka tša bonagala gabotse bjalo! 🍣</item>
+        <item>Phepo e botse, monate, e kgotsofatšago! 🥗✨</item>
+        <item>Seripagare sa letšatši! O swanelwa ke se. 🎉</item>
+        <item>A re boleleng ka dijo tsa mosegare! 🌮</item>
+        <item>Ke thabile go go bona! 🍲</item>
+    </string-array>
+
+    <string-array name="afternoon_greetings">
+        <item>☕ Seneke sa Thapama?</item>
+        <item>Tse bose go go thuša go fetša letšatši? 🍪</item>
+        <item>O kwa tlala? 🍎</item>
+        <item>Nako ya khutšo ya kofi! ☕</item>
+        <item>O hloka go itshedimoša? ✨</item>
+        <item>Nako ya tlhaselo ya seneke! 🍫</item>
+        <item>Dithato tsa thapama? 🍩</item>
+        <item>Tšea khutšo o thabele go loma! 🍇</item>
+        <item>Tse bose goba tse letswai? O dira kgetho! 🥨🍪</item>
+        <item>Khutšo ya monate go maatlafatsa! ⚡</item>
+        <item>Fahla maatla a thapama ya gago! 🥜</item>
+        <item>Eja seneke gabotse, dula o thabile! 🥯</item>
+        <item>Dikuki goba dienywa? 🍏🍪</item>
+        <item>Nako ya go itlosa bodutu! 🍫</item>
+        <item>Lethabo le le nnyane! 🥨</item>
+        <item>Boloka maatla a gago! ⚡🍎</item>
+        <item>Tse bose go kgantšha letšatši la gago! 🌞🍫</item>
+        <item>Nako ya seneke ke yona nako e kaone! ⏰</item>
+        <item>Fahla maatla, tsošološa, boeletša! 🥜</item>
+        <item>Maikutlo a thapama le go loma ga monate! 🍪</item>
+        <item>O se tshwenyege, thaba! 🍩</item>
+        <item>O seneke se tee go tloga go maikutlo a mabotse. 😉</item>
+        <item>Selo se sennyane go go tšwetša pele. 🍓</item>
+    </string-array>
+
+    <string-array name="dinner_greetings">
+        <item>🌙 Dijo tsa Mantšiboa di filwe</item>
+        <item>Go na le eng bakeng sa dijo tsa mantšiboa bošegong bjo? 🍝</item>
+        <item>Ke holofela o swerwe ke tlala! 🍲</item>
+        <item>Nako ya go iketla ka dijo tše dibotse. 🍷</item>
+        <item>A re direng selo se se makatšago bakeng sa dijo tsa mantšiboa!</item>
+        <item>Menate ya mantšiboa e letetše! 🍛</item>
+        <item>Apea, eja, boeletša! 🍽️</item>
+        <item>Maikutlo a dijo tsa mantšiboa fela! 🌟</item>
+        <item>Dijo tsa mantšiboa tša borutho bakeng sa bošego bja borutho. 🕯️</item>
+        <item>Kgobokanang, dijo di lokile! 🥘</item>
+        <item>Nako ya ditatso tšeo di homotšago moya! 🍲</item>
+        <item>Mantšiboa a monate a letetše! 😋</item>
+        <item>Dijo tsa mantšiboa le go iketla! 🍷</item>
+        <item>Thabela go loma go gongwe le go gongwe! 🥗</item>
+        <item>Dijo tsa mantšiboa, maikutlo a lethabo! 🌙</item>
+        <item>Fetša letšatši ka monate! 🍝</item>
+        <item>Nako ya dijo tsa mantšiboa tša lapa! 🥘👨‍👩‍👧‍👦</item>
+        <item>Apea maleatlana bošegong bjo! ✨🍛</item>
+        <item>Poleiti ye e tletšego lethabo! 🍽️</item>
+        <item>Re lebohela mantšiboa a monate! 🥂</item>
+        <item>A re jeng, a re nweng, a re thabeng! 🥳</item>
+        <item>Dijo tsa mantšiboa di bose ge re eja mmogo. ❤️</item>
+        <item>Nako ya monyanya! 🍗</item>
+    </string-array>
+
+    <string-array name="night_greetings">
+        <item>😋 Seneke sa Bosasa?</item>
+        <item>O nyaka selo se se bose? 🍰</item>
+        <item>Go loma ga bošego? 🍕</item>
+        <item>Selo sa borutho bakeng sa mantšiboa? 🍿</item>
+        <item>Ditoro tše bose di dirilwe ka tšhise… le se! 🧀</item>
+        <item>Dithato tsa bošego? 🌙</item>
+        <item>Nako ya seneke! ⏳🍫</item>
+        <item>Go loma ga bošego? 🍩</item>
+        <item>Go loma ga kgwedi! 🌌</item>
+        <item>Tse bose pele o robala? 🥛🍪</item>
+        <item>Bošego bja khutšo, go loma ga monate. 🛌🍫</item>
+        <item>O sephooko sa bošego? Itlhapetše! 🦉🍫</item>
+        <item>Tse bose goba tse letswai, o swanelwa ke tšona ka bobedi! 🍿🍫</item>
+        <item>Dula le setšidifatši! 🥒🥛</item>
+        <item>Lethabo la seneke ka tlase ga dinaledi! ✨🍪</item>
+        <item>Monate wa bosasa o letetše! 🌙🍩</item>
+        <item>Go loma ga mohlabani wa bošego! 🥨🌌</item>
+        <item>Loma, iketla, boeletša! 🛌🍫</item>
+        <item>Dithato di dumeletšwe! 🍫</item>
+        <item>Fetša bošego ka monate! 🌙🍪</item>
+        <item>Moraleng go a go bitsa… 🤫</item>
+        <item>Go loma go tee fela gape… ke a holofetša! 😉</item>
+        <item>Šhh… ke nako ya seneke. 🤫</item>
+    </string-array>
+
+    <!-- Add recipe-->
+    <string name="edit_recipe_title">Fetola Resepi ya Gago 🍳</string>
+    <string name="toast_recipe_saved">Resepi e bolokilwe! ❤️</string>
+    <string name="toast_recipe_deleted">Resepi e phumotswe! 🗑️</string>
+    <string name="toast_operation_failed">Tiro e paletswe: %1$s</string>
+    <string name="toast_could_not_load_recipe">Go paletswe go laetša resepi go e fetola. 😭</string>
+    <string name="toast_login_required">O swanetse go tsena go boloka resepi. 😭</string>
+    <string name="toast_failed">Go paletswe go thoma khamera. 😭</string>
+    <string name="toast_profile_error">Go paletswe go hwetša profaele ya mošomi: %1$s</string>
+    <string name="toast_photo_error">Go tšea senepe go paletswe: %1$s</string>
+    <string name="toast_object_error">Ga go na dilo tše di lemogilwego.🥺</string>
+    <string name="toast_classify_error">Go paletswe go hlopha selo.🥺</string>
+    <string name="toast_recognition_error">Go lemoga dilo go paletswe.🥺</string>
+
+    <string name="validation_recipe_name_required">Leina la resepi le a hlokega.🥺</string>
+    <string name="validation_category_required">Karolo e a hlokega. 🥺</string>
+    <string name="validation_meal_type_required">Mohuta wa Dijo o a hlokega. 🥺</string>
+    <string name="validation_time_required">Nako ya go dira e a hlokega. 🥺</string>
+    <string name="validation_servings_required">Palo ya diphologo e a hlokega. 🥺</string>
+    <string name="validation_ingredient_min_required">Hle, oketsa setshegiswana se tee bonyane. 🥺</string>
+    <string name="validation_ingredient_name_required">Maina ka moka a ditswako a a hlokega. 🥺</string>
+    <string name="validation_ingredient_qty_required">Bontši bja ditswako ka moka bo a hlokega. 🥺</string>
+    <string name="validation_step_min_required">Hle, oketsa kgato e tee bonyane. 🥺</string>
+    <string name="validation_step_desc_required">Dithaloso ka moka tsa dikgato di a hlokega. 🥺</string>
+
+    <string name="notification_upload_success_title">Go Layiša go Atlegile! 🎉</string>
+    <string name="notification_upload_success_body">Resepi ya gago e mpsha \'%1$s\' e a hwetšagala. 😉</string>
+
+    <string name="nutrition_fat">Makhura</string>
+    <string name="nutrition_carbs">Dikhabohaetereite</string>
+    <string name="nutrition_salts">Matswai</string>
+    <string name="unit_grams">%1$sg</string>
+
+    <string-array name="meal_types">
+        <item>Dijo tsa Mesong</item>
+        <item>Dijo tsa Mosegare</item>
+        <item>Dijo tsa Mantšiboa</item>
+        <item>Seneke</item>
+        <item>Deserete</item>
+    </string-array>
+
+    <string-array name="dialog_cover_photo_options">
+        <item>@string/dialog_option_take_photo</item>
+        <item>@string/dialog_option_choose_gallery</item>
+        <item>@string/dialog_option_remove_photo</item>
+    </string-array>
+
+    <string name="category_all">Tšohle</string>
+
+    <!-- CountrySelectionActivity -->
+    <string name="country_south_africa">Afrika Borwa</string>
+    <string name="country_toast_load_failed">Go paletswe go laetša dinaga</string>
+    <string name="country_toast_load_error">Phošo: %1$s</string>
+    <string name="country_toast_selection_required">Hle kgetha naga</string>
+    <string name="country_toast_update_success">Naga e ntlafaditswe!</string>
+    <string name="country_toast_update_failed">Go paletswe go ntlafatsa naga: %1$s</string>
+
+    <!-- CreateAccountActivity -->
+    <string name="create_account_toast_signup_failed_no_id">Go ingwadisa go paletswe: Go paletswe go hwetša boitsibisho bja mošomi.</string>
+    <string name="create_account_toast_signup_failed_exception">Go ingwadisa go paletswe: %1$s</string>
+    <string name="create_account_toast_signup_success">Go Ingwadisa go Atlegile! 🎉</string>
+    <string name="create_account_toast_save_profile_failed">Go paletswe go boloka profaele: %1$s</string>
+    <string name="validation_username_empty">Leina-mošomi ga le a swanela go ba le se nago selo</string>
+    <string name="validation_email_empty">Imeile ga e a swanela go ba le se nago selo</string>
+    <string name="validation_email_invalid">Hle, tsenya aterese ya imeile ye e nepagetšego</string>
+    <string name="validation_password_empty">Lentsu-phihlo ga le a swanela go ba le se nago selo</string>
+    <string name="validation_password_min_length">Lentsu-phihlo le swanetse go ba le ditlhaka tše %1$d bonyane</string>
+    <string name="validation_password_no_uppercase">Lentsu-phihlo le swanetse go ba le tlhakakgolo e tee</string>
+    <string name="validation_password_no_lowercase">Lentsu-phihlo le swanetse go ba le tlhakanyana e tee</string>
+    <string name="validation_password_no_digit">Lentsu-phihlo le swanetse go ba le nomoro e tee</string>
+    <string name="validation_password_no_special">Lentsu-phihlo le swanetse go ba le seka se se kgethegilego (mohl., @#$%)</string>
+    <string name="validation_password_confirm_empty">Hle, netefatsa lentsu-phihlo la gago</string>
+    <string name="validation_passwords_no_match">Mantsu-phihlo ga a swane</string>
+
+    <!-- Cuisines -->
+    <string name="cuisine_italian">Setaliana</string>
+    <string name="cuisine_mexican">Semexico</string>
+    <string name="cuisine_chinese">Setšhaena</string>
+    <string name="cuisine_japanese">Sejapane</string>
+    <string name="cuisine_indian">Seindia</string>
+    <string name="cuisine_thai">Sethai</string>
+    <string name="cuisine_french">Sefora</string>
+    <string name="cuisine_spanish">Sesepaniši</string>
+    <string name="cuisine_greek">Segerika</string>
+    <string name="cuisine_american">Seamerika</string>
+    <string name="cuisine_korean">Sekorea</string>
+    <string name="cuisine_vietnamese">Sevietnam</string>
+    <string name="cuisine_mediterranean">Mediteranea</string>
+    <string name="cuisine_caribbean">Caribbean</string>
+    <string name="cuisine_african">Seafrika</string>
+
+    <!-- CuisineSelectionActivity -->
+    <string name="cuisine_selection_toast_at_least_one">Hle kgetha dijo tše tee bonyane</string>
+    <string name="deselect_all">Hlakola ka Moka</string>
+    <string name="cuisine_selection_toast_preferences_updated">Dikgetho di ntlafaditswe!</string>
+    <string name="cuisine_selection_toast_update_failed">Go paletswe go ntlafatsa: %1$s</string>
+
+    <!-- DietarySelectionActivity -->
+    <string name="diet_selection_toast_at_least_one">Hle kgetha kgetho e tee bonyane</string>
+
+    <!-- Diets -->
+    <string name="diet_vegetarian">Se sa Merogo</string>
+    <string name="diet_vegan">Vegan</string>
+    <string name="diet_gluten_free">Ye e se nago Gluten</string>
+    <string name="diet_keto">Keto</string>
+    <string name="diet_paleo">Paleo</string>
+    <string name="diet_pescetarian">Pescetarian</string>
+    <string name="diet_low_carb">Ye e nago le Khabohaetereite ya Tlase</string>
+    <string name="diet_dairy_free">Ye e se nago Maswi</string>
+    <string name="diet_nut_allergy">Go Alejiša Nati</string>
+    <string name="diet_low_fodmap">Low-FODMAP</string>
+    <string name="diet_halal">Halal</string>
+    <string name="diet_kosher">Kosher</string>
+
+    <!-- DiscoverFragment -->
+    <string-array name="discover_sort_options">
+        <item>A-Z</item>
+        <item>Tše di Šišintšwego</item>
+        <item>Tše di Rategago</item>
+        <item>Nako ya go Apea</item>
+        <item>Z-A</item>
+    </string-array>
+
+    <!-- EditProfileActivity -->
+    <string name="edit_profile_permission_denied">Tumello ya khamera e ganetswe</string>
+    <string name="edit_profile_reset_link_sent">Sekgokaganyi sa go seta lefsa lentsu-phihlo se rometswe go imeile ya gago.</string>
+    <string name="edit_profile_reset_link_failed">Go paletswe go romela sekgokaganyi sa go seta lefsa: %1$s</string>
+    <string name="edit_profile_load_failed">Go paletswe go laetša profaele: %1$s</string>
+    <string name="edit_profile_upload_failed">Go paletswe go laetša seswantšho: %1$s</string>
+    <string name="edit_profile_update_success">Profaele e ntlafaditswe ka katlego!</string>
+    <string name="edit_profile_update_failed">Go paletswe go ntlafatsa profaele: %1$s</string>
+    <string name="validation_full_name_empty">Leina le feletšego ga le a swanela go ba le se nago selo</string>
+
+    <!-- ForgotPasswordActivity -->
+    <string name="forgot_password_link_sent">Sekgokaganyi sa go seta lefsa lentsu-phihlo se rometswe go imeile ya gago.</string>
+    <string name="forgot_password_link_failed">Go paletswe go romela imeile ya go seta lefsa: %1$s</string>
+
+    <!-- LoginActivity -->
+    <string name="login_firebase_auth_failed">Netefatšo ya Firebase e paletswe: %1$s</string>
+    <string name="login_google_sign_in_failed">Go tsena ka Google go paletswe: %1$s</string>
+    <string name="login_auth_failed">Netefatšo e paletswe: %1$s</string>
+    <string name="validation_user_input_empty">Imeile goba Leina-mošomi ga le a swanela go ba le se nago selo</string>
+    <string name="validation_user_input_invalid_email">Fomete ya imeile e fošagetše</string>
+
+    <!-- MainActivity -->
+    <string name="main_no_favorites_popup">Ga o na tšeo o di ratago!</string>
+    <string name="main_greeting_morning">☀️ Thobela</string>
+    <string name="main_greeting_afternoon">🌤️ Thobela</string>
+    <string name="main_greeting_evening">🌙 Thobela</string>
+    <string name="main_greeting_default_user">MOŠOMI</string>
+
+    <!-- Onboarding Tour -->
+    <string name="onboarding_home_title">O Amogetšwe go Harmony Kitchen!</string>
+    <string name="onboarding_home_text">Se ke sekirini sa gago sa Gae, moo o tlago hwetša kgothatšo ya letsatsi le letsatsi.</string>
+    <string name="onboarding_discover_title">Utolla Diresepi tše Difsa</string>
+    <string name="onboarding_discover_text">Hlola lefase la diresepi tša phatlalatsa tšeo di abelanwago ke setšhaba.</string>
+    <string name="onboarding_add_recipe_title">Oketsa Dihlolwa tša Gago</string>
+    <string name="onboarding_add_recipe_text">Tlanya konopo ya \'+\' nako ye nngwe le ye nngwe go oketsa diresepi tša gago.</string>
+    <string name="onboarding_scan_title">Skena Ditswako</string>
+    <string name="onboarding_scan_text">Šomiša khamera ya gago go hwetša diresepi go ya ka seo se lego ka moraleng wa gago.</string>
+    <string name="onboarding_cart_title">Mananeo a Theko</string>
+    <string name="onboarding_cart_text">Laola mananeo a gago a korosari bakeng sa diresepi tše di fapanego fa.</string>
+    <string name="onboarding_profile_title">Profaele ya Gago</string>
+    <string name="onboarding_profile_text">Bona dihlolwa tša gago, tšeo o di ratago, le go laola dipeakanyo tša app.</string>
+
+    <!-- Gamification -->
+    <string name="gamification_badge_unlocked">Petšhe e Notlolotswe! 🎉</string>
+    <string name="gamification_badge_earned_message">O thopile petšhe ya \'%1$s\'!</string>
+
+    <!-- MyRecipesActivity -->
+    <string name="my_recipes_login_required">O swanetse go tsena go bona diresepi tša gago.</string>
+    <string name="my_recipes_empty_state">Ga o so hlola diresepi. Tlanya konopo ya \'+\' go oketsa ya gago ya mathomo!</string>
+
+    <!-- ProfileCompletionActivity -->
+    <string name="profile_completion_permission_camera_required">Tumello ya khamera e a hlokega go tšea senepe.</string>
+    <string name="profile_completion_set_photo_title">Bea Senepe sa Profaele</string>
+    <string name="validation_fullname_empty">Leina le feletšego ga le a swanela go ba le se nago selo</string>
+    <string name="validation_phone_invalid">Nomoro ya founo e fošagetše</string>
+    <string name="gender_male">Monna</string>
+    <string name="gender_female">Mosadi</string>
+    <string name="gender_other">Tše Dingwe</string>
+    <string-array name="gender_options">
+        <item>@string/gender_male</item>
+        <item>@string/gender_female</item>
+        <item>@string/gender_other</item>
+    </string-array>
+
+    <!-- RecipeMatchAdapter -->
+    <string name="recipe_match_all_ingredients">O na le ditswako ka moka! 🎉</string>
+    <plurals name="recipe_match_missing_ingredients">
+        <item quantity="one">O hloka setshegiswana se tee gape</item>
+        <item quantity="other">O hloka ditshegiswana tše dingwe tše %d</item>
+    </plurals>
+
+    <!-- ScanCameraFragment -->
+    <string name="scan_camera_permission_needed">Tumello ya khamera e a hlokega.</string>
+    <string name="scan_camera_ingredients_found">Go hweditšwe: %1$s</string>
+    <string name="scan_camera_no_ingredients_identified">Go paletswe go lemoga ditswako.</string>
+    <string name="scan_camera_detection_failed">Go paletswe go lemoga ditswako.</string>
+
+    <!-- ScanFragment Tabs -->
+    <string name="scan_tab_item">Skena Selo</string>
+    <string name="scan_tab_type_voice">Ngwala &amp; Lentšu</string>
+    <string name="scan_tab_history">Histori</string>
+
+    <!-- ScanManualFragment -->
+    <string name="scan_manual_voice_prompt">Bolela ditswako tša gago…</string>
+    <string name="scan_manual_add_ingredients_first">Hle oketsa ditswako pele</string>
+    <string name="scan_manual_voice_not_available">Go lemoga lentšu ga go gona sedirišweng se</string>
+
+    <!-- ScanHistoryFragment -->
+    <string name="scan_history_delete_title">Phumola Selo sa Histori</string>
+    <string name="scan_history_delete_message">O na le bonnete bja gore o nyaka go phumola go skena mo historing ya gago?</string>
+
+    <!-- ShoppingListFragment -->
+    <string name="shopping_list_delete_dialog_title">Phumola Lenaneo 🗑️</string>
+    <string name="shopping_list_delete_dialog_message">O na le bonnete bja gore o nyaka go phumola lenaneo le la theko le dilo tša lona ka moka? 😥</string>
+    <string name="shopping_list_add_items_title">Oketsa Dilo tša Theko</string>
+    <string name="shopping_list_item_deleted_snackbar">🗑️ %1$s e phumotswe</string>
+    <string name="undo">BUSIŠA</string>
+    <!-- Using <plurals> for better handling of singular/plural cases across different languages -->
+    <plurals name="shopping_list_selection_count">
+        <item quantity="one">%1$d selo se kgethilwe</item>
+        <item quantity="other">%1$d dilo di kgethilwe</item>
+    </plurals>
+    <plurals name="shopping_list_toast_items_added">
+        <item quantity="one">%1$d selo se okeditswe.</item>
+        <item quantity="other">%1$d dilo di okeditswe.</item>
+    </plurals>
+
+    <!-- WelcomeActivity -->
+    <string name="welcome_firebase_auth_failed">Netefatšo ya Firebase e paletswe: %1$s</string>
+    <string name="welcome_google_sign_in_failed">Go tsena ka Google go paletswe: %1$s</string>
+
 </resources>

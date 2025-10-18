@@ -1013,13 +1013,9 @@ class ShoppingRepository(
             var query: com.google.firebase.firestore.Query = firestore.collection("recipes").whereEqualTo("public", true)
 
             // Step 1: Apply HARD filters from user's diet preferences
-            if (userDiets.contains("Vegan")) query = query.whereEqualTo("vegan", true)
-            if (userDiets.contains("Vegetarian")) query = query.whereEqualTo("vegetarian", true)
-            if (userDiets.contains("Gluten-Free")) query = query.whereEqualTo("glutenFree", true)
-            if (userDiets.contains("Dairy-Free")) query = query.whereEqualTo("dairyFree", true)
-            if (userDiets.contains("Keto")) query = query.whereEqualTo("keto", true)
-            if (userDiets.contains("Paleo")) query = query.whereEqualTo("paleo", true)
-            if (userDiets.contains("Low-FODMAP")) query = query.whereEqualTo("lowFodmap", true)
+            if (userDiets.isNotEmpty()) {
+                query = query.whereArrayContainsAny("dietTags", userDiets)
+            }
 
             // Step 2: Apply Sorting
             when (sortOption) {

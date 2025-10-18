@@ -4,21 +4,21 @@ object CuisineData {
     // This is now the single source of truth for all cuisines in the app.
     fun getAllCuisines(): List<Cuisine> {
         return listOf(
-            Cuisine("Italian", R.drawable.ic_italian),
-            Cuisine("Mexican", R.drawable.ic_mexican),
-            Cuisine("Chinese", R.drawable.ic_chinese),
-            Cuisine("Japanese", R.drawable.ic_japanese),
-            Cuisine("Indian", R.drawable.ic_indian),
-            Cuisine("Thai", R.drawable.ic_thai),
-            Cuisine("French", R.drawable.ic_french),
-            Cuisine("Spanish", R.drawable.ic_spanish),
-            Cuisine("Greek", R.drawable.ic_greek),
-            Cuisine("American", R.drawable.ic_american),
-            Cuisine("Korean", R.drawable.ic_korean),
-            Cuisine("Vietnamese", R.drawable.ic_vietnamese),
-            Cuisine("Mediterranean", R.drawable.ic_mediterranean),
-            Cuisine("Caribbean", R.drawable.ic_caribbean),
-            Cuisine("African", R.drawable.ic_african)
+            Cuisine(R.string.cuisine_italian, R.drawable.ic_italian),
+            Cuisine(R.string.cuisine_mexican, R.drawable.ic_mexican),
+            Cuisine(R.string.cuisine_chinese, R.drawable.ic_chinese),
+            Cuisine(R.string.cuisine_japanese, R.drawable.ic_japanese),
+            Cuisine(R.string.cuisine_indian, R.drawable.ic_indian),
+            Cuisine(R.string.cuisine_thai, R.drawable.ic_thai),
+            Cuisine(R.string.cuisine_french, R.drawable.ic_french),
+            Cuisine(R.string.cuisine_spanish, R.drawable.ic_spanish),
+            Cuisine(R.string.cuisine_greek, R.drawable.ic_greek),
+            Cuisine(R.string.cuisine_american, R.drawable.ic_american),
+            Cuisine(R.string.cuisine_korean, R.drawable.ic_korean),
+            Cuisine(R.string.cuisine_vietnamese, R.drawable.ic_vietnamese),
+            Cuisine(R.string.cuisine_mediterranean, R.drawable.ic_mediterranean),
+            Cuisine(R.string.cuisine_caribbean, R.drawable.ic_caribbean),
+            Cuisine(R.string.cuisine_african, R.drawable.ic_african)
         )
     }
 }

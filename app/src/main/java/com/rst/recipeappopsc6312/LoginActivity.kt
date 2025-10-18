@@ -77,11 +77,11 @@ class LoginActivity : AppCompatActivity() {
                                     navigateToMainApp()
                                 }
                             } else {
-                                Toast.makeText(this@LoginActivity, "Firebase Auth failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this@LoginActivity, getString(R.string.login_firebase_auth_failed, task.exception?.message), Toast.LENGTH_LONG).show()
                             }
                         }
                     } else {
-                        Toast.makeText(this@LoginActivity, "Google Sign-In failed: ${signInResult.errorMessage}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@LoginActivity, getString(R.string.login_google_sign_in_failed, signInResult.errorMessage), Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -157,7 +157,7 @@ class LoginActivity : AppCompatActivity() {
                     navigateToMainApp()
                 } else {
                     Log.w(TAG, "Sign in failed for user: $email", task.exception)
-                    Toast.makeText(this, "Authentication failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.login_auth_failed, task.exception?.message), Toast.LENGTH_SHORT).show()
                 }
             }
     }
@@ -167,17 +167,17 @@ class LoginActivity : AppCompatActivity() {
         passLayout.error = null
         var isValid = true
         if (userInput.isEmpty()) {
-            userLayout.error = "Email or Username cannot be empty"
+            userLayout.error = getString(R.string.validation_user_input_empty)
             isValid = false
         }
         // Basic email validation if it looks like an email, otherwise assume username
         else if (userInput.contains("@") && !Patterns.EMAIL_ADDRESS.matcher(userInput).matches()) {
-            userLayout.error = "Invalid email format"
+            userLayout.error = getString(R.string.validation_user_input_invalid_email)
             isValid = false
         }
 
         if (pass.isEmpty()) {
-            passLayout.error = "Password cannot be empty"
+            passLayout.error = getString(R.string.validation_password_empty)
             isValid = false
         }
         return isValid

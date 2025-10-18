@@ -43,7 +43,7 @@ class ScanCameraFragment : Fragment() {
         if (isGranted) {
             startCamera()
         } else {
-            Toast.makeText(context, "Camera permission is needed.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, getString(R.string.scan_camera_permission_needed), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -110,17 +110,17 @@ class ScanCameraFragment : Fragment() {
                             if (labels.isNotEmpty()) {
                                 labels.forEach { viewModel.addIngredient(it) }
                                 lottieAnimationView.visibility = View.GONE
-                                Toast.makeText(context, "Found: ${labels.joinToString()}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, getString(R.string.scan_camera_ingredients_found, labels.joinToString()), Toast.LENGTH_SHORT).show()
                             } else {
                                 lottieAnimationView.visibility = View.GONE
-                                Toast.makeText(context, "Could not identify any ingredients.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, getString(R.string.scan_camera_no_ingredients_identified), Toast.LENGTH_SHORT).show()
                             }
                         }
                     },
                     onFailure = { e ->
                         activity?.runOnUiThread {
                             lottieAnimationView.visibility = View.GONE
-                            Toast.makeText(context, "Could not detect ingredients.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, getString(R.string.scan_camera_detection_failed), Toast.LENGTH_SHORT).show()
                         }
                         Log.e(TAG, "Object detection failed", e)
                     },

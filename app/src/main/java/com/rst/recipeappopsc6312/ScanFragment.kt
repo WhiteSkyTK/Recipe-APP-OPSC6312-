@@ -27,9 +27,9 @@ class ScanFragment : Fragment() {
         // Link the TabLayout with the ViewPager
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = when (position) {
-                0 -> "Scan Item"
-                1 -> "Type & Voice"
-                2 -> "History"
+                0 -> getString(R.string.scan_tab_item)
+                1 -> getString(R.string.scan_tab_type_voice)
+                2 -> getString(R.string.scan_tab_history)
                 else -> null
             }
         }.attach()

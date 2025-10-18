@@ -27,7 +27,7 @@ class CategoryFragment : Fragment() {
         categoryAdapter = CategoryAdapter(categoryList) { clickedCategory ->
             // This is where you handle the click on a category
             // For now, we'll just show a Toast message.
-            Toast.makeText(context, "Selected: ${clickedCategory.name}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, getString(R.string.category_toast_selected, clickedCategory.name), Toast.LENGTH_SHORT).show()
         }
         recyclerView.layoutManager = GridLayoutManager(context, 3)
         recyclerView.adapter = categoryAdapter

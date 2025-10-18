@@ -18,7 +18,7 @@ class CuisineAdapter(private val onClick: (Cuisine) -> Unit) :
         private val name: TextView = itemView.findViewById(R.id.textViewCuisineName)
 
         fun bind(cuisine: Cuisine) {
-            name.text = cuisine.name
+            name.text = itemView.context.getString(cuisine.name)
             itemView.isSelected = cuisine.isSelected
             Glide.with(itemView.context)
                 .load(cuisine.imageResId)

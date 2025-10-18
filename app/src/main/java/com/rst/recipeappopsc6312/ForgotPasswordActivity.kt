@@ -76,12 +76,12 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 showLoading(false)
                 if (task.isSuccessful) {
                     Log.d(TAG, "Password reset email sent successfully.")
-                    Toast.makeText(this, "Password reset link sent to your email.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.forgot_password_link_sent), Toast.LENGTH_LONG).show()
                     // Optionally, you can navigate back to the login screen after a delay
                     finish()
                 } else {
                     Log.w(TAG, "sendPasswordResetEmail:failure", task.exception)
-                    Toast.makeText(this, "Failed to send reset email: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.forgot_password_link_failed, task.exception?.message), Toast.LENGTH_SHORT).show()
                 }
             }
     }
@@ -91,11 +91,11 @@ class ForgotPasswordActivity : AppCompatActivity() {
         emailLayout.error = null
 
         if (email.isEmpty()) {
-            emailLayout.error = "Email cannot be empty"
+            emailLayout.error = getString(R.string.validation_email_empty)
             return false
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailLayout.error = "Please enter a valid email address"
+            emailLayout.error = getString(R.string.validation_email_invalid)
             return false
         }
         return true

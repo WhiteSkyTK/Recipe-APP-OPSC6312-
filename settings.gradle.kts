@@ -26,4 +26,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Recipe APP (OPSC6312)"
 include(":app")
- 
+include(":migration-script")

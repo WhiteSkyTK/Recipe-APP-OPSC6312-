@@ -68,12 +68,12 @@ class WelcomeActivity : AppCompatActivity() {
                                 }
                             } else {
                                 Log.e(TAG, "Firebase Auth with Google credential failed.", task.exception)
-                                Toast.makeText(this@WelcomeActivity, "Firebase Auth failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this@WelcomeActivity, getString(R.string.welcome_firebase_auth_failed, task.exception?.message), Toast.LENGTH_LONG).show()
                             }
                         }
                     } else {
                         Log.e(TAG, "Google Sign-In failed: ${signInResult.errorMessage}")
-                        Toast.makeText(this@WelcomeActivity, "Google Sign-In failed: ${signInResult.errorMessage}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@WelcomeActivity, getString(R.string.welcome_google_sign_in_failed, signInResult.errorMessage), Toast.LENGTH_LONG).show()
                     }
                 }
             } else {

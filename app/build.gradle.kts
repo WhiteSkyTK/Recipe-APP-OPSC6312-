@@ -120,7 +120,7 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.crashlytics)
     implementation(libs.play.services.auth)
-    implementation("com.google.firebase:firebase-messaging-ktx:24.1.2")
+    implementation(libs.google.firebase.messaging.ktx)
 
     // Room
     implementation(libs.androidx.room.runtime)

@@ -108,7 +108,7 @@ class CreateAccountActivity : AppCompatActivity() {
                     if (userId == null) {
                         // This is a failsafe, should not happen
                         showLoading(false)
-                        Toast.makeText(this, "Sign up failed: Could not get user ID.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.create_account_toast_signup_failed_no_id), Toast.LENGTH_SHORT).show()
                         return@addOnCompleteListener
                     }
 
@@ -136,7 +136,7 @@ class CreateAccountActivity : AppCompatActivity() {
                 } else {
                     showLoading(false)
                     Log.e(TAG, "Firebase Auth user creation failed.", task.exception)
-                    Toast.makeText(this, "Sign up failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.create_account_toast_signup_failed_exception, task.exception?.message), Toast.LENGTH_LONG).show()
                 }
             }
     }
@@ -161,13 +161,13 @@ class CreateAccountActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 showLoading(false)
                 Log.d(TAG, "User profile saved successfully to Firestore.")
-                Toast.makeText(this, "Sign Up Successful! 🎉", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.create_account_toast_signup_success), Toast.LENGTH_LONG).show()
                 navigateToMainApp()
             }
             .addOnFailureListener { e ->
                 showLoading(false)
                 Log.e(TAG, "Failed to save user profile to Firestore.", e)
-                Toast.makeText(this, "Failed to save profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.create_account_toast_save_profile_failed, e.message), Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -184,19 +184,19 @@ class CreateAccountActivity : AppCompatActivity() {
         var isValid = true
 
         if (username.isEmpty()) {
-            userLayout.error = "Username cannot be empty"
+            userLayout.error = getString(R.string.validation_username_empty)
             return false
         }
         if (email.isEmpty()) {
-            emailLayout.error = "Email cannot be empty"
+            emailLayout.error = getString(R.string.validation_email_empty)
             return false
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailLayout.error = "Please enter a valid email address"
+            emailLayout.error = getString(R.string.validation_email_invalid)
             return false
         }
         if (pass1.isEmpty()) {
-            pass1Layout.error = "Password cannot be empty"
+            pass1Layout.error = getString(R.string.validation_password_empty)
             isValid = false
         } else {
             // You can adjust these criteria as needed
@@ -207,31 +207,31 @@ class CreateAccountActivity : AppCompatActivity() {
             val hasSpecialChar = pass1.any { !it.isLetterOrDigit() } // Or define your own set of special chars
 
             if (pass1.length < minLength) {
-                pass1Layout.error = "Password must be at least $minLength characters"
+                pass1Layout.error = getString(R.string.validation_password_min_length, minLength)
                 isValid = false
             } else if (!hasUppercase) {
-                pass1Layout.error = "Password must include an uppercase letter"
+                pass1Layout.error = getString(R.string.validation_password_no_uppercase)
                 isValid = false
             } else if (!hasLowercase) {
-                pass1Layout.error = "Password must include a lowercase letter" // Good to have, though often implied
+                pass1Layout.error = getString(R.string.validation_password_no_lowercase) // Good to have, though often implied
                 isValid = false
             } else if (!hasDigit) {
-                pass1Layout.error = "Password must include a digit"
+                pass1Layout.error = getString(R.string.validation_password_no_digit)
                 isValid = false
             } else if (!hasSpecialChar) {
                 // Be specific about allowed special characters if you have a strict list
-                pass1Layout.error = "Password must include a special character (e.g., @#\$%)"
+                pass1Layout.error = getString(R.string.validation_password_no_special)
                 isValid = false
             }
             // Note: Firebase Auth itself has a minimum password length of 6.
             // Your stricter rules here are for your app's UI validation.
         }
         if (pass2.isEmpty()) {
-            pass2Layout.error = "Please confirm your password"
+            pass2Layout.error = getString(R.string.validation_password_confirm_empty)
             return false
         }
         if (pass1 != pass2) {
-            pass2Layout.error = "Passwords do not match"
+            pass2Layout.error = getString(R.string.validation_passwords_no_match)
             return false
         }
         return true

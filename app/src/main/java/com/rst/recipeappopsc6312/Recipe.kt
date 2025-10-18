@@ -30,6 +30,7 @@ data class Recipe(
     val mealType: String = "",
     var nutrition: List<NutritionFact> = emptyList(), // Already has a default
     var ingredients: List<Ingredient> = emptyList(),  // Already has a default
+    val dietTags: List<String> = emptyList(),
     val isVegan: Boolean = false,      // ++ ADD
     val isVegetarian: Boolean = false, // ++ ADD
     val isGlutenFree: Boolean = false, // ++ ADD

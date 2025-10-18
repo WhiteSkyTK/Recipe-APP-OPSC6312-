@@ -11,6 +11,16 @@ fun SpoonacularRecipe.toAppRecipe(): Recipe {
         Html.fromHtml(it, Html.FROM_HTML_MODE_LEGACY).toString()
     } ?: "No description available."
 
+    // Build the dietTags list from the boolean flags
+    val tags = mutableListOf<String>()
+    if (this.vegan) tags.add("Vegan")
+    if (this.vegetarian) tags.add("Vegetarian")
+    if (this.glutenFree) tags.add("Gluten-Free")
+    if (this.ketogenic) tags.add("Keto")
+    if (this.whole30) tags.add("Paleo") // Mapping whole30 to Paleo
+    if (this.dairyFree) tags.add("Dairy-Free")
+    if (this.lowFodmap) tags.add("Low-FODMAP")
+
     return Recipe(
         id = "sp_${this.id}",
         title = this.title,
@@ -35,7 +45,8 @@ fun SpoonacularRecipe.toAppRecipe(): Recipe {
         isLowFodmap = this.lowFodmap,
         isPaleo = this.whole30,
         isPopular = this.veryPopular || (this.spoonacularScore ?: 0.0) > 85.0,
-        nutrition = emptyList()
+        nutrition = emptyList(),
+        dietTags = tags // Assign the newly created list
     )
 }
 
@@ -57,7 +68,6 @@ fun TastyRecipe.toAppRecipe(): Recipe {
                 Ingredient(
                     name = component.ingredient.name.replaceFirstChar { it.uppercase() },
                     quantity = parsableQuantity!!,
-                    // ++ THIS IS THE FIX: Use safe calls to prevent crashes ++
                     unit = measurement?.unit?.display_singular ?: ""
                 )
             } else { null }
@@ -81,7 +91,9 @@ fun TastyRecipe.toAppRecipe(): Recipe {
     val isGlutenFree = tagNames.contains("gluten_free")
     val isDairyFree = tagNames.contains("dairy_free")
     val isKeto = tagNames.contains("keto")
-    val dietsList = this.tags?.filter { it.type == "dietary" }?.map { it.display_name } ?: emptyList()
+
+    // Build the dietTags list from the API tags
+    val tags = this.tags?.filter { it.type == "dietary" }?.map { it.display_name } ?: emptyList()
 
     return Recipe(
         id = "tasty_${this.id}",
@@ -101,11 +113,12 @@ fun TastyRecipe.toAppRecipe(): Recipe {
         isGlutenFree = isGlutenFree,
         isDairyFree = isDairyFree,
         isKeto = isKeto,
-        isPaleo = false,
-        isLowFodmap = false,
-        diets = dietsList,
+        isPaleo = false, // Tasty API doesn't have a clear paleo tag
+        isLowFodmap = false, // Tasty API doesn't have a clear low-fodmap tag
+        diets = tags, // Keep the original list for display if needed
         isPopular = (this.user_ratings?.score ?: 0.0) > 0.9,
-        nutrition = nutritionFacts
+        nutrition = nutritionFacts,
+        dietTags = tags // Assign the list to the new queryable field
     )
 }
 

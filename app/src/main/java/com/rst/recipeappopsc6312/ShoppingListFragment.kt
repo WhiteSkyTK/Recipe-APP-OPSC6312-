@@ -93,7 +93,7 @@ class ShoppingListFragment : Fragment() {
     private fun setupObservers() {
         viewModel.allShoppingLists.observe(viewLifecycleOwner) { lists ->
             // We'll add special "All" and "My List" options here
-            val listNames = mutableListOf("All Items 🛒", "My List 📝")
+            val listNames = mutableListOf(getString(R.string.shopping_list_all_items), getString(R.string.shopping_list_my_list))
             listNames.addAll(lists.map { "${it.emoji} ${it.name}" })
 
             val adapter = ArrayAdapter(
@@ -124,12 +124,12 @@ class ShoppingListFragment : Fragment() {
         deleteListButton.setOnClickListener {
             // Show a confirmation dialog before deleting
             AlertDialog.Builder(requireContext())
-                .setTitle("Delete List 🗑️") // Emoji in title
-                .setMessage("Are you sure you want to delete this shopping list and all its items? 😥") // Emoji in message
-                .setPositiveButton("Delete") { _, _ ->
+                .setTitle(getString(R.string.shopping_list_delete_dialog_title))
+                .setMessage(getString(R.string.shopping_list_delete_dialog_message))
+                .setPositiveButton(getString(R.string.delete)) { _, _ ->
                     viewModel.deleteCurrentList()
                 }
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show()
         }
 
@@ -159,8 +159,8 @@ class ShoppingListFragment : Fragment() {
                 val item = shoppingListAdapter.currentList[position]
                 viewModel.deleteItem(item) // Delegate deletion to ViewModel
 
-                Snackbar.make(requireView(), "🗑️ ${item.name} deleted", Snackbar.LENGTH_LONG)
-                    .setAction("UNDO") {
+                Snackbar.make(requireView(), getString(R.string.shopping_list_item_deleted_snackbar, item.name), Snackbar.LENGTH_LONG)
+                    .setAction(getString(R.string.undo)) {
                         viewModel.addItem(item) // Delegate re-adding to ViewModel
                     }.show()
             }
@@ -175,12 +175,12 @@ class ShoppingListFragment : Fragment() {
         if (isInSelectionMode) {
             fabAddItem.hide()
             fabDeleteItems.show()
-            titleTextView.text = "$count item(s) selected"
+            titleTextView.text = resources.getQuantityString(R.plurals.shopping_list_selection_count, count, count)
         } else {
             // UPDATED: Use the new 'canAddItem' boolean
             if (canAddItem) fabAddItem.show() else fabAddItem.hide()
             fabDeleteItems.hide()
-            titleTextView.text = listsSpinner.selectedItem?.toString() ?: "Shopping List 🍽️"
+            titleTextView.text = listsSpinner.selectedItem?.toString() ?: getString(R.string.shopping_list_default_title)
         }
     }
 
@@ -189,9 +189,9 @@ class ShoppingListFragment : Fragment() {
         val editTextItems = dialogView.findViewById<EditText>(R.id.editTextItems)
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Add Shopping Items")
+            .setTitle(getString(R.string.shopping_list_add_items_title))
             .setView(dialogView)
-            .setPositiveButton("Add") { dialog, _ ->
+            .setPositiveButton(getString(R.string.add)) { dialog, _ ->
                 val itemsText = editTextItems.text.toString()
                 if (itemsText.isNotBlank()) {
                     val itemNames = itemsText.split("\n")
@@ -200,11 +200,11 @@ class ShoppingListFragment : Fragment() {
                     // CORRECTED: Tell the ViewModel to add the new items.
                     viewModel.addItems(itemNames)
 
-                    Toast.makeText(context, "${itemNames.size} items added.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, resources.getQuantityString(R.plurals.shopping_list_toast_items_added, itemNames.size, itemNames.size), Toast.LENGTH_SHORT).show()
                 }
                 dialog.dismiss()
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
                 dialog.cancel()
             }
             .create()

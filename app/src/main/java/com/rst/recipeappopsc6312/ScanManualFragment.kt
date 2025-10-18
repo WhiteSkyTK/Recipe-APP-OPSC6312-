@@ -79,14 +79,14 @@ class ScanManualFragment : Fragment() {
                 intent.putStringArrayListExtra("INGREDIENTS", ArrayList(ingredients))
                 startActivity(intent)
             } else {
-                Toast.makeText(context, "Please add some ingredients first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.scan_manual_add_ingredients_first), Toast.LENGTH_SHORT).show()
             }
         }
 
         voiceButton.setOnClickListener {
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_PROMPT, "Say your ingredients...")
+                putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.scan_manual_voice_prompt))
                 // We can set the language to English, but it will often default to the user's system language
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH)
             }
@@ -94,7 +94,7 @@ class ScanManualFragment : Fragment() {
                 voiceLauncher.launch(intent)
             } catch (e: Exception) {
                 // This can happen if the device doesn't have a voice recognition service
-                Toast.makeText(context, "Voice recognition is not available on this device", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.scan_manual_voice_not_available), Toast.LENGTH_SHORT).show()
             }
         }
 
