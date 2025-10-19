@@ -60,7 +60,7 @@
     <!--About-->
     <string name="about_harmony_kitchen">Hi ta Harmony Kitchen 🍲</string>
     <string name="our_mission">🎯 Xikongomelo xa Hina</string>
-    <string name="harmony_kitchen_is_a_final_year_project_designed_to_bring_delicious_easy_to_make_recipes_to_your_fingertips_tailored_to_the_ingredients_you_have_and_the_flavors_you_love">Harmony Kitchen i phurojeke ya lembe ro hetelela leyi endleriweke ku tisa swakudya swa nandziha na swo olova ku swi endla, swi fambisana na swilala leswi u nga na swona na swin\'wiw'wi leswi u swi rhandzaka.</string>
+    <string name="harmony_kitchen_is_a_final_year_project_designed_to_bring_delicious_easy_to_make_recipes_to_your_fingertips_tailored_to_the_ingredients_you_have_and_the_flavors_you_love">Harmony Kitchen i phurojeke ya lembe ro hetelela leyi endleriweke ku tisa swakudya swa nandziha na swo olova ku swi endla, swi fambisana na swilala leswi u nga na swona na swin\'wiw\'wi leswi u swi rhandzaka.</string>
     <string name="the_team_rst_innovations">👥 Ntlawa: RST Innovations</string>
     <string name="this_app_was_proudly_developed_by_students_of_rosebank_college_n_tokollo_nonyane_n_sagwadi_mashimbye_n_rinae_magadagela">App leyi yi endliwile hi ku tinyungubyisa hi swichudeni swa Rosebank College:\n• Tokollo Nonyane\n• Sagwadi Mashimbye\n• Rinae Magadagela</string>
     <string name="credits_amp_attributions"><![CDATA[©️ Swikweleti na Nkhensani]]></string>
@@ -309,7 +309,7 @@
         <item>Ku swekiwa yini nimixo lowu? 🥞</item>
         <item>Siku ro saseka ri sungula hi swakudya swo saseka!</item>
         <item>Avuxeni, dyambu! ☀️</item>
-        <item>Siku rintshwa, swin\'wiw'wi leswintshwa! 🍯</item>
+        <item>Siku rintshwa, swin\'wiw\'wi leswintshwa! 🍯</item>
         <item>Kofi ro sungula, kutani u hlula siku! ☕</item>
         <item>Mintlhaveko ya mixo ntsena! 🌸</item>
         <item>Swakudya swa mixo swi lunghile! 🍞🥓</item>
@@ -391,7 +391,7 @@
         <item>Nkarhi wa swin\'wiw\'wi leswi rhulaka moya! 🍲</item>
         <item>Madyambu yo nandziha ma le mahlweni! 😋</item>
         <item>Swakudya swa madyambu na ku wisanyana! 🍷</item>
-        <item>Tiphine hi ku luma kun\'wana na kun'wana! 🥗</item>
+        <item>Tiphine hi ku luma kun\'wana na kun\'wana! 🥗</item>
         <item>Swakudya swa madyambu, mintlhaveko yo tsaka! 🌙</item>
         <item>Hetisa siku hi nantswo! 🍝</item>
         <item>Nkarhi wa swakudya swa madyambu swa ndyangu! 🥘👨‍👩‍👧‍👦</item>
@@ -584,7 +584,7 @@
     <string name="onboarding_discover_title">Kuma Tiresepi Tontshwa</string>
     <string name="onboarding_discover_text">Lavisisa misava ya tiresepi ta mani na mani leti avelanaka hi vaaki.</string>
     <string name="onboarding_add_recipe_title">Engetela Vutumbuluxi bya Wena</string>
-    <string name="onboarding_add_recipe_text">Tlanya konopo ya \'+\' nkarhi wun\'wana na wun'wana ku engetela tiresepi ta wena.</string>
+    <string name="onboarding_add_recipe_text">Tlanya konopo ya \'+\' nkarhi wun\'wana na wun\'wana ku engetela tiresepi ta wena.</string>
     <string name="onboarding_scan_title">Skena Swilala</string>
     <string name="onboarding_scan_text">Tirhisa khamera ya wena ku kuma tiresepi hi ku ya hi leswi nga exikitsini xa wena.</string>
     <string name="onboarding_cart_title">Minxaxamelo ya Vuxavisi</string>
