@@ -659,5 +659,6 @@
     <!-- WelcomeActivity -->
     <string name="welcome_firebase_auth_failed">Vhuṱanzi bya Firebase vhu kundile: %1$s</string>
     <string name="welcome_google_sign_in_failed">U dzhena nga Google zwo kundwa: %1$s</string>
+    <string name="surprise_me">Suprise Me</string>
 
 </resources>

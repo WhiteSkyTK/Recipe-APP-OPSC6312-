@@ -33,6 +33,7 @@ import androidx.lifecycle.lifecycleScope
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -196,9 +197,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         // ++ ADDED LOGGING to the observer to help debug ++
-        mainViewModel.hasUnreadNotifications.observe(this) { hasUnread ->
-            Log.d(TAG, "Observer notified: hasUnreadNotifications is now $hasUnread")
-            notificationDotIcon.visibility = if (hasUnread) View.VISIBLE else View.GONE
+        lifecycleScope.launch {
+            mainViewModel.hasUnreadNotifications.collect { hasUnread ->
+                Log.d(TAG, "Collector notified: hasUnreadNotifications is now $hasUnread")
+                notificationDotIcon.visibility = if (hasUnread) View.VISIBLE else View.GONE
+            }
         }
     }
 
@@ -339,17 +342,20 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        mainViewModel.notifications.observe(this) { notifications ->
-            if (notifications.isNullOrEmpty()) {
-                noItemsTextView.visibility = View.VISIBLE
-                recyclerView.visibility = View.GONE
-                viewAll.visibility = View.GONE
-                noItemsTextView.text = getString(R.string.no_new_notifications)
-            } else {
-                noItemsTextView.visibility = View.GONE
-                recyclerView.visibility = View.VISIBLE
-                viewAll.visibility = View.VISIBLE
-                recyclerView.adapter = NotificationAdapter(notifications.take(3)) // Show up to 3 in the popup
+        lifecycleScope.launch {
+            mainViewModel.notifications.collect { notifications ->
+                if (notifications.isNullOrEmpty()) {
+                    noItemsTextView.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
+                    viewAll.visibility = View.GONE
+                    noItemsTextView.text = getString(R.string.no_new_notifications)
+                } else {
+                    noItemsTextView.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
+                    viewAll.visibility = View.VISIBLE
+                    recyclerView.adapter =
+                        NotificationAdapter(notifications.take(3)) // Show up to 3 in the popup
+                }
             }
         }
 

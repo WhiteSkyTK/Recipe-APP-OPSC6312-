@@ -666,5 +666,6 @@
     <!-- WelcomeActivity -->
     <string name="welcome_firebase_auth_failed">Netefatšo ya Firebase e paletswe: %1$s</string>
     <string name="welcome_google_sign_in_failed">Go tsena ka Google go paletswe: %1$s</string>
+    <string name="surprise_me">Suprise Me</string>
 
 </resources>

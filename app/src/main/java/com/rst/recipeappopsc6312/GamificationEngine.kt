@@ -64,6 +64,7 @@ class GamificationEngine(
             // Send a notification for the first new badge earned in this check
             val firstNewBadge = newlyEarnedBadges.first()
             repository.createNotification(
+                userId, // <-- Pass the userId here
                 "Badge Unlocked! 🎉",
                 "You've earned the '${firstNewBadge.title}' badge!",
                 firstNewBadge.iconName

@@ -27,6 +27,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
@@ -195,15 +197,18 @@ class AddRecipeFragment : Fragment() {
                 // Trigger a notification for successful uploads
                 if (!result.isDelete) {
                     val recipeName = view.findViewById<TextInputLayout>(R.id.textInputLayoutRecipeName).editText?.text.toString()
-                    lifecycleScope.launch {
-                        viewModel.repository.createNotification(
-                            getString(R.string.notification_upload_success_title),
-                            getString(R.string.notification_upload_success_body, recipeName), // Pass recipeName as placeholder
-                            "ic_new_recipe"
-                        )
+                    val userId = Firebase.auth.currentUser?.uid
+                    if (userId != null) {
+                        lifecycleScope.launch {
+                            viewModel.repository.createNotification(
+                                userId,
+                                getString(R.string.notification_upload_success_title),
+                                getString(R.string.notification_upload_success_body, recipeName),
+                                "ic_notification"
+                            )
+                        }
                     }
                 }
-
                 if (result.isDelete) {
                     parentFragmentManager.popBackStack()
                 } else {

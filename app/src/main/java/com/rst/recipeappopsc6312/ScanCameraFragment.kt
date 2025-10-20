@@ -21,8 +21,6 @@ import androidx.fragment.app.activityViewModels
 import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -102,31 +100,30 @@ class ScanCameraFragment : Fragment() {
             if (mediaImage != null) {
                 val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
 
-                // Call the new ViewModel function for object detection
-                viewModel.processImageFromCamera(
+                viewModel.processImageForIngredients(
                     image = image,
                     onSuccess = { labels ->
                         activity?.runOnUiThread {
                             if (labels.isNotEmpty()) {
                                 labels.forEach { viewModel.addIngredient(it) }
-                                lottieAnimationView.visibility = View.GONE
                                 Toast.makeText(context, getString(R.string.scan_camera_ingredients_found, labels.joinToString()), Toast.LENGTH_SHORT).show()
                             } else {
-                                lottieAnimationView.visibility = View.GONE
                                 Toast.makeText(context, getString(R.string.scan_camera_no_ingredients_identified), Toast.LENGTH_SHORT).show()
                             }
                         }
                     },
                     onFailure = { e ->
                         activity?.runOnUiThread {
-                            lottieAnimationView.visibility = View.GONE
                             Toast.makeText(context, getString(R.string.scan_camera_detection_failed), Toast.LENGTH_SHORT).show()
                         }
-                        Log.e(TAG, "Object detection failed", e)
+                        Log.e(TAG, "Combined ML processing failed", e)
                     },
                     onComplete = {
+                        activity?.runOnUiThread {
+                            lottieAnimationView.visibility = View.GONE
+                        }
                         imageProxy.close()
-                        // Stop analyzing after one frame to prevent continuous scanning
+                        // Stop analyzing after one frame.
                         imageAnalyzer?.clearAnalyzer()
                     }
                 )

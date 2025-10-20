@@ -114,10 +114,12 @@ class HomeFragment : Fragment() {
     private fun observeViewModel(view: View) {
         val timeOfDayTitle = view.findViewById<TextView>(R.id.textViewTimeOfDayTitle)
 
-        mainViewModel.networkStatus.observe(viewLifecycleOwner) { isConnected ->
-            contentScrollView.visibility = if (isConnected) View.VISIBLE else View.GONE
-            offlineContainer.visibility = if (isConnected) View.GONE else View.VISIBLE
-            swipeRefreshLayout.isEnabled = isConnected
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.networkStatus.collect { isConnected ->
+                contentScrollView.visibility = if (isConnected) View.VISIBLE else View.GONE
+                offlineContainer.visibility = if (isConnected) View.GONE else View.VISIBLE
+                swipeRefreshLayout.isEnabled = isConnected
+            }
         }
 
         shoppingViewModel.isInitiallyLoading.observe(viewLifecycleOwner) { isLoading ->

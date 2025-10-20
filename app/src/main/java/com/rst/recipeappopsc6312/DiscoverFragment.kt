@@ -19,11 +19,13 @@ import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
 
 class DiscoverFragment : Fragment() {
 
@@ -144,14 +146,16 @@ class DiscoverFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        mainViewModel.networkStatus.observe(viewLifecycleOwner) { isConnected ->
-            if (isConnected) {
-                offlineContainer.visibility = View.GONE
-            } else {
-                offlineContainer.visibility = View.VISIBLE
-                contentLayout.visibility = View.GONE
-                loadingOverlay.visibility = View.GONE
-                swipeRefreshLayout.isRefreshing = false
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.networkStatus.collect { isConnected ->
+                if (isConnected) {
+                    offlineContainer.visibility = View.GONE
+                } else {
+                    offlineContainer.visibility = View.VISIBLE
+                    contentLayout.visibility = View.GONE
+                    loadingOverlay.visibility = View.GONE
+                    swipeRefreshLayout.isRefreshing = false
+                }
             }
         }
 

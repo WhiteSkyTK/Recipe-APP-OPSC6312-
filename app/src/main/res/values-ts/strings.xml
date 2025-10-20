@@ -659,5 +659,6 @@
     <!-- WelcomeActivity -->
     <string name="welcome_firebase_auth_failed">Netefatso ya Firebase yi tsandzekile: %1$s</string>
     <string name="welcome_google_sign_in_failed">Ku nghena hi Google swi tsandzekile: %1$s</string>
+    <string name="surprise_me">Suprise Me</string>
 
 </resources>

@@ -1,38 +1,49 @@
 package com.rst.recipeappopsc6312
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(repository) {
 
-    private val _notifications = MutableLiveData<List<Notification>>()
-    val notifications: LiveData<List<Notification>> = _notifications
+    private val _notifications = MutableStateFlow<List<Notification>>(emptyList())
+    val notifications: StateFlow<List<Notification>> = _notifications.asStateFlow()
 
-    private val _networkStatus = MutableLiveData<Boolean>()
-    val networkStatus: LiveData<Boolean> = _networkStatus
+    private val _networkStatus = MutableStateFlow(true)
+    val networkStatus: StateFlow<Boolean> = _networkStatus.asStateFlow()
 
-    private val _hasUnreadNotifications = MutableLiveData<Boolean>()
-    val hasUnreadNotifications: LiveData<Boolean> = _hasUnreadNotifications
+    private val _hasUnreadNotifications = MutableStateFlow(false)
+    val hasUnreadNotifications: StateFlow<Boolean> = _hasUnreadNotifications.asStateFlow()
 
-    fun fetchNotifications() {
+    private fun startListeningForNotifications() {
+        val userId = Firebase.auth.currentUser?.uid ?: return
+
         viewModelScope.launch {
-            val fetchedNotifications = repository.getNotifications()
-            _notifications.postValue(fetchedNotifications)
-            // Check if any of the fetched notifications are unread
-            _hasUnreadNotifications.postValue(fetchedNotifications.any { !it.isRead })
+            repository.getNotificationsForUser(userId).collect { notificationsList ->
+                _notifications.value = notificationsList
+                _hasUnreadNotifications.value = notificationsList.any { !it.isRead }
+            }
         }
     }
 
     fun markAllNotificationsAsRead() {
         viewModelScope.launch {
-            repository.markAllNotificationsAsRead()
-            // After updating, fetch the list again to update the UI state
-            fetchNotifications()
+            val userId = Firebase.auth.currentUser?.uid ?: return@launch
+
+            // 1. Get the current list of notifications from our state.
+            val unreadNotificationIds = _notifications.value
+                .filter { !it.isRead } // Find the unread ones.
+                .map { it.id }         // Get their unique document IDs.
+
+            // 2. If there are any, tell the repository to update them.
+            if (unreadNotificationIds.isNotEmpty()) {
+                repository.markNotificationsAsRead(userId, unreadNotificationIds)
+            }
         }
     }
 
@@ -44,8 +55,6 @@ class MainViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(reposi
         val userId = Firebase.auth.currentUser?.uid
         if (userId != null) {
             viewModelScope.launch {
-                // This tells the repository to download favorites from Firebase
-                // and save them into the local Room database.
                 repository.syncFavoritesFromFirebase(userId)
             }
         }
@@ -68,7 +77,7 @@ class MainViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(reposi
         viewModelScope.launch {
             repository.seedFirebaseDatabase()
         }
-        // Fetch notifications once when the ViewModel is created
-        fetchNotifications()
+        startListeningForNotifications()
     }
 }
+

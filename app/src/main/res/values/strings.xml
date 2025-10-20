@@ -667,5 +667,6 @@
     <!-- WelcomeActivity -->
     <string name="welcome_firebase_auth_failed">Firebase Auth failed: %1$s</string>
     <string name="welcome_google_sign_in_failed">Google Sign-In failed: %1$s</string>
+    <string name="surprise_me">Suprise Me</string>
 
 </resources>

@@ -9,12 +9,16 @@ import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.Query
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -924,23 +928,27 @@ class ShoppingRepository(
         recipeDao.updateFavoriteStatus(recipe.id, newFavoriteState)
     }
 
-    // ++ ADD THIS FUNCTION to mark notifications as read in Firestore ++
-    suspend fun markAllNotificationsAsRead() {
-        val userId = FirebaseManager.auth.currentUser?.uid ?: return
+    /**
+     * Marks all of a user's unread notifications as read in Firestore.
+     */
+    suspend fun markNotificationsAsRead(userId: String, notificationIds: List<String>) {
         try {
             val notificationsRef = firestore.collection("users").document(userId).collection("notifications")
             val unreadNotifications = notificationsRef.whereEqualTo("isRead", false).get().await()
 
-            if (unreadNotifications.isEmpty) return // Nothing to do
+            if (unreadNotifications.isEmpty) {
+                Log.d("Notifications", "No unread notifications to mark as read for user $userId.")
+                return
+            }
 
             val batch = firestore.batch()
             for (doc in unreadNotifications.documents) {
                 batch.update(doc.reference, "isRead", true)
             }
             batch.commit().await()
-            Log.d("Notifications", "Marked ${unreadNotifications.size()} notifications as read.")
+            Log.d("Notifications", "Marked ${unreadNotifications.size()} notifications as read for user $userId.")
         } catch (e: Exception) {
-            Log.e("Notifications", "Error marking notifications as read", e)
+            Log.e("Notifications", "Error marking notifications as read for user $userId", e)
         }
     }
 
@@ -1113,21 +1121,54 @@ class ShoppingRepository(
         }
     }
 
-    suspend fun createNotification(title: String, message: String, iconName: String) {
+    /**
+     * Creates a new notification and saves it to a specific user's private sub-collection.
+     */
+    suspend fun createNotification(userId: String, title: String, message: String, iconName: String) {
         try {
             val notification = mapOf(
                 "title" to title,
-                "message" to message, // Using 'message' to match your likely data model
-                "iconName" to iconName, // Storing the name of the icon
+                "message" to message,
+                "iconName" to iconName,
+                "isRead" to false, // Always starts as unread
                 "timestamp" to com.google.firebase.firestore.FieldValue.serverTimestamp()
             )
-            firestore.collection("notifications").add(notification).await()
-            Log.d("Notifications", "Successfully created notification: $title")
+            firestore.collection("users").document(userId).collection("notifications").add(notification).await()
+            Log.d("Notifications", "Successfully created notification for user $userId: $title")
         } catch (e: Exception) {
-            Log.e("Notifications", "Error creating notification", e)
+            Log.e("Notifications", "Error creating notification for user $userId", e)
         }
     }
 
+    /**
+     * Sets up a real-time listener for a user's notifications.
+     * This will automatically provide updates whenever a notification is added or changed.
+     * It returns a Flow that the ViewModel can collect.
+     */
+    fun getNotificationsForUser(userId: String): Flow<List<Notification>> = callbackFlow {
+        Log.d("Notifications", "Setting up real-time listener for user $userId...")
+        val listenerRegistration = firestore.collection("users").document(userId).collection("notifications")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.w("Notifications", "Listener failed.", error)
+                    close(error) // Close the flow on error
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    val notifications = snapshot.toObjects(Notification::class.java)
+                    val unreadCount = notifications.count { !it.isRead }
+                    Log.d("Notifications", "Listener fired! Found ${notifications.size} notifications, $unreadCount are unread.")
+                    trySend(notifications) // Send the latest list to the flow collector
+                }
+            }
+        // This is called when the coroutine scope is cancelled, cleaning up the listener
+        awaitClose {
+            Log.d("Notifications", "Closing real-time listener.")
+            listenerRegistration.remove()
+        }
+    }
 
     suspend fun syncFavoritesFromFirebase(userId: String) {
         try {

@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -22,9 +23,29 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
         Log.d(TAG, "From: ${remoteMessage.from}")
 
-        remoteMessage.notification?.let {
-            Log.d(TAG, "Message Notification Body: ${it.body}")
-            sendNotification(it.title ?: "New Recipe Alert", it.body ?: "Check it out!")
+        remoteMessage.notification?.let { notification ->
+            Log.d(TAG, "Message Notification Body: ${notification.body}")
+
+            // 1. Show the system tray notification to the user
+            sendNotification(notification.title ?: "New Recipe Alert", notification.body ?: "Check it out!")
+
+            // --- ** NOTIFICATION CHANGE ** ---
+            // 2. Also save a copy of this notification to the user's private collection in Firestore.
+            // This ensures it appears in their in-app notification history.
+            val userId = Firebase.auth.currentUser?.uid
+            if (userId != null) {
+                val notificationData = mapOf(
+                    "title" to (notification.title ?: "New Notification"),
+                    "message" to (notification.body ?: "Check it out!"),
+                    "iconName" to "ic_notification", // A default icon for push notifications
+                    "isRead" to false,
+                    "timestamp" to FieldValue.serverTimestamp()
+                )
+                Firebase.firestore.collection("users").document(userId).collection("notifications")
+                    .add(notificationData)
+                    .addOnSuccessListener { Log.d(TAG, "Notification saved to user's private collection.") }
+                    .addOnFailureListener { e -> Log.w(TAG, "Error saving notification to user's collection.", e) }
+            }
         }
     }
 
@@ -35,13 +56,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun sendTokenToServer(token: String) {
-        // Get the current user's ID
         val userId = Firebase.auth.currentUser?.uid
         if (userId != null) {
-            // Create a map to update the user's profile
             val tokenData = hashMapOf("fcmToken" to token)
-
-            // Save the token to the 'users' collection
             Firebase.firestore.collection("users").document(userId)
                 .update(tokenData as Map<String, Any>)
                 .addOnSuccessListener { Log.d(TAG, "FCM token successfully updated for user: $userId") }
@@ -57,7 +74,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         val channelId = "recipe_channel"
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.ic_notification) // Make sure you have this icon
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(messageBody)
             .setAutoCancel(true)
@@ -75,3 +92,4 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         notificationManager.notify(0, notificationBuilder.build())
     }
 }
+

@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.objects.ObjectDetection
 import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.launch
 
 class ScanViewModel(private val repository: ShoppingRepository) : ViewModel() {
@@ -23,6 +25,108 @@ class ScanViewModel(private val repository: ShoppingRepository) : ViewModel() {
 
     // This holds the history for the history tab
     val scanHistory: LiveData<List<ScanHistoryItem>> = repository.getScanHistory()
+
+    // --- ** START OF ML COMBINATION LOGIC ** ---
+
+    /**
+     * The main function to process an image. It runs both object and text detection in parallel
+     * and merges the results.
+     */
+    @SuppressLint("UnsafeOptInUsageError")
+    fun processImageForIngredients(
+        image: InputImage,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (Exception) -> Unit,
+        onComplete: () -> Unit
+    ) {
+        val allDetectedItems = mutableSetOf<String>()
+        var objectDetectionFinished = false
+        var textRecognitionFinished = false
+
+        // Helper to check if both processes are done
+        fun checkCompletion() {
+            if (objectDetectionFinished && textRecognitionFinished) {
+                onSuccess(allDetectedItems.toList())
+                onComplete()
+            }
+        }
+
+        // 1. Run Object Detection
+        detectObjectsInImage(image,
+            onSuccess = { objectLabels ->
+                objectLabels.forEach { allDetectedItems.add(it) }
+                objectDetectionFinished = true
+                checkCompletion()
+            },
+            onFailure = {
+                objectDetectionFinished = true // Mark as finished even on failure
+                checkCompletion()
+            }
+        )
+
+        // 2. Run Text Recognition
+        detectTextInImage(image,
+            onSuccess = { textWords ->
+                textWords.forEach { allDetectedItems.add(it) }
+                textRecognitionFinished = true
+                checkCompletion()
+            },
+            onFailure = {
+                textRecognitionFinished = true // Mark as finished even on failure
+                checkCompletion()
+            }
+        )
+    }
+
+    /**
+     * Helper function specifically for running the Object Detection model.
+     */
+    private fun detectObjectsInImage(
+        image: InputImage,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val options = ObjectDetectorOptions.Builder()
+            .setDetectorMode(ObjectDetectorOptions.SINGLE_IMAGE_MODE)
+            .enableMultipleObjects()
+            .enableClassification()
+            .build()
+        val objectDetector = ObjectDetection.getClient(options)
+
+        objectDetector.process(image)
+            .addOnSuccessListener { detectedObjects ->
+                val labels = detectedObjects.mapNotNull { obj ->
+                    obj.labels.firstOrNull()?.text?.replaceFirstChar { it.uppercase() }
+                }.distinct()
+                onSuccess(labels)
+            }
+            .addOnFailureListener(onFailure)
+    }
+
+    /**
+     * Helper function specifically for running the Text Recognition model.
+     */
+    private fun detectTextInImage(
+        image: InputImage,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+        recognizer.process(image)
+            .addOnSuccessListener { visionText ->
+                val words = visionText.textBlocks.flatMap { block ->
+                    block.lines.flatMap { line ->
+                        line.elements.map { element ->
+                            element.text.trim().replaceFirstChar { it.uppercase() }
+                        }
+                    }
+                }.distinct()
+                onSuccess(words)
+            }
+            .addOnFailureListener(onFailure)
+    }
+
+    // --- ** END OF ML COMBINATION LOGIC ** ---
 
     fun findRecipesByIngredients(userIngredients: List<String>) {
         if (userIngredients.isEmpty()) return

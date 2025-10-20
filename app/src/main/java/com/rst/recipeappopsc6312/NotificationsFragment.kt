@@ -7,8 +7,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.launch
 
 class NotificationsFragment : Fragment() {
 
@@ -35,21 +37,20 @@ class NotificationsFragment : Fragment() {
 
         observeViewModel()
 
-        // Fetch the notifications when the fragment is created
-        mainViewModel.fetchNotifications()
-
         return view
     }
 
     private fun observeViewModel() {
-        mainViewModel.notifications.observe(viewLifecycleOwner) { notifications ->
-            if (notifications.isNullOrEmpty()) {
-                recyclerView.visibility = View.GONE
-                noNotificationsTextView.visibility = View.VISIBLE
-            } else {
-                recyclerView.visibility = View.VISIBLE
-                noNotificationsTextView.visibility = View.GONE
-                notificationAdapter.updateData(notifications) // Create this helper function in your adapter
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.notifications.collect { notifications ->
+                if (notifications.isNullOrEmpty()) {
+                    recyclerView.visibility = View.GONE
+                    noNotificationsTextView.visibility = View.VISIBLE
+                } else {
+                    recyclerView.visibility = View.VISIBLE
+                    noNotificationsTextView.visibility = View.GONE
+                    notificationAdapter.updateData(notifications)
+                }
             }
         }
     }
