@@ -22,3 +22,10 @@ object CuisineData {
         )
     }
 }
+
+object CuisineHelper {
+    // New function to get String names
+    fun getAllCuisineNames(context: android.content.Context): List<String> {
+        return CuisineData.getAllCuisines().map { context.getString(it.name) }
+    }
+}

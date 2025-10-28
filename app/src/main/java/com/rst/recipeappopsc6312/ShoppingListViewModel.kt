@@ -30,9 +30,14 @@ class ShoppingListViewModel(private val repository: ShoppingRepository) : ViewMo
         currentUser?.let { user ->
             userId.value = user.uid
             viewModelScope.launch {
+                // Ensure the default "My List" exists locally first
                 repository.ensureListExists(MY_LIST_ID, "My List", user.uid)
+                // ** ADD THIS LINE TO TRIGGER THE SYNC **
+                repository.syncShoppingDataFromFirebase(user.uid)
             }
         }
+        // If currentUser is null initially, you might need an observer
+        // on the auth state to trigger the sync when the user logs in.
     }
 
     val currentShoppingItems: LiveData<List<ShoppingItem>> = _selectedListId.switchMap { listId ->
@@ -105,10 +110,14 @@ class ShoppingListViewModel(private val repository: ShoppingRepository) : ViewMo
 
     fun addItems(itemNames: List<String>) {
         viewModelScope.launch {
-            val listId = _selectedListId.value ?: MY_LIST_ID
+            var targetListId = _selectedListId.value ?: MY_LIST_ID // Default to My List if null
+            // If "All Items" is selected, force add to "My List" instead.
+            if (targetListId == ALL_ITEMS_ID) {
+                targetListId = MY_LIST_ID
+            }
             val currentUserId = userId.value ?: return@launch
-            val newItems = itemNames.map { name -> ShoppingItem(ownerListId = listId, name = name) }
-            repository.addItems(newItems, listId, currentUserId)
+            val newItems = itemNames.map { name -> ShoppingItem(ownerListId = targetListId, name = name) }
+            repository.addItems(newItems, targetListId, currentUserId)
         }
     }
 

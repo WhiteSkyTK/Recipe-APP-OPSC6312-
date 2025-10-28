@@ -55,9 +55,11 @@ class WelcomeActivity : AppCompatActivity() {
                                     Log.d(TAG, "New user detected. Creating default profile...")
                                     // If it's a new user, create their default profile
                                     lifecycleScope.launch {
-                                        task.result?.user?.let {
-                                            viewModel.repository.createDefaultUserProfile(it)
-                                            Log.d(TAG, "Default profile created for user: ${it.uid}")
+                                        task.result?.user?.let { firebaseUser ->
+                                            // Get the string names *here* using the Activity's context
+                                            val cuisineNames = CuisineHelper.getAllCuisineNames(applicationContext)
+                                            viewModel.repository.createDefaultUserProfile(firebaseUser, cuisineNames) // Pass the names
+                                            Log.d(TAG, "Default profile created for user: ${firebaseUser.uid}")
                                         }
                                         navigateToMainApp()
                                     }
