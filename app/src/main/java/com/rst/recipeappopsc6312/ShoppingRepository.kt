@@ -1065,15 +1065,14 @@ class ShoppingRepository(
     }
 
     // ++ ADD THIS FUNCTION to create the default profile for SSO users ++
-    suspend fun createDefaultUserProfile(user: com.google.firebase.auth.FirebaseUser) {
+    suspend fun createDefaultUserProfile(user: com.google.firebase.auth.FirebaseUser, cuisineNames: List<String>) { // Pass the names
         val userProfile = mapOf(
             "full_name" to user.displayName,
             "email" to user.email,
             "username" to (user.email?.split("@")?.get(0) ?: "user_${user.uid.take(6)}"),
             "selected_country" to "South Africa",
-            "selected_cuisines" to CuisineData.getAllCuisines().map { it.name },
-            "selected_diets" to emptyList<String>() // Defaulting to none
-            // Note: phone number, gender, and birthday require extra permissions and API setup
+            "selected_cuisines" to cuisineNames, // Use the pre-converted list
+            "selected_diets" to emptyList<String>()
         )
         firestore.collection("users").document(user.uid).set(userProfile).await()
     }
