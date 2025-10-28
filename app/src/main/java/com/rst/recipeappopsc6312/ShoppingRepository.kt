@@ -706,6 +706,18 @@ class ShoppingRepository(
         }
 
         if (itemsToInsert.isNotEmpty()) {
+            // ++ START: DEBUGGING STEP ++
+            // Verify the parent list exists before inserting items
+            val parentListExists = shoppingDao.getListById(listId) != null
+            if (!parentListExists) {
+                // Log an error if the parent list doesn't exist in the database
+                Log.e("ShoppingRepo", "CRITICAL ERROR: Parent ShoppingList with ID $listId NOT FOUND in Room DB before inserting items! Aborting item insert.")
+                // Stop this function here to prevent the crash
+                return
+            }
+            // Log success if the parent list is found
+            Log.d("ShoppingRepo", "Parent list $listId confirmed to exist in Room DB. Proceeding with item insert.")
+            // ++ END: DEBUGGING STEP ++
             shoppingDao.insertItems(itemsToInsert)
             // Sync new items to Firebase
             itemsToInsert.forEach { item ->
@@ -1188,6 +1200,60 @@ class ShoppingRepository(
             }
         } catch (e: Exception) {
             Log.e("Sync", "Error syncing favorites from Firebase", e)
+        }
+    }
+
+    suspend fun syncShoppingDataFromFirebase(userId: String) {
+        Log.d("Sync", "Starting shopping data sync from Firebase for user $userId.")
+        if (userId.isBlank()){
+            Log.w("Sync", "User ID is blank, cannot sync shopping data.")
+            return
+        }
+        try {
+            // 1. Fetch Lists from Firestore
+            val firestoreListsSnapshot = firestore.collection("users").document(userId)
+                .collection("shopping_lists").get().await()
+            val firestoreLists = firestoreListsSnapshot.toObjects(ShoppingList::class.java)
+            Log.d("Sync", "Fetched ${firestoreLists.size} lists from Firestore.")
+
+            // 2. Insert/Update Lists into Room
+            if (firestoreLists.isNotEmpty()) {
+                // Using insertShoppingLists which should handle conflicts (replace)
+                shoppingDao.insertShoppingLists(firestoreLists)
+                Log.d("Sync", "Upserted ${firestoreLists.size} lists into Room.")
+            }
+
+            // 3. Fetch Items for EACH list from Firestore
+            var totalItemsSynced = 0
+            firestoreLists.forEach { list ->
+                try { // Add inner try-catch for item fetching per list
+                    val firestoreItemsSnapshot = firestore.collection("users").document(userId)
+                        .collection("shopping_lists").document(list.listId)
+                        .collection("items").get().await()
+                    val firestoreItems = firestoreItemsSnapshot.toObjects(ShoppingItem::class.java)
+
+                    if (firestoreItems.isNotEmpty()) {
+                        // 4. Insert/Update Items into Room
+                        // Ensure ownerListId is correct before inserting (should be, but safe)
+                        val validItems = firestoreItems.filter { it.ownerListId == list.listId }
+                        if (validItems.isNotEmpty()) {
+                            shoppingDao.insertItems(validItems) // Assumes insertItems handles conflicts
+                            totalItemsSynced += validItems.size
+                            //Log.d("Sync", "Upserted ${validItems.size} items for list ${list.listId} into Room.")
+                        }
+                        if (validItems.size != firestoreItems.size) {
+                            Log.w("Sync", "Found ${firestoreItems.size - validItems.size} items with mismatched ownerListId for list ${list.listId}.")
+                        }
+                    }
+                } catch (itemError: Exception) {
+                    Log.e("Sync", "Error syncing items for list ${list.listId}", itemError)
+                }
+            }
+            Log.d("Sync", "Finished syncing shopping data. Total items synced: $totalItemsSynced")
+
+        } catch (e: Exception) {
+            Log.e("Sync", "Error syncing shopping data from Firebase for user $userId", e)
+            // Handle error appropriately - maybe notify the user?
         }
     }
 }
