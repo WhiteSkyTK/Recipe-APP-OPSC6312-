@@ -18,7 +18,7 @@ class DietAdapter(private val onClick: (Diet) -> Unit) :
         private val name: TextView = itemView.findViewById(R.id.textViewDietName)
 
         fun bind(diet: Diet) {
-            name.text = diet.name
+            name.text = itemView.context.getString(diet.name)
             itemView.isSelected = diet.isSelected
             Glide.with(itemView.context)
                 .load(diet.imageResId)

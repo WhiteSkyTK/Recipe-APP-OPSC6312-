@@ -1,6 +1,8 @@
 [versions]
 agp = "8.13.0"
+firebaseAdmin = "9.3.0"
 firebaseBom = "34.3.0"
+firebaseMessagingKtx = "24.1.2"
 fragmentKtx = "1.8.9"
 gson = "2.13.2"
 kotlin = "2.2.20"
@@ -15,6 +17,7 @@ activity = "1.11.0"
 constraintlayout = "2.2.1"
 lottie = "6.6.9"
 circleimageview = "3.1.0"
+playServicesAuth = "21.4.0"
 retrofit = "3.0.0"
 glide = "5.0.5"
 
@@ -27,6 +30,7 @@ firebaseAuth = "24.0.1"
 media3CommonKtx = "1.8.0"    # Latest stable Ktor
 textRecognition = "16.0.1"
 uiText = "1.9.2"
+jetbrainsKotlinJvm = "2.2.20"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,11 +42,14 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomTest
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomTesting" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "roomTesting" }
 
+firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebaseAdmin" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version = "23.2.1" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version = "25.1.4" }
+firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx", version = "21.0.2" }
+google-firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
@@ -53,6 +60,7 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circleimageview" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
@@ -69,3 +77,4 @@ androidx-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.re
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }

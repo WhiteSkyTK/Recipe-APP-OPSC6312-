@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -24,6 +22,7 @@
             android:id="@+id/imageViewBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:contentDescription="@string/todo"
             android:src="@drawable/ic_arrow_back"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"/>
@@ -31,7 +30,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="About Harmony Kitchen 🍲"
+            android:text="@string/about_harmony_kitchen"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColor"
@@ -52,14 +51,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🎯 Our Mission"
+                    android:text="@string/our_mission"
                     android:textStyle="bold"
                     android:textSize="16sp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Harmony Kitchen is a final year project designed to bring delicious, easy-to-make recipes to your fingertips, tailored to the ingredients you have and the flavors you love."/>
+                    android:text="@string/harmony_kitchen_is_a_final_year_project_designed_to_bring_delicious_easy_to_make_recipes_to_your_fingertips_tailored_to_the_ingredients_you_have_and_the_flavors_you_love"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -77,14 +76,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="👥 The Team: RST Innovations"
+                    android:text="@string/the_team_rst_innovations"
                     android:textStyle="bold"
                     android:textSize="16sp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="This app was proudly developed by students of Rosebank College:\n• Tokollo Nonyane\n• Sagwadi Mashimbye\n• Rinae Magadagela"/>
+                    android:text="@string/this_app_was_proudly_developed_by_students_of_rosebank_college_n_tokollo_nonyane_n_sagwadi_mashimbye_n_rinae_magadagela"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -102,14 +101,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="©️ Credits &amp; Attributions"
+                    android:text="@string/credits_amp_attributions"
                     android:textStyle="bold"
                     android:textSize="16sp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="UI/UX Design: Figma\nPhotos: Unsplash\nIcons: Material Design Icons"/>
+                    android:text="@string/ui_ux_design_figma_nphotos_unsplash_nicons_material_design_icons"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -119,7 +118,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="32dp"
-        android:text="Are you enjoying the app so far? 😊"/>
+        android:text="@string/are_you_enjoying_the_app_so_far"/>
 
     <!-- Version Number -->
     <TextView
@@ -129,7 +128,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="16dp"
         android:textColor="@android:color/darker_gray"
-        tools:text="Version 1.0.0"/>
+        tools:text="@string/VersionNumber"/>
 
     </LinearLayout>
 </ScrollView>

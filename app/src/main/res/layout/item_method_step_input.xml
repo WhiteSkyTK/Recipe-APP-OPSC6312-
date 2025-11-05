@@ -10,7 +10,7 @@
         android:id="@+id/textViewStepNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1."
+        android:text="@string/_1"
         android:textSize="16sp"
         android:layout_marginEnd="8dp"/>
 
@@ -19,7 +19,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:hint="Step details...">
+        android:hint="@string/step_details">
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -29,6 +29,7 @@
         android:id="@+id/buttonRemoveStep"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@string/todo"
         android:src="@drawable/ic_delete"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:layout_marginStart="8dp"/>

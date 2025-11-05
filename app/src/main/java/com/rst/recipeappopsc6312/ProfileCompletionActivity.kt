@@ -32,7 +32,6 @@ import java.util.Calendar
 import java.io.FileOutputStream
 import java.util.Locale
 
-
 class ProfileCompletionActivity : AppCompatActivity() {
 
     private lateinit var profileImageView: CircleImageView
@@ -68,7 +67,7 @@ class ProfileCompletionActivity : AppCompatActivity() {
         if (isGranted) {
             openCamera()
         } else {
-            Toast.makeText(this, "Camera permission is required to take a photo.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.profile_completion_permission_camera_required), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -112,7 +111,7 @@ class ProfileCompletionActivity : AppCompatActivity() {
     }
 
     private fun setupGenderDropdown() {
-        val genders = arrayOf("Male", "Female", "Other")
+        val genders = resources.getStringArray(R.array.gender_options)
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, genders)
         genderAutoComplete.setAdapter(adapter)
     }
@@ -149,9 +148,9 @@ class ProfileCompletionActivity : AppCompatActivity() {
 
 
     private fun showImagePickerDialog() {
-        val options = arrayOf("Take Photo", "Choose from Gallery", "Remove Photo")
+        val options = resources.getStringArray(R.array.dialog_cover_photo_options).map { it.toString() }.toTypedArray()
         AlertDialog.Builder(this)
-            .setTitle("Set Profile Picture")
+            .setTitle(getString(R.string.profile_completion_set_photo_title))
             .setItems(options) { dialog, which ->
                 when (which) {
                     0 -> checkCameraPermissionAndOpen()
@@ -218,11 +217,11 @@ class ProfileCompletionActivity : AppCompatActivity() {
     private fun validateInput(): Boolean {
         // Only Full Name and Phone Number are now required
         if (fullNameEditText.text.isNullOrBlank()) {
-            fullNameEditText.error = "Full name cannot be empty"
+            fullNameEditText.error = getString(R.string.validation_fullname_empty)
             return false
         }
         if (!ccp.isValidFullNumber) {
-            phoneEditText.error = "Invalid phone number" // Set error on the actual input field
+            phoneEditText.error = getString(R.string.validation_phone_invalid) // Set error on the actual input field
             return false
         }
         return true

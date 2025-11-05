@@ -53,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:icon="@drawable/ic_edit_profile_icon"
-                android:text="Edit Profile"/>
+                android:text="@string/edit_profile_setting"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonMyRecipes"
@@ -62,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 app:icon="@drawable/ic_my_recipes_icon"
-                android:text="My Recipes"/>
+                android:text="@string/my_recipes"/>
         </LinearLayout>
 
         <!-- Account Settings Card -->
@@ -80,33 +80,42 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="👤 Account"
+                    android:text="@string/account"
                     android:textStyle="bold"
                     android:textSize="16sp"/>
+
+                <TextView
+                    android:id="@+id/textViewBadges"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/my_badges_achievementsbtn"
+                    android:drawablePadding="16dp"
+                    android:paddingVertical="12dp"
+                    app:drawableStartCompat="@drawable/ic_badge" />
 
                 <TextView
                     android:id="@+id/textViewPreferences"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Preferences"
-                    android:drawableStart="@drawable/ic_preferences"
+                    android:text="@string/preferences_setting"
                     android:drawablePadding="16dp"
-                    android:paddingVertical="12dp"/>
+                    android:paddingVertical="12dp"
+                    app:drawableStartCompat="@drawable/ic_preferences" />
 
                 <TextView
                     android:id="@+id/textViewLanguage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Language"
-                    android:drawableStart="@drawable/ic_language"
+                    android:text="@string/language"
                     android:drawablePadding="16dp"
-                    android:paddingVertical="12dp"/>
+                    android:paddingVertical="12dp"
+                    app:drawableStartCompat="@drawable/ic_language" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/switchNotifications"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Notifications"
+                    android:text="@string/notifications_setting"
                     android:drawableStart="@drawable/ic_alert"
                     android:drawablePadding="16dp"
                     android:checked="true"
@@ -131,7 +140,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🛠️ Support &amp; About"
+                    android:text="@string/support_amp_about"
                     android:textStyle="bold"
                     android:textSize="16sp"/>
 
@@ -139,19 +148,19 @@
                     android:id="@+id/textViewAboutUs"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="About Us"
-                    android:drawableStart="@drawable/ic_about_us"
+                    android:text="@string/about_us"
                     android:drawablePadding="16dp"
-                    android:paddingVertical="12dp"/>
+                    android:paddingVertical="12dp"
+                    app:drawableStartCompat="@drawable/ic_about_us" />
 
                 <TextView
                     android:id="@+id/textViewReportIssue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Report an Issue"
-                    android:drawableStart="@drawable/ic_report_issue"
+                    android:text="@string/report_an_issue"
                     android:drawablePadding="16dp"
-                    android:paddingVertical="12dp"/>
+                    android:paddingVertical="12dp"
+                    app:drawableStartCompat="@drawable/ic_report_issue" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -163,7 +172,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="24dp"
             android:textColor="@android:color/darker_gray"
-            tools:text="Version 1.0.0"/>
+            tools:text="@string/VersionNumber"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonLogOut"
@@ -172,7 +181,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
-            android:text="Log Out"
+            android:text="@string/log_out"
             android:textColor="@color/design_default_color_error"
             app:icon="@drawable/ic_logout"
             app:iconTint="@color/design_default_color_error" />

@@ -37,10 +37,12 @@ class AboutUsActivity : AppCompatActivity() {
 
         try {
             val versionName = packageManager.getPackageInfo(packageName, 0).versionName
-            versionTextView.text = "Version $versionName"
+            // Use the string resource and pass the version name into the placeholder
+            versionTextView.text = getString(R.string.profile_version, versionName)
         } catch (e: Exception) {
             Log.e(TAG, "Couldn't get package info", e)
-            versionTextView.text = "Version 1.0"
+            // Use the same string resource with a fallback version number
+            versionTextView.text = getString(R.string.profile_version, "1.0")
         }
     }
 }

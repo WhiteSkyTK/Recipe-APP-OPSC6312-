@@ -10,18 +10,18 @@ data class TastyRecipe(
     val thumbnail_url: String?,
     val description: String?,
     val cook_time_minutes: Int?,
-    val prep_time_minutes: Int?,    // ++ ADD
-    val total_time_minutes: Int?,  // ++ ADD
-    val num_servings: Int?,          // ++ ADD
+    val prep_time_minutes: Int?,
+    val total_time_minutes: Int?,
+    val num_servings: Int?,
     val user_ratings: TastyUserRatings?,
     val sections: List<TastySection>?,
-    val nutrition: TastyNutrition?, // ++ UPDATE this from {} to a class
+    val nutrition: TastyNutrition?,
     val instructions: List<TastyInstruction>?,
     val tags: List<TastyTag>?
 )
 
 data class TastyUserRatings(
-    val score: Double? // The score is a decimal, e.g., 0.94
+    val score: Double?
 )
 
 data class TastyNutrition(
@@ -40,7 +40,7 @@ data class TastySection(
 data class TastyComponent(
     val raw_text: String,
     val ingredient: TastyIngredient,
-    val measurements: List<TastyMeasurement> // ++ ADD
+    val measurements: List<TastyMeasurement>
 )
 
 data class TastyIngredient(
@@ -53,11 +53,10 @@ data class TastyInstruction(
 
 data class TastyTag(
     val type: String,
-    val name: String, // The API uses 'name' for the key (e.g., "vegan")
-    val display_name: String // And 'display_name' for the label (e.g., "Vegan")
+    val name: String,
+    val display_name: String
 )
 
-// ++ ADD these two new classes for measurements
 data class TastyMeasurement(
     val unit: TastyUnit,
     val quantity: String

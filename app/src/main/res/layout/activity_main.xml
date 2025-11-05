@@ -2,11 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_content_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/windowBackground"
-    tools:context=".MainActivity"
-    android:id="@+id/main_content_layout">
+    tools:context=".MainActivity">
 
     <LinearLayout
         android:id="@+id/main_content"
@@ -15,6 +15,19 @@
         android:orientation="vertical"
         android:layout_above="@id/bottomNavigationView">
 
+        <TextView
+            android:id="@+id/offlineBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFC107"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="@string/offline_mode"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
         <!-- Top Bar -->
         <RelativeLayout
             android:layout_width="match_parent"
@@ -22,37 +35,59 @@
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:paddingHorizontal="24dp">
+
             <TextView
                 android:id="@+id/textViewGreeting"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="☀️ Good Morning\nEBMTС"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="0dp"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="?android:attr/textColorPrimary"/>
+                android:layout_toStartOf="@id/buttonAddRecipe"
+                tools:text="☀️ Good Morning\nEBMTС" />
             <ImageView
                 android:id="@+id/buttonFavorites"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/todo"
                 android:src="@drawable/ic_heart_outline"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 app:tint="?android:attr/textColor" />
-            <ImageView
-                android:id="@+id/buttonNotifications"
+            <FrameLayout
+                android:id="@+id/notificationButtonContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_notification"
                 android:layout_toStartOf="@id/buttonFavorites"
                 android:layout_marginEnd="16dp"
-                app:tint="?android:attr/textColor"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true">
+
+                <ImageView
+                    android:id="@+id/buttonNotifications"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/todo"
+                    android:src="@drawable/ic_notification"
+                    app:tint="?android:attr/textColor" />
+
+                <View
+                    android:id="@+id/notificationDotIcon"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_gravity="top|end"
+                    android:background="@drawable/notification_dot_background"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+            </FrameLayout>
             <ImageView
                 android:id="@+id/buttonAddRecipe"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/todo"
                 android:src="@drawable/ic_add_circle"
-                android:layout_toStartOf="@id/buttonNotifications"
+                android:layout_toStartOf="@id/notificationButtonContainer"
                 android:layout_marginEnd="16dp"
                 app:tint="?android:attr/textColor"
                 android:layout_centerVertical="true"/>

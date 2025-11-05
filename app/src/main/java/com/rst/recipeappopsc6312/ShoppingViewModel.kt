@@ -2,253 +2,82 @@ package com.rst.recipeappopsc6312
 
 import android.util.Log
 import androidx.lifecycle.*
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import java.util.Calendar
-import java.util.UUID
 
 class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(repository) {
 
-    companion object {
-        const val ALL_ITEMS_ID = "ALL_ITEMS_ID"
-        const val MY_LIST_ID = "MY_LIST_ID" // This will be the default list
-    }
+    // For the full-screen loading animation on first launch
+    private val _isInitiallyLoading = MutableLiveData<Boolean>()
+    val isInitiallyLoading: LiveData<Boolean> = _isInitiallyLoading
 
-    private val currentUser = FirebaseAuth.getInstance().currentUser
-    private val userId =
-        MutableLiveData<String>() // Replace with actual logged-in user ID from Firebase Auth
+    // For the smaller pull-to-refresh animation
+    private val _isRefreshing = MutableLiveData<Boolean>()
+    val isRefreshing: LiveData<Boolean> = _isRefreshing
 
-    private val databaseShoppingLists: LiveData<List<ShoppingList>> = userId.switchMap { id ->
-        repository.getAllShoppingListsForUser(id)
-    }
-
-    // LiveData for the list of all shopping lists (for the Spinner)
-    val allShoppingLists: LiveData<List<ShoppingList>> = databaseShoppingLists
-
-    private val _selectedListId = MutableLiveData<String>()
-
+    // --- LiveData for each section of the Home Screen ---
     private val _featuredRecipes = MutableLiveData<List<Recipe>>()
     val featuredRecipes: LiveData<List<Recipe>> = _featuredRecipes
-
-    private val _recommendedRecipes = MutableLiveData<List<Recipe>>()
-    val recommendedRecipes: LiveData<List<Recipe>> = _recommendedRecipes
-
-    private val _categories = MutableLiveData<List<Category>>()
-    val categories: LiveData<List<Category>> = _categories
-
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
-
-    private val _timeOfDayRecipes = MutableLiveData<List<Recipe>>()
-    val timeOfDayRecipes: LiveData<List<Recipe>> = _timeOfDayRecipes
 
     private val _timeOfDayTitle = MutableLiveData<String>()
     val timeOfDayTitle: LiveData<String> = _timeOfDayTitle
 
+    private val _timeOfDayRecipes = MutableLiveData<List<Recipe>>()
+    val timeOfDayRecipes: LiveData<List<Recipe>> = _timeOfDayRecipes
+
+    private val _categories = MutableLiveData<List<Category>>()
+    val categories: LiveData<List<Category>> = _categories
+
+    private val _recommendedRecipes = MutableLiveData<List<Recipe>>()
+    val recommendedRecipes: LiveData<List<Recipe>> = _recommendedRecipes
+
     init {
-        currentUser?.let { user ->
-            userId.value = user.uid
-            viewModelScope.launch {
-                // First, sync the user's data from Firebase
-                repository.syncFirebaseToRoom(user.uid)
-                // ++ THIS IS THE MISSING LINE ++
-                repository.syncFavoritesFromFirebase(user.uid)
-
-                // After syncing, load the initial data for the home screen.
-                loadInitialData()
-            }
-        }
+        loadHomeScreenData(isInitialLoad = true)
     }
 
-    val currentShoppingItems: LiveData<List<ShoppingItem>> = _selectedListId.switchMap { listId ->
-        when (listId) {
-            ALL_ITEMS_ID -> repository.getAllItemsForUser(userId.value!!)
-            MY_LIST_ID -> repository.getItemsForList(MY_LIST_ID)
-            else -> repository.getItemsForList(listId)
-        }
-    }
+    fun loadHomeScreenData(isInitialLoad: Boolean = false, forceRefresh: Boolean = false) {
+        if (isInitialLoad) _isInitiallyLoading.value = true else _isRefreshing.value = true
 
-    fun createListFromRecipe(recipeTitle: String, ingredientNames: List<String>) {
         viewModelScope.launch {
-            val currentUserId = userId.value ?: return@launch
-            repository.createNewListWithItems(recipeTitle, ingredientNames, currentUserId)
-        }
-    }
+            try {
+                // Step 1: Try to sync data from Firebase. This might fail if offline.
+                if (forceRefresh) {
+                    repository.preloadHomeScreenData(forceRefresh = true)
+                }
 
-    private val _isInSelectionMode = MutableLiveData(false)
-    val isInSelectionMode: LiveData<Boolean> = _isInSelectionMode
+                // Step 2: Load all data from the local cache. This will work even if offline.
+                populateLiveDataFromCache()
 
-    private val _selectedItems = MutableLiveData<MutableSet<ShoppingItem>>(mutableSetOf())
-    val selectedItemsCount: LiveData<Int> = _selectedItems.map { it.size }
-
-
-    fun onItemClicked(item: ShoppingItem) {
-        if (_isInSelectionMode.value == true) {
-            toggleItemSelection(item)
-        } else {
-            // If not in selection mode, a normal click toggles the checkbox
-            onItemCheckedChanged(item, !item.isChecked)
-        }
-    }
-
-    fun onItemLongClicked(item: ShoppingItem) {
-        _isInSelectionMode.value = true
-        toggleItemSelection(item)
-    }
-
-    fun onItemCheckedChanged(item: ShoppingItem, isChecked: Boolean) {
-        // Find the item in the current list
-        val currentList = currentShoppingItems.value ?: return
-        val updatedItem = currentList.find { it.itemId == item.itemId } ?: return
-
-        // Create a copy with the new checked state
-        val itemToSave = updatedItem.copy(isChecked = isChecked)
-
-        // Save the updated copy
-        viewModelScope.launch {
-            val currentUserId = userId.value ?: return@launch
-            repository.updateItem(itemToSave, currentUserId)
-        }
-    }
-
-    private fun toggleItemSelection(item: ShoppingItem) {
-        val selected = _selectedItems.value ?: mutableSetOf()
-        // We need to find the actual item from the current list to modify its isSelected property
-        val currentList = currentShoppingItems.value
-        val actualItem = currentList?.find { it.itemId == item.itemId }
-
-        if (actualItem != null) {
-            if (selected.any { it.itemId == actualItem.itemId }) {
-                selected.removeIf { it.itemId == actualItem.itemId }
-                actualItem.isSelected = false
-            } else {
-                selected.add(actualItem)
-                actualItem.isSelected = true
-            }
-        }
-
-        _selectedItems.value = selected
-
-        if (selected.isEmpty()) {
-            _isInSelectionMode.value = false
-        }
-    }
-
-    fun setSelectedList(listId: String) {
-        _selectedListId.value = listId
-    }
-
-    fun updateItem(item: ShoppingItem) = viewModelScope.launch {
-        val currentUserId = userId.value ?: return@launch
-        repository.updateItem(item, currentUserId)
-    }
-
-    fun deleteSelectedItems() {
-        val itemsToDelete = _selectedItems.value?.toList() ?: return
-        if (itemsToDelete.isNotEmpty()) {
-            viewModelScope.launch {
-                val currentUserId = userId.value ?: return@launch
-                repository.deleteItems(itemsToDelete, currentUserId)
-            }
-        }
-        // Clear selection and exit selection mode
-        _selectedItems.value?.clear()
-        _isInSelectionMode.value = false
-    }
-
-    fun deleteItem(item: ShoppingItem) {
-        viewModelScope.launch {
-            val currentUserId = userId.value ?: return@launch
-            repository.deleteItems(listOf(item), currentUserId)
-        }
-    }
-
-    // For the "Undo" snackbar
-    fun addItem(item: ShoppingItem) {
-        viewModelScope.launch {
-            val currentUserId = userId.value ?: return@launch
-            repository.insertItem(item, currentUserId)
-        }
-    }
-
-    fun onListSelected(position: Int) {
-        when (position) {
-            0 -> _selectedListId.value = ALL_ITEMS_ID
-            1 -> _selectedListId.value = MY_LIST_ID
-            else -> {
-                // Get the actual recipe list, accounting for the 2 special items at the start
-                val recipeListIndex = position - 2
-                val selectedList = databaseShoppingLists.value?.get(recipeListIndex)
-                _selectedListId.value = selectedList?.listId
-            }
-        }
-    }
-
-    // For adding new items from the dialog
-    fun addItems(itemNames: List<String>) {
-        viewModelScope.launch {
-            // Hardcode this to only add to "My List"
-            val listId = MY_LIST_ID
-            val currentUserId = userId.value ?: return@launch
-            // We need to ensure "My List" exists
-            repository.ensureListExists(MY_LIST_ID, "My List", currentUserId)
-
-            val newItems = itemNames.map { name -> ShoppingItem(ownerListId = listId, name = name) }
-            repository.addItems(newItems, listId, currentUserId)
-        }
-    }
-
-    fun deleteCurrentList() {
-        // Ensure a list is selected and it's not one of the permanent ones
-        val listId = _selectedListId.value
-        if (listId == null || listId == ALL_ITEMS_ID || listId == MY_LIST_ID) {
-            return // Do nothing if it's a special list
-        }
-
-        // Find the list object and delete it
-        viewModelScope.launch {
-            val listToDelete = databaseShoppingLists.value?.find { it.listId == listId }
-            val currentUserId = userId.value
-            if (listToDelete != null && currentUserId != null) {
-                repository.deleteList(listToDelete, currentUserId)
-                // After deleting, select "My List" as a safe default
-                _selectedListId.postValue(MY_LIST_ID)
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Failed to load home screen data (likely offline): ${e.message}")
+                // Even if the sync fails, we still try to load from the local cache.
+                populateLiveDataFromCache()
+            } finally {
+                if (isInitialLoad) _isInitiallyLoading.postValue(false) else _isRefreshing.postValue(false)
             }
         }
     }
 
     fun refreshHomeScreenData() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                // Step 1: Force the repository to get fresh data for everything.
-                repository.preloadHomeScreenData(forceRefresh = true)
-
-                // Step 2: Reload all data into the LiveData from the updated cache.
-                loadInitialData()
-
-            } catch (e: Exception) {
-                Log.e("Refresh", "Failed to refresh home screen data", e)
-            } finally {
-                _isLoading.postValue(false)
-            }
-        }
+        loadHomeScreenData(isInitialLoad = false, forceRefresh = true)
     }
 
-    private suspend fun loadInitialData() {
-        val featured = repository.getFeaturedRecipes()
-        Log.d("DataFlow", "Step 4 (ViewModel): Posting ${featured.size} featured recipes to LiveData.")
-
-        // These will be instant because the data is already in the repository's cache.
-        _featuredRecipes.postValue(featured)
+    private suspend fun populateLiveDataFromCache() {
+        _featuredRecipes.postValue(repository.getFeaturedRecipes())
         _recommendedRecipes.postValue(repository.getRecommendedForYou())
         _categories.postValue(repository.getAllCategories())
 
-        // Load the Time of Day data here using the correct function.
-        _timeOfDayTitle.postValue(GreetingManager.getRandomGreetingForCurrentTime()) // <-- Corrected Line
-
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         _timeOfDayRecipes.postValue(getRecipesForTimeOfDay(hour))
+    }
+
+    fun onCategorySelected(categoryName: String) {
+        _isRefreshing.value = true
+        viewModelScope.launch {
+            val filteredRecommendations = repository.getRecommendedForYou(forceRefresh = true, category = categoryName)
+            _recommendedRecipes.postValue(filteredRecommendations)
+            _isRefreshing.postValue(false)
+        }
     }
 
     private suspend fun getRecipesForTimeOfDay(hour: Int): List<Recipe> {
@@ -257,7 +86,8 @@ class ShoppingViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(re
             in 11..13 -> repository.getLunchRecipes()
             in 14..17 -> repository.getSnackRecipes()
             in 18..21 -> repository.getDinnerRecipes()
-            else -> repository.getSnackRecipes() // Default
+            else -> repository.getSnackRecipes()
         }
     }
 }
+

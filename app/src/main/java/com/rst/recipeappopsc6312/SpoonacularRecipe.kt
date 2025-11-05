@@ -14,14 +14,14 @@ data class SpoonacularRecipe(
     val analyzedInstructions: List<SpoonacularInstruction>,
     val veryPopular: Boolean,
     val spoonacularScore: Double?,
-    val vegetarian: Boolean, // ++ ADD
-    val vegan: Boolean,      // ++ ADD
-    val glutenFree: Boolean, // ++ ADD
+    val vegetarian: Boolean,
+    val vegan: Boolean,
+    val glutenFree: Boolean,
     val dairyFree: Boolean,
     val diets: List<String>,
-    val ketogenic: Boolean, // ++ ADD
-    val lowFodmap: Boolean, // ++ ADD
-    val whole30: Boolean,   // ++ ADD (often similar to Paleo)
+    val ketogenic: Boolean,
+    val lowFodmap: Boolean,
+    val whole30: Boolean,
     val cuisines: List<String>?,
     val dishTypes: List<String>?
 )

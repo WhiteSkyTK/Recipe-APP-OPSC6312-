@@ -39,7 +39,7 @@ class MyRecipesActivity : AppCompatActivity() {
             db.scanHistoryDao(),
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance())
-        ShoppingViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,7 +94,7 @@ class MyRecipesActivity : AppCompatActivity() {
     private fun observeMyRecipes() {
         val userId = FirebaseManager.auth.currentUser?.uid
         if (userId == null) {
-            Toast.makeText(this, "You must be logged in to see your recipes.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.my_recipes_login_required), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -113,6 +113,7 @@ class MyRecipesActivity : AppCompatActivity() {
                 if (myRecipes.isEmpty()) {
                     recyclerView.visibility = View.GONE
                     emptyStateTextView.visibility = View.VISIBLE
+                    emptyStateTextView.text = getString(R.string.my_recipes_empty_state)
                 } else {
                     recyclerView.visibility = View.VISIBLE
                     emptyStateTextView.visibility = View.GONE

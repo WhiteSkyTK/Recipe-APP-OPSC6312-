@@ -46,7 +46,7 @@ class CameraScannerActivity : AppCompatActivity() {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture)
             } catch (e: Exception) {
-                Toast.makeText(this, "Failed to start camera.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.toast_failed, Toast.LENGTH_SHORT).show()
             }
         }, ContextCompat.getMainExecutor(this))
     }
@@ -64,7 +64,7 @@ class CameraScannerActivity : AppCompatActivity() {
                 imageProxy.close()
             }
             override fun onError(exception: ImageCaptureException) {
-                Toast.makeText(baseContext, "Photo capture failed: ${exception.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(baseContext, R.string.toast_photo_error, Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -80,7 +80,7 @@ class CameraScannerActivity : AppCompatActivity() {
         objectDetector.process(image)
             .addOnSuccessListener { detectedObjects ->
                 if (detectedObjects.isEmpty()) {
-                    Toast.makeText(this, "No objects recognized.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.toast_object_error, Toast.LENGTH_SHORT).show()
                     return@addOnSuccessListener
                 }
 
@@ -98,11 +98,11 @@ class CameraScannerActivity : AppCompatActivity() {
                     setResult(Activity.RESULT_OK, resultIntent)
                     finish()
                 } else {
-                    Toast.makeText(this, "Could not classify the object.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.toast_classify_error, Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Object recognition failed.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.toast_recognition_error, Toast.LENGTH_SHORT).show()
             }
     }
 }

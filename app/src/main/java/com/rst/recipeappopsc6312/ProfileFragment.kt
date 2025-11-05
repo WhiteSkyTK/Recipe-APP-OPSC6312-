@@ -3,6 +3,8 @@ package com.rst.recipeappopsc6312
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,7 +13,10 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.android.material.materialswitch.MaterialSwitch
@@ -23,6 +28,7 @@ import kotlinx.coroutines.launch
 class ProfileFragment : Fragment() {
 
     private val TAG = "ProfileFragment"
+    private val mainViewModel: MainViewModel by activityViewModels() // Use the shared MainViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,19 +49,19 @@ class ProfileFragment : Fragment() {
         val versionTextView = view.findViewById<TextView>(R.id.textViewVersion)
         val myRecipesButton = view.findViewById<Button>(R.id.buttonMyRecipes)
         val logOutButton = view.findViewById<Button>(R.id.buttonLogOut)
+        val badgesTextView = view.findViewById<TextView>(R.id.textViewBadges)
 
         // --- Load User Data from Firebase ---
         loadUserProfile(profileImageView, userNameTextView, userEmailTextView)
 
         logOutButton.setOnClickListener {
-            // Show a confirmation dialog before logging out
             AlertDialog.Builder(requireContext())
-                .setTitle("Log Out")
-                .setMessage("Are you sure you want to log out and clear all local data?")
-                .setPositiveButton("Log Out") { _, _ ->
+                .setTitle(getString(R.string.profile_logout_title))
+                .setMessage(getString(R.string.profile_logout_message))
+                .setPositiveButton(getString(R.string.profile_logout_button)) { _, _ ->
                     logoutUser()
                 }
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show()
         }
 
@@ -63,55 +69,95 @@ class ProfileFragment : Fragment() {
         try {
             val versionName = requireContext().packageManager
                 .getPackageInfo(requireContext().packageName, 0).versionName
-            versionTextView.text = "Version $versionName"
+            versionTextView.text = getString(R.string.profile_version, versionName)
         } catch (e: Exception) {
             Log.e(TAG, "Couldn't get package info", e)
-            versionTextView.text = "Version 1.0"
+            versionTextView.text = getString(R.string.profile_version, "1.0")
         }
 
         // --- Set Click Listeners ---
         myRecipesButton.setOnClickListener {
-            val intent = Intent(activity, MyRecipesActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(activity, MyRecipesActivity::class.java))
         }
         editProfileButton.setOnClickListener {
-            val intent = Intent(activity, EditProfileActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(activity, EditProfileActivity::class.java))
         }
-
         preferencesTextView.setOnClickListener {
-            // FIXED: Launch the new PreferencesActivity
-            val intent = Intent(activity, PreferencesActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(activity, PreferencesActivity::class.java))
         }
-
         aboutUsTextView.setOnClickListener {
-            // FIXED: Launch the new AboutUsActivity
-            val intent = Intent(activity, AboutUsActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(activity, AboutUsActivity::class.java))
         }
-
-        // --- Disabled Features ---
-        languageTextView.alpha = 0.5f // Make it look disabled
-        reportIssueTextView.alpha = 0.5f
-        notificationsSwitch.isEnabled = false
-
+        badgesTextView.setOnClickListener {
+            startActivity(Intent(activity, BadgesActivity::class.java))
+        }
         languageTextView.setOnClickListener {
-            //TODO
-            Toast.makeText(context, "Language selection is coming soon!", Toast.LENGTH_SHORT).show()
+            showLanguageSelectionDialog()
+        }
+        reportIssueTextView.setOnClickListener {
+            sendReportEmail()
         }
 
-        reportIssueTextView.setOnClickListener {
-            //TODO
-            Toast.makeText(context, "Issue reporting is coming soon!", Toast.LENGTH_SHORT).show()
-        }
+        val prefs = requireActivity().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        notificationsSwitch.isChecked = prefs.getBoolean("NotificationsEnabled", true)
+        notificationsSwitch.isEnabled = true
 
         notificationsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            // TODO: Save the user's notification preference to your backend or local storage
-            Toast.makeText(context, "Notification settings are coming soon!", Toast.LENGTH_SHORT).show()
+            prefs.edit().putBoolean("NotificationsEnabled", isChecked).apply()
+            mainViewModel.updateNotificationSubscription(isChecked)
         }
 
         return view
+    }
+
+    private fun sendReportEmail() {
+        val recipient = getString(R.string.report_issue_email_address)
+        val subject = getString(R.string.report_issue_subject)
+
+        // Gather useful debug info
+        val appVersion = try {
+            requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).versionName
+        } catch (e: Exception) { "N/A" }
+        val deviceModel = "${Build.MANUFACTURER} ${Build.MODEL}"
+        val androidVersion = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})"
+        val userId = FirebaseManager.auth.currentUser?.uid ?: "Not Logged In"
+
+        val body = getString(R.string.report_issue_body, appVersion, deviceModel, androidVersion, userId)
+
+        // Create the email intent
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:") // Only email apps should handle this
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(recipient))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, body)
+        }
+
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), getString(R.string.report_issue_error), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showLanguageSelectionDialog() {
+        val languages = arrayOf("🇬🇧 English", "🇿🇦 Sepedi", "🇿🇦 Tsonga", "🇿🇦 Venda")
+        val languageCodes = arrayOf("en", "nso", "ts", "ve")
+
+        AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.select_language))
+            .setItems(languages) { dialog, which ->
+                val selectedLanguageCode = languageCodes[which]
+                setAppLocale(selectedLanguageCode)
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun setAppLocale(languageCode: String) {
+        val localeList = LocaleListCompat.forLanguageTags(languageCode)
+        AppCompatDelegate.setApplicationLocales(localeList)
+        // The activity needs to be recreated for the language change to take full effect.
+        activity?.recreate()
     }
 
     private fun logoutUser() {
@@ -159,7 +205,7 @@ class ProfileFragment : Fragment() {
                         val fullName = document.getString("full_name")
                         val profileImageUrl = document.getString("profileImageUrl")
 
-                        nameView.text = fullName ?: "Your Name"
+                        nameView.text = fullName ?: getString(R.string.profile_default_name)
 
                         // Use Glide to load the profile picture
                         if (profileImageUrl != null) {
@@ -170,12 +216,12 @@ class ProfileFragment : Fragment() {
                         }
                     } else {
                         Log.d(TAG, "No profile document found in Firestore.")
-                        nameView.text = "Your Name"
+                        nameView.text = getString(R.string.profile_default_name)
                     }
                 }
                 .addOnFailureListener { exception ->
                     Log.e(TAG, "Error getting user profile from Firestore.", exception)
-                    nameView.text = "Your Name"
+                    nameView.text = getString(R.string.profile_default_name)
                 }
         }
     }

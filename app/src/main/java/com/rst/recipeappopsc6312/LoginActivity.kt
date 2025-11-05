@@ -13,12 +13,19 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.Firebase
 import kotlinx.coroutines.launch
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var loadingOverlayContainer: FrameLayout
@@ -30,13 +37,66 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var googleSignInButton: ImageButton
     private lateinit var backButton: ImageView
 
+    private lateinit var googleAuthUiClient: GoogleAuthUiClient
+
+    // We need a ViewModel to access the repository for creating the user profile
+    private val viewModel: ShoppingViewModel by viewModels {
+        val db = AppDatabase.getDatabase(application)
+        val repo = ShoppingRepository(
+            db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
+            FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
+        )
+        ViewModelFactory(repo)
+    }
 
     private val TAG = "LoginActivity"
+
+    // This is the modern way to handle the result of the Google Sign-In intent
+    private val googleSignInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val intent = result.data
+            if (intent != null) {
+                lifecycleScope.launch {
+                    val signInResult = googleAuthUiClient.handleSignInResult(intent)
+                    if (signInResult.credential != null) {
+                        Firebase.auth.signInWithCredential(signInResult.credential).addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val isNewUser = task.result?.additionalUserInfo?.isNewUser ?: false
+                                if (isNewUser) {
+                                    // If it's a new user, create their default profile
+                                    lifecycleScope.launch {
+                                        task.result?.user?.let { firebaseUser ->
+                                            // Get the string names *here* using the Activity's context
+                                            val cuisineNames = CuisineHelper.getAllCuisineNames(applicationContext)
+                                            viewModel.repository.createDefaultUserProfile(firebaseUser, cuisineNames) // Pass the names
+                                            Log.d(TAG, "Default profile created for user: ${firebaseUser.uid}")
+                                        }
+                                        navigateToMainApp()
+                                    }
+                                } else {
+                                    // If they are a returning user, just log them in
+                                    navigateToMainApp()
+                                }
+                            } else {
+                                Toast.makeText(this@LoginActivity, getString(R.string.login_firebase_auth_failed, task.exception?.message), Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(this@LoginActivity, getString(R.string.login_google_sign_in_failed, signInResult.errorMessage), Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         enableEdgeToEdge()
+
+        googleAuthUiClient = GoogleAuthUiClient(applicationContext)
 
         val emailLayout = findViewById<TextInputLayout>(R.id.textInputLayoutEmail)
         emailEditText = findViewById(R.id.editTextEmail)
@@ -51,7 +111,6 @@ class LoginActivity : AppCompatActivity() {
         progressBar = loadingOverlayContainer.findViewById(R.id.loadingIndicator) // Ensure this ID exists INSIDE the FrameLayout in XML
 
         // --- Click Listeners ---
-
         showLoading(false)
 
         backButton.setOnClickListener {
@@ -71,8 +130,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         forgotPasswordTextView.setOnClickListener {
-            val intent = Intent(this, ForgotPasswordActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
 
         googleSignInButton.setOnClickListener {
@@ -99,13 +157,10 @@ class LoginActivity : AppCompatActivity() {
                 showLoading(false)
                 if (task.isSuccessful) {
                     Log.d(TAG, "Sign in successful for user: $email")
-                    // Optional but recommended: Pre-fetch user profile to warm up the cache
-                    // This ensures MainActivity and ProfileFragment load instantly.
-                    // fetchUserProfile()
                     navigateToMainApp()
                 } else {
                     Log.w(TAG, "Sign in failed for user: $email", task.exception)
-                    Toast.makeText(this, "Authentication failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.login_auth_failed, task.exception?.message), Toast.LENGTH_SHORT).show()
                 }
             }
     }
@@ -115,29 +170,25 @@ class LoginActivity : AppCompatActivity() {
         passLayout.error = null
         var isValid = true
         if (userInput.isEmpty()) {
-            userLayout.error = "Email or Username cannot be empty"
+            userLayout.error = getString(R.string.validation_user_input_empty)
             isValid = false
         }
         // Basic email validation if it looks like an email, otherwise assume username
         else if (userInput.contains("@") && !Patterns.EMAIL_ADDRESS.matcher(userInput).matches()) {
-            userLayout.error = "Invalid email format"
+            userLayout.error = getString(R.string.validation_user_input_invalid_email)
             isValid = false
         }
 
         if (pass.isEmpty()) {
-            passLayout.error = "Password cannot be empty"
+            passLayout.error = getString(R.string.validation_password_empty)
             isValid = false
         }
         return isValid
     }
 
     private fun handleGoogleSignIn() {
-        // --- Placeholder for your  Google Sign-In Logic ---
-        // This code would be the same as in your WelcomeActivity.
-        // It initiates the Google One-Tap flow and, on success,
-        // either logs the user in or creates a default profile if they're new.
-        Toast.makeText(this, "Coming Soon...", Toast.LENGTH_SHORT).show()
-        //navigateToMainApp()
+        val signInIntent = googleAuthUiClient.getSignInIntent()
+        googleSignInLauncher.launch(signInIntent)
     }
 
     private fun navigateToMainApp() {

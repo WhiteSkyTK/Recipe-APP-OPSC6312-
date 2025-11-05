@@ -46,7 +46,7 @@ class RecipeDetailActivity : AppCompatActivity() {
     private var missingIngredients: List<String>? = null
 
 
-    private val shoppingViewModel: ShoppingViewModel by viewModels {
+    private val shoppingListViewModel: ShoppingListViewModel by viewModels {
         val database = AppDatabase.getDatabase(application)
         // Provide the missing FirebaseStorage instance as the fourth argument
         val repository = ShoppingRepository(
@@ -56,7 +56,7 @@ class RecipeDetailActivity : AppCompatActivity() {
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance() // <-- This was the missing part
         )
-        ShoppingViewModelFactory(repository)
+        ViewModelFactory(repository)
     }
 
     private val recipeDetailViewModel: RecipeDetailViewModel by viewModels {
@@ -68,7 +68,7 @@ class RecipeDetailActivity : AppCompatActivity() {
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance()
         )
-        RecipeDetailViewModelFactory(repository)
+        ViewModelFactory(repository)
     }
 
 
@@ -126,7 +126,7 @@ class RecipeDetailActivity : AppCompatActivity() {
 
         val recipeId = intent.getStringExtra("RECIPE_ID")
         if (recipeId == null) {
-            Toast.makeText(this, "Recipe ID missing", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.recipe_detail_error_missing_id), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -150,7 +150,7 @@ class RecipeDetailActivity : AppCompatActivity() {
             val viewEndTime = System.currentTimeMillis()
             val durationSeconds = (viewEndTime - viewStartTime) / 1000
             if (durationSeconds > 1) { // Only log if they spent more than a second
-                shoppingViewModel.repository.logRecipeView(recipeId!!, durationSeconds)
+                recipeDetailViewModel.repository.logRecipeView(recipeId!!, durationSeconds)
             }
         }
     }
@@ -172,19 +172,19 @@ class RecipeDetailActivity : AppCompatActivity() {
             }
             R.id.action_publish_recipe -> {
                 AlertDialog.Builder(this)
-                    .setTitle("Publish Recipe")
-                    .setMessage("Are you sure you want to make this recipe public for everyone to see?")
-                    .setPositiveButton("Publish") { _, _ ->
+                    .setTitle(getString(R.string.recipe_detail_publish_dialog_title))
+                    .setMessage(getString(R.string.recipe_detail_publish_dialog_message))
+                    .setPositiveButton(getString(R.string.recipe_detail_publish_button)) { _, _ ->
                         recipeDetailViewModel.publishCurrentRecipe()
-                        Toast.makeText(this, "Recipe published!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.recipe_detail_toast_published), Toast.LENGTH_SHORT).show()
                     }
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton(getString(R.string.cancel), null)
                     .show()
                 true
             }
             R.id.action_unpublish_recipe -> {
                 recipeDetailViewModel.unpublishCurrentRecipe()
-                Toast.makeText(this, "Recipe is now private.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.recipe_detail_toast_private), Toast.LENGTH_SHORT).show()
                 true
             }
             R.id.action_edit_recipe -> {
@@ -210,8 +210,9 @@ class RecipeDetailActivity : AppCompatActivity() {
         if (selected.isNotEmpty()) {
             val recipeTitle = currentRecipe!!.title
             val ingredientNames = selected.map { it.name }
-            shoppingViewModel.createListFromRecipe(recipeTitle, ingredientNames)
-            Toast.makeText(this, "${selected.size} ingredients added to new list", Toast.LENGTH_LONG).show()
+            shoppingListViewModel.createListFromRecipe(recipeTitle, ingredientNames)
+            val toastMessage = resources.getQuantityString(R.plurals.recipe_detail_toast_ingredients_added, selected.size, selected.size)
+            Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
         }
 
         // Reset the state
@@ -252,18 +253,18 @@ class RecipeDetailActivity : AppCompatActivity() {
     private fun showAddToListDialog() {
         // First, make sure we have a recipe loaded
         currentRecipe?.let { recipe ->
-            val options = arrayOf("Add all ingredients", "Select ingredients to add")
+            val options = arrayOf(getString(R.string.recipe_detail_add_all_ingredients), getString(R.string.recipe_detail_select_ingredients))
             AlertDialog.Builder(this)
-                .setTitle("Add to Shopping List")
+                .setTitle(getString(R.string.recipe_detail_add_to_list_title))
                 .setItems(options) { _, which ->
                     when (which) {
                         0 -> { // "Add all ingredients" was clicked
                             val recipeTitle = recipe.title
                             val ingredients = recipe.ingredients.map { it.name }
-                            shoppingViewModel.createListFromRecipe(recipeTitle, ingredients)
+                            shoppingListViewModel.createListFromRecipe(recipeTitle, ingredients)
                             Toast.makeText(
                                 this,
-                                "Added ingredients from $recipeTitle to a new list",
+                                getString(R.string.recipe_detail_toast_all_ingredients_added, recipeTitle),
                                 Toast.LENGTH_LONG
                             ).show()
                         }
@@ -272,13 +273,14 @@ class RecipeDetailActivity : AppCompatActivity() {
                             isIngredientSelectionMode = true
                             invalidateOptionsMenu() // This tells the toolbar to redraw itself
                             ingredientAdapter.setSelectionMode(true)
-                            Toast.makeText(this, "Select ingredients to add", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, getString(R.string.recipe_detail_select_ingredients), Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
                 .show()
-        } ?: Toast.makeText(this, "Recipe not loaded yet.", Toast.LENGTH_SHORT).show()
+        } ?: Toast.makeText(this, getString(R.string.recipe_detail_toast_recipe_not_loaded), Toast.LENGTH_SHORT).show()
     }
+
     private fun observeViewModel() {
         recipeDetailViewModel.recipe.observe(this) { fetchedRecipe ->
             if (fetchedRecipe != null) {
@@ -332,7 +334,7 @@ class RecipeDetailActivity : AppCompatActivity() {
         Glide.with(this).load(recipeToDisplay.imageUrl).into(recipeImageView)
         titleTextView.text = recipeToDisplay.title
         timeTextView.text = "${recipeToDisplay.timeInMins} mins"
-        authorTextView.text = "by ${recipeToDisplay.author}"
+        authorTextView.text = getString(R.string.recipe_detail_author_prefix, recipeToDisplay.author)
         descriptionTextView.text = recipeToDisplay.description // Populate description
 
         descriptionTextView.post {
@@ -460,14 +462,14 @@ class RecipeDetailActivity : AppCompatActivity() {
     }
 
     private fun toggleReadMoreState() {
-        if (readMoreTextView.text.toString().equals("Read More", ignoreCase = true)) {
+        if (readMoreTextView.text.toString().equals(getString(R.string.read_more), ignoreCase = true)) {
             descriptionTextView.maxLines = Integer.MAX_VALUE
             descriptionTextView.ellipsize = null // Remove the "..."
-            readMoreTextView.text = "Read Less"
+            readMoreTextView.text = getString(R.string.read_less)
         } else {
             descriptionTextView.maxLines = 4
             descriptionTextView.ellipsize = android.text.TextUtils.TruncateAt.END // Restore the "..."
-            readMoreTextView.text = "Read More"
+            readMoreTextView.text = getString(R.string.read_more)
         }
     }
     override fun onSupportNavigateUp(): Boolean {

@@ -30,6 +30,7 @@
                     android:id="@+id/imageViewRecipe"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:contentDescription="@string/todo"
                     android:scaleType="centerCrop"
                     tools:src="@tools:sample/backgrounds/scenic[1]"/>
             </com.google.android.material.card.MaterialCardView>
@@ -38,6 +39,7 @@
                 android:id="@+id/imageViewFavorite"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/todo"
                 android:src="@drawable/ic_heart_outline"
                 android:layout_gravity="top|end"
                 android:padding="8dp"
@@ -59,9 +61,9 @@
             android:id="@+id/textViewTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:drawableStartCompat="@drawable/ic_time"
             tools:text="40 Min"
             app:tint="?android:attr/textColor"
-            android:drawableStart="@drawable/ic_time"
             android:textColor="?android:attr/textColor"
             android:drawablePadding="4dp"
             android:layout_marginTop="4dp"/>

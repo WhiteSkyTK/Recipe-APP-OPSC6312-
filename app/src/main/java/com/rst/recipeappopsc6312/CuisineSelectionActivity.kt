@@ -49,7 +49,7 @@ class CuisineSelectionActivity : AppCompatActivity() {
 
         if (isEditMode) {
             progressBar.visibility = View.GONE
-            continueButton.text = "Save Changes"
+            continueButton.text = getString(R.string.save_changes)
             skipButton.visibility = View.GONE // Hide skip button in edit mode
             // In edit mode, you would fetch the user's current selections from Firestore
             // and pre-select them in the 'prepareCuisineData' function.
@@ -77,9 +77,9 @@ class CuisineSelectionActivity : AppCompatActivity() {
         continueButton.setOnClickListener {
             val selectedCuisines = cuisineList.filter { it.isSelected }
             if (selectedCuisines.isEmpty()) {
-                Toast.makeText(this, "Please select at least one cuisine", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.cuisine_selection_toast_at_least_one), Toast.LENGTH_SHORT).show()
             } else {
-                val selectedCuisineNames = selectedCuisines.map { it.name }
+                val selectedCuisineNames = selectedCuisines.map { getString(it.name) }
                 if (isEditMode) {
                     updateUserCuisines(selectedCuisineNames)
                 } else {
@@ -102,7 +102,7 @@ class CuisineSelectionActivity : AppCompatActivity() {
             val updatedList = cuisineList.map { it.copy(isSelected = isAllSelected) }
             cuisineList = ArrayList(updatedList)
             cuisineAdapter.submitList(cuisineList) // Submit the updated list
-            (it as Button).text = if (isAllSelected) "Deselect All" else "Select All"
+            (it as Button).text = if (isAllSelected) getString(R.string.deselect_all) else getString(R.string.select_all)
         }
     }
 
@@ -118,30 +118,16 @@ class CuisineSelectionActivity : AppCompatActivity() {
         FirebaseManager.firestore.collection("users").document(userId)
             .update("selected_cuisines", cuisines)
             .addOnSuccessListener {
-                Toast.makeText(this, "Preferences updated!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.cuisine_selection_toast_preferences_updated), Toast.LENGTH_SHORT).show()
                 finish()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Failed to update: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.cuisine_selection_toast_update_failed, e.message), Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun prepareCuisineData() {
-        // Here is a comprehensive list. You will need to add corresponding
-        cuisineList.add(Cuisine("Italian", R.drawable.ic_italian))
-        cuisineList.add(Cuisine("Mexican", R.drawable.ic_mexican))
-        cuisineList.add(Cuisine("Chinese", R.drawable.ic_chinese))
-        cuisineList.add(Cuisine("Japanese", R.drawable.ic_japanese))
-        cuisineList.add(Cuisine("Indian", R.drawable.ic_indian))
-        cuisineList.add(Cuisine("Thai", R.drawable.ic_thai))
-        cuisineList.add(Cuisine("French", R.drawable.ic_french))
-        cuisineList.add(Cuisine("Spanish", R.drawable.ic_spanish))
-        cuisineList.add(Cuisine("Greek", R.drawable.ic_greek))
-        cuisineList.add(Cuisine("American", R.drawable.ic_american))
-        cuisineList.add(Cuisine("Korean", R.drawable.ic_korean))
-        cuisineList.add(Cuisine("Vietnamese", R.drawable.ic_vietnamese))
-        cuisineList.add(Cuisine("Mediterranean", R.drawable.ic_mediterranean))
-        cuisineList.add(Cuisine("Caribbean", R.drawable.ic_caribbean))
-        cuisineList.add(Cuisine("African", R.drawable.ic_african))
+        // It now gets the data from our single source of truth.
+        cuisineList = ArrayList(CuisineData.getAllCuisines())
     }
 }

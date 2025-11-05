@@ -13,12 +13,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.os.postDelayed
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -27,13 +25,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.amlcurran.showcaseview.ShowcaseView
 import com.github.amlcurran.showcaseview.targets.ViewTarget
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.util.Calendar
 import android.os.Handler
+import androidx.lifecycle.lifecycleScope
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener
-
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,6 +41,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var favoritesButton: ImageView
     private lateinit var notificationButton: ImageView
     private lateinit var addRecipeButton: ImageView
+    private lateinit var offlineBanner: TextView
+    private lateinit var notificationDotIcon: View
     private var currentFragmentId = R.id.nav_home
     private var hasFavorites = false
     private var lastBottomNavFragmentId = R.id.nav_home
@@ -56,9 +58,10 @@ class MainActivity : AppCompatActivity() {
             db.scanHistoryDao(),
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance())
-        MainViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
 
+    private lateinit var connectivityObserver: NetworkConnectivityObserver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +81,8 @@ class MainActivity : AppCompatActivity() {
         favoritesButton = findViewById(R.id.buttonFavorites)
         notificationButton = findViewById(R.id.buttonNotifications)
         addRecipeButton = findViewById(R.id.buttonAddRecipe)
+        offlineBanner = findViewById(R.id.offlineBanner)
+        notificationDotIcon = findViewById(R.id.notificationDotIcon)
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
         // Set the dynamic greeting
@@ -85,6 +90,10 @@ class MainActivity : AppCompatActivity() {
 
         // Handle the initial intent when the activity is first created
         handleIncomingIntent(intent)
+
+        setupNetworkObserver()
+        mainViewModel.logUserLogin()
+        mainViewModel.syncUserData()
 
         // Load the HomeFragment by default when the app starts
         if (savedInstanceState != null) {
@@ -106,7 +115,6 @@ class MainActivity : AppCompatActivity() {
                 showOnboardingTour()
             }, 500) // 500 milliseconds
         }
-
 
         bottomNav.setOnItemSelectedListener { item ->
             if (item.itemId == currentFragmentId) return@setOnItemSelectedListener false
@@ -171,20 +179,28 @@ class MainActivity : AppCompatActivity() {
                 if (hasFavorites) {
                     loadFragment(FavoritesFragment(), -1)
                 } else {
-                    showEmptyPopup(favoritesButton, "You have no favorites yet!")
+                    showEmptyPopup(favoritesButton, getString(R.string.main_no_favorites_popup))
                 }
             }
         }
 
         notificationButton.setOnClickListener {
             val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
-            // If the NotificationsFragment is already showing, go back.
+            // If the full notifications screen is already open, just go back.
             if (currentFragment is NotificationsFragment) {
                 supportFragmentManager.popBackStack()
             } else {
-                // Otherwise, just show the popup as before.
-                // The popup's "View All" button will handle opening the full fragment.
+                // Otherwise, mark notifications as read and show the popup.
+                mainViewModel.markAllNotificationsAsRead()
                 showNotificationsPopup()
+            }
+        }
+
+        // ++ ADDED LOGGING to the observer to help debug ++
+        lifecycleScope.launch {
+            mainViewModel.hasUnreadNotifications.collect { hasUnread ->
+                Log.d(TAG, "Collector notified: hasUnreadNotifications is now $hasUnread")
+                notificationDotIcon.visibility = if (hasUnread) View.VISIBLE else View.GONE
             }
         }
     }
@@ -221,9 +237,9 @@ class MainActivity : AppCompatActivity() {
 
                     val calendar = Calendar.getInstance()
                     val greetingText = when (calendar.get(Calendar.HOUR_OF_DAY)) {
-                        in 2..11 -> "☀️ Good Morning"
-                        in 12..17 -> "🌤️ Good Afternoon"
-                        else -> "🌙 Good Evening"
+                        in 2..11 -> getString(R.string.main_greeting_morning)
+                        in 12..17 -> getString(R.string.main_greeting_afternoon)
+                        else -> getString(R.string.main_greeting_evening)
                     }
                     val fullGreeting = "$greetingText\n$fullName"
 
@@ -239,9 +255,21 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 .addOnFailureListener {
-                    greetingTextView.text = "☀️ Good Morning\nUSER"
+                    greetingTextView.text = getString(R.string.main_greeting_morning) + "\n" + getString(R.string.main_greeting_default_user)
                 }
         }
+    }
+
+    private fun setupNetworkObserver() {
+        connectivityObserver = NetworkConnectivityObserver(applicationContext)
+        connectivityObserver.networkStatus
+            .onEach { isConnected ->
+                mainViewModel.setNetworkStatus(isConnected) // ++ UPDATE THE VIEWMODEL
+                runOnUiThread {
+                    offlineBanner.visibility = if (isConnected) View.GONE else View.VISIBLE
+                }
+            }
+            .launchIn(lifecycleScope)
     }
 
     internal fun loadFragment(fragment: Fragment, newFragmentId: Int) {
@@ -303,10 +331,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showNotificationsPopup() {
-
-        val recentNotifications = DummyData.getNotifications() // Get fake data
-        val notificationButton = findViewById<ImageView>(R.id.buttonNotifications)
-
         val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val popupView = inflater.inflate(R.layout.popup_notifications, null)
         val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
@@ -316,18 +340,27 @@ class MainActivity : AppCompatActivity() {
         val viewAll = popupView.findViewById<TextView>(R.id.textViewViewAll)
         val noItemsTextView = popupView.findViewById<TextView>(R.id.textViewNoItems)
 
-        if (recentNotifications.isEmpty()) {
-            noItemsTextView.visibility = View.VISIBLE
-            recyclerView.visibility = View.GONE
-            viewAll.visibility = View.GONE
-            noItemsTextView.text = "No new notifications"
-        } else {
-            recyclerView.layoutManager = LinearLayoutManager(this)
-            recyclerView.adapter = NotificationAdapter(recentNotifications.take(2))
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        lifecycleScope.launch {
+            mainViewModel.notifications.collect { notifications ->
+                if (notifications.isNullOrEmpty()) {
+                    noItemsTextView.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
+                    viewAll.visibility = View.GONE
+                    noItemsTextView.text = getString(R.string.no_new_notifications)
+                } else {
+                    noItemsTextView.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
+                    viewAll.visibility = View.VISIBLE
+                    recyclerView.adapter =
+                        NotificationAdapter(notifications.take(3)) // Show up to 3 in the popup
+                }
+            }
         }
 
         viewAll.setOnClickListener {
-            loadFragment(NotificationsFragment(), -1)
+            loadFragment(NotificationsFragment(), -3)
             popupWindow.dismiss()
         }
 
@@ -392,7 +425,7 @@ class MainActivity : AppCompatActivity() {
         val tourSteps = mutableListOf<() -> ShowcaseView.Builder?>()
 
         // Helper to add steps, ensuring view is not null
-        fun addTourStep(viewId: Int, title: String, text: String, isBottomNavItem: Boolean = true) {
+        fun addTourStep(viewId: Int, title: Int, text: Int, isBottomNavItem: Boolean = true) {
             val targetView: View? = if (isBottomNavItem) {
                 bottomNav.findViewById(viewId)
             } else {
@@ -413,37 +446,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 2. Define the steps using the helper
-        addTourStep(
-            R.id.nav_home, // This is a menu item ID within your bottom_nav_menu.xml
-            "Welcome to Hamory Kitchen!",
-            "This is your Home screen, where you'll find daily inspiration."
-        )
-        addTourStep(
-            R.id.nav_discover,
-            "Discover New Recipes",
-            "Explore a world of public recipes shared by the community."
-        )
-        addTourStep(
-            R.id.buttonAddRecipe, // This is an ImageView ID in your activity_main.xml
-            "Add Your Creations",
-            "Tap the '+' button anytime to add your own recipes.",
-            isBottomNavItem = false // Explicitly state it's not a bottom nav item
-        )
-        addTourStep(
-            R.id.nav_scan,
-            "Scan Ingredients",
-            "Use your camera to find recipes based on what's in your kitchen."
-        )
-        addTourStep(
-            R.id.nav_cart,
-            "Shopping Lists",
-            "Manage your grocery lists for different recipes here."
-        )
-        addTourStep(
-            R.id.nav_profile,
-            "Your Profile",
-            "View your own creations, favorites, and manage app settings."
-        )
+        addTourStep(R.id.nav_home, R.string.onboarding_home_title, R.string.onboarding_home_text)
+        addTourStep(R.id.nav_discover, R.string.onboarding_discover_title, R.string.onboarding_discover_text)
+        addTourStep(R.id.buttonAddRecipe, R.string.onboarding_add_recipe_title, R.string.onboarding_add_recipe_text, isBottomNavItem = false)
+        addTourStep(R.id.nav_scan, R.string.onboarding_scan_title, R.string.onboarding_scan_text)
+        addTourStep(R.id.nav_cart, R.string.onboarding_cart_title, R.string.onboarding_cart_text)
+        addTourStep(R.id.nav_profile, R.string.onboarding_profile_title, R.string.onboarding_profile_text)
+
 
         // 3. Start the sequence if there are any valid steps
         if (tourSteps.isNotEmpty()) {

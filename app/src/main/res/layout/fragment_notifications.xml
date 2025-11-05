@@ -12,19 +12,35 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Notifications 🔔"
+        android:text="@string/notifications"
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="?android:attr/textColorPrimary"
         android:layout_marginTop="16dp"
         android:layout_marginStart="24dp"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewAllNotifications"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="16dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_notification" />
+        android:layout_marginTop="16dp">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewAllNotifications"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_notification" />
+
+        <TextView
+            android:id="@+id/textViewNoNotifications"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_notifications_yet"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:visibility="gone"
+            android:textSize="16sp"
+            tools:visibility="visible"/>
+
+    </RelativeLayout>
 </LinearLayout>

@@ -29,7 +29,7 @@ class SplashActivity : AppCompatActivity() {
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance()
         )
-        SplashViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

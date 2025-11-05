@@ -28,7 +28,7 @@
                 android:id="@+id/textViewAddRecipeTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Add Your Recipe 🍳"
+                android:text="@string/add_your_recipe"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary"/>
@@ -40,6 +40,7 @@
                 android:layout_height="180dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/upload_image_background"
+                android:contentDescription="@string/todo"
                 android:scaleType="center"
                 android:src="@drawable/ic_add_a_photo"/>
 
@@ -49,7 +50,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Recipe Name">
+                android:hint="@string/recipe_name">
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
@@ -61,7 +62,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="Category">
+                android:hint="@string/category">
                 <AutoCompleteTextView
                     android:id="@+id/autoCompleteCategory"
                     android:layout_width="match_parent"
@@ -75,7 +76,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="Meal Type (e.g., Breakfast, Snack)">
+                android:hint="@string/meal_type_e_g_breakfast_snack">
                 <AutoCompleteTextView
                     android:id="@+id/autoCompleteMealType"
                     android:layout_width="match_parent"
@@ -88,7 +89,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="Description">
+                android:hint="@string/description">
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -100,7 +101,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ingredients"
+                android:text="@string/ingredients"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary"
@@ -115,14 +116,14 @@
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Add Ingredient"
+                android:text="@string/add_ingredient"
                 app:icon="@drawable/ic_add"/>
 
             <!-- Nutrition Section -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nutrition Facts (Optional)"
+                android:text="@string/nutrition_facts_optional"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary"
@@ -136,7 +137,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="Calories">
+                    android:hint="@string/calories">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -148,7 +149,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:hint="Fat (g)">
+                    android:hint="@string/fat_g">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -165,7 +166,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="Carbs (g)">
+                    android:hint="@string/carbs_g">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -177,7 +178,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:hint="Salts (g)">
+                    android:hint="@string/salts_g">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -189,7 +190,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Method / Steps"
+                android:text="@string/method_steps"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary"
@@ -204,7 +205,7 @@
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Add Step"
+                android:text="@string/add_step"
                 app:icon="@drawable/ic_add"/>
 
             <!-- Time and Servings -->
@@ -218,7 +219,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="Time to Make (e.g., 45 mins)">
+                    android:hint="@string/time_to_make_e_g_45_mins">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -230,7 +231,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:hint="Servings">
+                    android:hint="@string/servings">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -243,7 +244,7 @@
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Delete Recipe"
+                android:text="@string/delete_recipe"
                 android:textColor="@color/design_default_color_error"
                 app:strokeColor="@color/design_default_color_error"
                 android:paddingVertical="14dp"
@@ -257,7 +258,7 @@
                 android:id="@+id/buttonSaveRecipe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Save Recipe"
+                android:text="@string/save_recipe"
                 android:paddingVertical="14dp"
                 android:layout_marginTop="32dp"
                 android:backgroundTint="?attr/colorPrimary"

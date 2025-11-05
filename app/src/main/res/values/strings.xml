@@ -1,3 +1,672 @@
 <resources>
     <string name="app_name">Harmony Kitchen</string>
+
+    <!-- General / Reusable -->
+    <string name="ok">OK</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="coming_soon">Coming Soon…</string>
+    <string name="permission_needed_title">Permission Needed</string>
+    <string name="select_language">🌍 Select Language</string>
+
+    <!-- RecipeDetailActivity -->
+    <string name="recipe_detail_error_missing_id">Recipe ID missing</string>
+    <string name="recipe_detail_add_to_list_title">Add to Shopping List</string>
+    <string name="recipe_detail_add_all_ingredients">Add all ingredients</string>
+    <string name="recipe_detail_select_ingredients">Select ingredients to add</string>
+    <string name="recipe_detail_toast_recipe_not_loaded">Recipe not loaded yet.</string>
+    <string name="recipe_detail_publish_dialog_title">Publish Recipe</string>
+    <string name="recipe_detail_publish_dialog_message">Are you sure you want to make this recipe public for everyone to see?</string>
+    <string name="recipe_detail_toast_published">Recipe published!</string>
+    <string name="recipe_detail_toast_private">Recipe is now private.</string>
+    <string name="read_less">Read Less</string>
+    <string name="recipe_detail_publish_button">Publish</string>
+    <string name="recipe_detail_toast_all_ingredients_added">Added ingredients from %1$s to a new list</string>
+    <string name="recipe_detail_author_prefix">by %1$s</string>
+    <!-- Using <plurals> for better handling of singular/plural cases across different languages -->
+    <plurals name="recipe_detail_toast_ingredients_added">
+        <item quantity="one">%1$d ingredient added to new list</item>
+        <item quantity="other">%1$d ingredients added to new list</item>
+    </plurals>
+
+    <!-- ShoppingListFragment -->
+    <string name="shopping_list_default_title">Shopping List 🍽️</string>
+    <string name="shopping_list_all_items">All Items 🛒</string>
+    <string name="shopping_list_my_list">My List 📝</string>
+    <!-- Using <plurals> for better handling of singular/plural cases across different languages -->
+
+    <!-- AddRecipeFragment & ProfileCompletionActivity -->
+    <string name="permission_camera_required">Camera permission is required.😥</string>
+    <string name="dialog_set_photo_title">Set Cover Photo</string>
+    <string name="dialog_option_take_photo">Take Photo</string>
+    <string name="dialog_option_choose_gallery">Choose from Gallery</string>
+    <string name="dialog_option_remove_photo">Remove Photo😥</string>
+    <string name="permission_camera_rationale">Camera access is required to take a photo for your recipe.😥</string>
+    <string name="delete_recipe_dialog_title">Delete Recipe 🗑️</string>
+    <string name="delete_recipe_dialog_message">Are you sure you want to permanently delete this recipe? 😥</string>
+
+    <!-- Welcome & Login -->
+    <string name="google_sign_in_failed">Google Sign-In failed: %1$s</string>
+    <string name="firebase_auth_failed">Firebase Auth failed: %1$s</string>
+    <string name="auth_failed">Authentication failed: %1$s</string>
+
+    <!-- ProfileFragment -->
+    <string name="profile_logout_title">Log Out</string>
+    <string name="profile_logout_message">Are you sure you want to log out and clear all local data?</string>
+    <string name="profile_logout_button">Log Out</string>
+    <string name="profile_version">Version %1$s</string>
+    <string name="profile_default_name">Your Name</string>
+
+    <!--About-->
+    <string name="about_harmony_kitchen">About Harmony Kitchen 🍲</string>
+    <string name="our_mission">🎯 Our Mission</string>
+    <string name="harmony_kitchen_is_a_final_year_project_designed_to_bring_delicious_easy_to_make_recipes_to_your_fingertips_tailored_to_the_ingredients_you_have_and_the_flavors_you_love">Harmony Kitchen is a final year project designed to bring delicious, easy-to-make recipes to your fingertips, tailored to the ingredients you have and the flavors you love.</string>
+    <string name="the_team_rst_innovations">👥 The Team: RST Innovations</string>
+    <string name="this_app_was_proudly_developed_by_students_of_rosebank_college_n_tokollo_nonyane_n_sagwadi_mashimbye_n_rinae_magadagela">This app was proudly developed by students of Rosebank College:\n• Tokollo Nonyane\n• Sagwadi Mashimbye\n• Rinae Magadagela</string>
+    <string name="credits_amp_attributions"><![CDATA[©️ Credits & Attributions]]></string>
+    <string name="ui_ux_design_figma_nphotos_unsplash_nicons_material_design_icons">UI/UX Design: Figma\nPhotos: Unsplash\nIcons: Material Design Icons</string>
+    <string name="are_you_enjoying_the_app_so_far">Are you enjoying the app so far? 😊</string>
+    <string name="VersionNumber">Version 1.0.0</string>
+
+    <!--Camera Scanner-->
+    <string name="point_at_a_list_of_ingredients">Point at a list of ingredients</string>
+    <string name="scan_text">Scan Text</string>
+
+    <!--Country Selector-->
+    <string name="back_button">Back button</string>
+    <string name="which_country_are_you_from">Which country are you from 🥰</string>
+    <string name="please_select_your_country_of_origin_for_a_better_recommendation">Please select your country of origin for a better recommendation</string>
+    <string name="select_country">Select Country</string>
+    <string name="continuebtn">Continue</string>
+
+    <!--Create Account-->
+    <string name="todo">TODO</string>
+    <string name="create_an_account">Create an Account 🤝</string>
+    <string name="enter_your_username_email_amp_password_if_you_forgot_it_then_you_have_to_do_forget_password"><![CDATA[Enter your username, email, & password. If you forgot it, then you have to do forget password]]></string>
+    <string name="username">Username</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="sign_up">Sign Up</string>
+
+    <!--Cuisine Selector-->
+    <string name="select_your_cuisines_preferences">Select your cuisines preferences 🤔</string>
+    <string name="select_your_cuisines_preferences_for_better_recommendations_or_you_can_skip">Select your cuisines preferences for better recommendations or you can skip</string>
+    <string name="select_all">Select All</string>
+    <string name="skip">Skip</string>
+
+    <!--Dietary Selector-->
+    <string name="any_dietary_preferences">Any dietary preferences? 🥗</string>
+    <string name="select_your_dietary_preferences_for_better_recommendations_or_you_can_skip_it">Select your dietary preferences for better recommendations or you can skip it</string>
+
+    <!--Edit Profile-->
+    <string name="edit_profile">Edit Profile ✏️</string>
+    <string name="change_photo">Change Photo</string>
+    <string name="full_name">Full Name</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="change_password">Change Password</string>
+
+    <!--Forgot Password-->
+    <string name="forgot_password">Forgot Password 🔒</string>
+    <string name="enter_your_email_address_we_will_send_a_link_for_verification">Enter your email address. We will send a link for verification</string>
+    <string name="send_link">Send Link</string>
+
+    <!--Login-->
+    <string name="hey_there">Hey There 👋</string>
+    <string name="please_enter_your_username_email_and_password_to_sign_in">Please enter your username/email and password to sign in</string>
+    <string name="email_username">Email / Username</string>
+    <string name="log_in">Log in</string>
+    <string name="or_continue_with">Or continue with</string>
+    <string name="forgot_passwordbtn">Forgot Password</string>
+
+    <!--Main-->
+    <string name="offline_mode">Offline Mode 🛡️</string>
+
+    <!--My recipe-->
+    <string name="my_creations">My Creations 🎨</string>
+
+    <!--OTP-->
+    <string name="otp_has_been_sent">OTP Has Been Sent 📲</string>
+    <string name="enter_your_otp_to_verify">Enter your OTP to Verify.</string>
+    <string name="reset_password">Reset Password</string>
+
+    <!--Preference-->
+    <string name="preferences">Preferences ⚙️</string>
+    <string name="personal">👤 Personal</string>
+    <string name="country">Country</string>
+    <string name="cuisines">Cuisines</string>
+    <string name="dietary_preferences">Dietary Preferences</string>
+    <string name="appearance">🎨 Appearance</string>
+    <string name="light_mode">Light Mode</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="follow_system">Follow System</string>
+    <string name="unit_system">🔢 Unit System</string>
+    <string name="metric_grams_ml">Metric (grams, ml)</string>
+    <string name="imperial_ounces_cups">Imperial (ounces, cups)</string>
+    <string name="display_name_in_all_caps">Display name in ALL CAPS</string>
+
+    <!--Profile Completion-->
+    <string name="complete_your_profile">Complete your Profile 🤞</string>
+    <string name="don_t_worry_only_you_can_see_your_personal_data_no_one_else_will_be_able_to_see_it">Don\'t worry only you can see your personal data, no one else will be able to see it.</string>
+    <string name="gender_optional">Gender (optional)</string>
+    <string name="date_of_birth_optional">Date of Birth (optional)</string>
+
+    <!--Recipe Detail-->
+    <string name="read_more">Read More</string>
+    <string name="nutrition_facts">Nutrition Facts 🍎</string>
+    <string name="nutrition_facts_not_provided_for_this_recipe">Nutrition facts not provided for this recipe. 😔</string>
+    <string name="ingredients">Ingredients 🍋</string>
+    <string name="Minus">-</string>
+    <string name="Size">6</string>
+    <string name="Addition">+</string>
+    <string name="method">Method 🍳</string>
+    <string name="toggle_favorite">toggle_favorite</string>
+
+    <!--Rest Password-->
+    <string name="reset_your_password">Reset Your Password 🔑</string>
+    <string name="enter_your_new_password">Enter your new password</string>
+
+    <!--Scan Result-->
+    <string name="back">Back</string>
+    <string name="recipe_matches">Recipe Matches 💡</string>
+
+    <!--Welcome-->
+    <string name="welcome_to_nharmony_kitchen">Welcome to\nHarmony Kitchen</string>
+    <string name="welcome_emoji">👋</string>
+    <string name="your_daily_dose_of_delicious">Your daily dose of delicious</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="get_started">Get Started</string>
+    <string name="i_already_have_an_account">I Already Have an Account</string>
+
+    <!--Add Shopping item-->
+    <string name="enter_items_one_per_line">Enter items, one per line…</string>
+
+    <!--Add Recipe-->
+    <string name="add_your_recipe">Add Your Recipe 🍳</string>
+    <string name="recipe_name">Recipe Name</string>
+    <string name="category">Category</string>
+    <string name="meal_type_e_g_breakfast_snack">Meal Type (e.g., Breakfast, Snack)</string>
+    <string name="description">Description</string>
+    <string name="add_ingredient">Add Ingredient</string>
+    <string name="nutrition_facts_optional">Nutrition Facts (Optional)</string>
+    <string name="calories">Calories</string>
+    <string name="fat_g">Fat (g)</string>
+    <string name="carbs_g">Carbs (g)</string>
+    <string name="salts_g">Salts (g)</string>
+    <string name="method_steps">Method / Steps</string>
+    <string name="add_step">Add Step</string>
+    <string name="time_to_make_e_g_45_mins">Time to Make (e.g., 45 mins)</string>
+    <string name="servings">Servings</string>
+    <string name="delete_recipe">Delete Recipe</string>
+    <string name="save_recipe">Save Recipe</string>
+
+    <!--Category-->
+    <string name="all_categories">All Categories 🏷️</string>
+
+    <!-- CategoryFragment -->
+    <string name="category_toast_selected">Selected: %1$s</string>
+
+    <!--Discover-->
+    <string name="discover_recipes">Discover Recipes 🌍</string>
+    <string name="search_recipes">Search recipes…</string>
+
+    <!--Favorites-->
+    <string name="my_favorites">My Favorites ❤️</string>
+    <string name="you_haven_t_saved_any_favorites_yet_tap_the_on_a_recipe_to_add_it_here">You haven\'t saved any favorites yet. Tap the ❤️ on a recipe to add it here!</string>
+
+    <!--Home Fragment-->
+    <string name="featured">Featured 😄</string>
+    <string name="categoryhome">Category 🧑‍🍳</string>
+    <string name="recommended_recipes">Recommended Recipes 📖</string>
+
+    <!--Notification-->
+    <string name="notifications">Notifications 🔔</string>
+
+    <!--Offline -->
+    <string name="you_are_offline">You are Offline🥺</string>
+    <string name="check_your_connection_and_try_again">Check your connection and try again.\n Your favourites are saved offline🥹</string>
+
+    <!--Profile-->
+    <string name="edit_profile_setting">Edit Profile</string>
+    <string name="my_recipes">My Recipes</string>
+    <string name="account">👤 Account</string>
+    <string name="preferences_setting">Preferences</string>
+    <string name="language">Language</string>
+    <string name="notifications_setting">Notifications</string>
+    <string name="support_amp_about"><![CDATA[🛠️ Support & About]]></string>
+    <string name="about_us">About Us</string>
+    <string name="report_an_issue">Report an Issue</string>
+    <string name="log_out">Log Out</string>
+
+    <!--Scan-->
+    <string name="what_s_in_your_kitchen">What\'s in your kitchen? 🧑‍🍳</string>
+    <string name="type_an_ingredient">Type an ingredient…</string>
+    <string name="find_recipes">Find Recipes</string>
+    <string name="your_scan_history">Your Scan History ✨</string>
+
+    <!--Shopping-->
+    <string name="shopping_list">Shopping List 🍽️</string>
+    <string name="delete_list">Delete List</string>
+
+    <!--Chip-->
+    <string name="breakfast">Breakfast</string>
+
+    <!--Ingredient-->
+    <string name="ingredient_name">Ingredient Name</string>
+    <string name="_100_g">100 g</string>
+    <string name="sample_ingredient">Sample Ingredient</string>
+    <string name="qty">Qty</string>
+    <string name="unit">Unit</string>
+    <string name="remove_ingredient">Remove Ingredient</string>
+    <string name="_1_halve_the_vanilla_pod_and_scrape_out_the_seeds">1. Halve the vanilla pod and scrape out the seeds…</string>
+    <string name="_1">1.</string>
+    <string name="step_details">Step details…</string>
+    <string name="_278_4">278.4</string>
+    <string name="_5_min">5 Min</string>
+    <string name="blackberry_fro_yo_with_a_very_long_name">Blackberry fro-yo with a very long name</string>
+    <string name="with_bay_sugar_and_some_other_ingredients">With: bay sugar and some other ingredients</string>
+    <string name="recipe_title">Recipe Title</string>
+    <string name="you_need_2_more_ingredients">You need 2 more ingredients</string>
+    <string name="blueberry_muffins">Blueberry muffins</string>
+    <string name="_40_min">40 Min</string>
+    <string name="view_all">View All</string>
+
+    <!--Menu-->
+    <string name="home">Home</string>
+    <string name="discover">Discover</string>
+    <string name="scan">Scan</string>
+    <string name="items">Items</string>
+    <string name="profile">Profile</string>
+    <string name="add_to_shopping_list">Add to Shopping List</string>
+    <string name="confirm">Confirm</string>
+    <string name="publish_recipe">Publish Recipe</string>
+    <string name="make_private">Make Private</string>
+    <string name="edit_recipe">Edit Recipe</string>
+
+    <string name="no_new_notifications">No new notifications</string>
+    <string name="no_notifications_yet">No Notifications Yet</string>
+    <string name="my_badges_achievements"><![CDATA[My Badges & Achievements 🏆]]></string>
+    <string name="my_badges_achievementsbtn"><![CDATA[My Badges & Achievements]]></string>
+
+    <!-- Report-->
+    <string name="report_issue_email_address">whiteshytk@gmail.com</string>
+    <string name="report_issue_subject">Hamory Kitchen - Bug Report / Feedback</string>
+    <string name="report_issue_body">
+        \n\n--- Please Do Not Edit Below This Line ---\n
+        App Version: %1$s\n
+        Device: %2$s\n
+        Android Version: %3$s\n
+        User ID: %4$s\n
+        --- PLease Explain Here ---\n
+    </string>
+    <string name="report_issue_error">No email app found.</string>
+
+    <!-- Greeting message-->
+    <string-array name="morning_greetings">
+        <item>☀️ Good Morning!</item>
+        <item>Rise and shine! 🌅</item>
+        <item>Time for some breakfast? 🍳</item>
+        <item>What\'s cooking this morning? 🥞</item>
+        <item>A great day starts with a great meal!</item>
+        <item>Hello, sunshine! ☀️</item>
+        <item>New day, new flavors! 🍯</item>
+        <item>Coffee first, then conquer the day! ☕</item>
+        <item>Morning vibes only! 🌸</item>
+        <item>Breakfast is served! 🍞🥓</item>
+        <item>Wake up and smell the coffee! ☕🌄</item>
+        <item>Good morning, food explorer! 🥐</item>
+        <item>Fuel up for the day ahead! 🍌</item>
+        <item>Bright mornings, tasty mornings! 🌞</item>
+        <item>A morning without pancakes is just sad. 🥞</item>
+        <item>Start your day deliciously! 🍯🥖</item>
+        <item>Hello, early bird! 🐦</item>
+        <item>Eggs, toast, coffee… repeat! 🍳☕</item>
+        <item>Smiles and breakfast all around! 😄🥯</item>
+        <item>Rise, shine, and dine! 🍴</item>
+        <item>Let\'s get this bread! (Literally) 🍞</item>
+        <item>Today\'s forecast: 100% chance of delicious.🌧️ </item>
+        <item>Sip, sip, hooray! It\'s a new day! 🍊</item>
+    </string-array>
+
+    <string-array name="lunch_greetings">
+        <item>🥗 Lunchtime!</item>
+        <item>Ready for a midday meal? 🥪</item>
+        <item>Refuel for the afternoon! 💪</item>
+        <item>What\'s on the menu for lunch? 🍱</item>
+        <item>Time for a delicious break.</item>
+        <item>Midday munchies? 🍛</item>
+        <item>Keep your energy up! 🌯</item>
+        <item>Lunch o\'clock! ⏰🍴</item>
+        <item>A tasty break for a busy day! 🥗</item>
+        <item>Fuel your afternoon adventures! 🥙</item>
+        <item>Bon appétit! 😋</item>
+        <item>Sandwiches, salads, or soup? 🥗🥪🍜</item>
+        <item>Time to power up! ⚡🥪</item>
+        <item>Lunch with a side of smiles! 😊</item>
+        <item>Eat well, work well! 🍛💻</item>
+        <item>Take a break and enjoy your food! 🍲</item>
+        <item>Midday delight for the foodie soul! 🥙</item>
+        <item>Refuel like a champ! 🏆🍱</item>
+        <item>Lunch never looked this good! 🍣</item>
+        <item>Healthy, tasty, satisfying! 🥗✨</item>
+        <item>Halfway through the day! You deserve this. 🎉</item>
+        <item>Let\'s taco \'bout lunch! 🌮</item>
+        <item>Soup-er to see you! 🍲</item>
+    </string-array>
+
+    <string-array name="afternoon_greetings">
+        <item>☕ Afternoon Snack?</item>
+        <item>A little treat to get you through the day? 🍪</item>
+        <item>Feeling peckish? 🍎</item>
+        <item>Time for a coffee break! ☕</item>
+        <item>Need a little pick-me-up? ✨</item>
+        <item>Snack attack time! 🍫</item>
+        <item>Afternoon cravings? 🍩</item>
+        <item>Take five and enjoy a bite! 🍇</item>
+        <item>Sweet or savory? You decide! 🥨🍪</item>
+        <item>A tasty pause to power through! ⚡</item>
+        <item>Fuel your afternoon! 🥜</item>
+        <item>Snack smart, stay happy! 🥯</item>
+        <item>Cookies or fruits? 🍏🍪</item>
+        <item>Time for a little indulgence! 🍫</item>
+        <item>Bite-sized happiness! 🥨</item>
+        <item>Keep your energy flowing! ⚡🍎</item>
+        <item>A treat to brighten your day! 🌞🍫</item>
+        <item>Snack o\'clock is the best o\'clock! ⏰</item>
+        <item>Refuel, recharge, repeat! 🥜</item>
+        <item>Afternoon vibes and delicious bites! 🍪</item>
+        <item>Donut worry, be happy! 🍩</item>
+        <item>You\'re one snack away from a good mood. 😉</item>
+        <item>A little something to keep you going. 🍓</item>
+    </string-array>
+
+    <string-array name="dinner_greetings">
+        <item>🌙 Dinner is Served</item>
+        <item>What\'s for dinner tonight? 🍝</item>
+        <item>Hope you\'re hungry! 🍲</item>
+        <item>Time to unwind with a good meal. 🍷</item>
+        <item>Let\'s make something amazing for dinner!</item>
+        <item>Evening delights await! 🍛</item>
+        <item>Cook, eat, repeat! 🍽️</item>
+        <item>Dinner vibes only! 🌟</item>
+        <item>A cozy dinner for a cozy night. 🕯️</item>
+        <item>Gather \'round, food is ready! 🥘</item>
+        <item>Time for flavors that soothe the soul! 🍲</item>
+        <item>Delicious evening ahead! 😋</item>
+        <item>Dinner and chill! 🍷</item>
+        <item>Savor every bite! 🥗</item>
+        <item>Evening meals, happy feels! 🌙</item>
+        <item>End the day on a tasty note! 🍝</item>
+        <item>Family dinner time! 🥘👨‍👩‍👧‍👦</item>
+        <item>Cook up some magic tonight! ✨🍛</item>
+        <item>A plate full of happiness! 🍽️</item>
+        <item>Cheers to a tasty evening! 🥂</item>
+        <item>Let\'s eat, drink, and be merry! 🥳</item>
+        <item>Dinner is better when we eat together. ❤️</item>
+        <item>Time to feast! 🍗</item>
+    </string-array>
+
+    <string-array name="night_greetings">
+        <item>😋 Midnight Snack?</item>
+        <item>Craving something sweet? 🍰</item>
+        <item>A late-night bite? 🍕</item>
+        <item>Something cozy for the evening? 🍿</item>
+        <item>Sweet dreams are made of cheese… and this! 🧀</item>
+        <item>Late-night cravings? 🌙</item>
+        <item>Snack o\'clock! ⏳🍫</item>
+        <item>Nighttime nibbles? 🍩</item>
+        <item>Moonlight munchies! 🌌</item>
+        <item>A tiny treat before bed? 🥛🍪</item>
+        <item>Quiet night, tasty bites. 🛌🍫</item>
+        <item>Night owl? Treat yourself! 🦉🍫</item>
+        <item>Sweet or salty, you deserve both! 🍿🍫</item>
+        <item>Keep the fridge company! 🥒🥛</item>
+        <item>Snack bliss under the stars! ✨🍪</item>
+        <item>Midnight delight awaits! 🌙🍩</item>
+        <item>A bite for the night warrior! 🥨🌌</item>
+        <item>Nibble, relax, repeat! 🛌🍫</item>
+        <item>Cravings approved! 🍫</item>
+        <item>End the night deliciously! 🌙🍪</item>
+        <item>The kitchen is calling… 🤫</item>
+        <item>Just one more bite... I promise! 😉</item>
+        <item>Shhh… it\'s snack time. 🤫</item>
+    </string-array>
+
+    <!-- Add recipe-->
+    <string name="edit_recipe_title">Edit Your Recipe 🍳</string>
+    <string name="toast_recipe_saved">Recipe saved! ❤️</string>
+    <string name="toast_recipe_deleted">Recipe deleted! 🗑️</string>
+    <string name="toast_operation_failed">Operation failed: %1$s</string>
+    <string name="toast_could_not_load_recipe">Could not load recipe to edit. 😭</string>
+    <string name="toast_login_required">You must be logged in to save a recipe. 😭</string>
+    <string name="toast_failed">Failed to start camera. 😭</string>
+    <string name="toast_profile_error">Could not retrieve user profile: %1$s</string>
+    <string name="toast_photo_error">Photo capture failed: %1$s</string>
+    <string name="toast_object_error">No objects recognized.🥺</string>
+    <string name="toast_classify_error">Could not classify the object.🥺</string>
+    <string name="toast_recognition_error">Object recognition failed.🥺</string>
+
+    <string name="validation_recipe_name_required">Recipe name is required.🥺</string>
+    <string name="validation_category_required">Category is required. 🥺</string>
+    <string name="validation_meal_type_required">Meal Type is required. 🥺</string>
+    <string name="validation_time_required">Time to make is required. 🥺</string>
+    <string name="validation_servings_required">Servings amount is required. 🥺</string>
+    <string name="validation_ingredient_min_required">Please add at least one ingredient. 🥺</string>
+    <string name="validation_ingredient_name_required">All ingredient names are required. 🥺</string>
+    <string name="validation_ingredient_qty_required">All ingredient quantities are required. 🥺</string>
+    <string name="validation_step_min_required">Please add at least one step. 🥺</string>
+    <string name="validation_step_desc_required">All step descriptions are required. 🥺</string>
+
+    <string name="notification_upload_success_title">Upload Successful! 🎉</string>
+    <string name="notification_upload_success_body">Your new recipe \'%1$s\' is now available. 😉</string>
+
+    <string name="nutrition_fat">Fat</string>
+    <string name="nutrition_carbs">Carbs</string>
+    <string name="nutrition_salts">Salts</string>
+    <string name="unit_grams">%1$sg</string>
+
+    <string-array name="meal_types">
+        <item>Breakfast</item>
+        <item>Lunch</item>
+        <item>Dinner</item>
+        <item>Snack</item>
+        <item>Dessert</item>
+    </string-array>
+
+    <string-array name="dialog_cover_photo_options">
+        <item>@string/dialog_option_take_photo</item>
+        <item>@string/dialog_option_choose_gallery</item>
+        <item>@string/dialog_option_remove_photo</item>
+    </string-array>
+
+    <string name="category_all">All</string>
+
+    <!-- CountrySelectionActivity -->
+    <string name="country_south_africa">South Africa</string>
+    <string name="country_toast_load_failed">Failed to load countries</string>
+    <string name="country_toast_load_error">Error: %1$s</string>
+    <string name="country_toast_selection_required">Please select a country</string>
+    <string name="country_toast_update_success">Country updated!</string>
+    <string name="country_toast_update_failed">Failed to update country: %1$s</string>
+
+    <!-- CreateAccountActivity -->
+    <string name="create_account_toast_signup_failed_no_id">Sign up failed: Could not get user ID.</string>
+    <string name="create_account_toast_signup_failed_exception">Sign up failed: %1$s</string>
+    <string name="create_account_toast_signup_success">Sign Up Successful! 🎉</string>
+    <string name="create_account_toast_save_profile_failed">Failed to save profile: %1$s</string>
+    <string name="validation_username_empty">Username cannot be empty</string>
+    <string name="validation_email_empty">Email cannot be empty</string>
+    <string name="validation_email_invalid">Please enter a valid email address</string>
+    <string name="validation_password_empty">Password cannot be empty</string>
+    <string name="validation_password_min_length">Password must be at least %1$d characters</string>
+    <string name="validation_password_no_uppercase">Password must include an uppercase letter</string>
+    <string name="validation_password_no_lowercase">Password must include a lowercase letter</string>
+    <string name="validation_password_no_digit">Password must include a digit</string>
+    <string name="validation_password_no_special">Password must include a special character (e.g., @#$%</string>
+    <string name="validation_password_confirm_empty">Please confirm your password</string>
+    <string name="validation_passwords_no_match">Passwords do not match</string>
+
+    <!-- Cuisines -->
+    <string name="cuisine_italian">Italian</string>
+    <string name="cuisine_mexican">Mexican</string>
+    <string name="cuisine_chinese">Chinese</string>
+    <string name="cuisine_japanese">Japanese</string>
+    <string name="cuisine_indian">Indian</string>
+    <string name="cuisine_thai">Thai</string>
+    <string name="cuisine_french">French</string>
+    <string name="cuisine_spanish">Spanish</string>
+    <string name="cuisine_greek">Greek</string>
+    <string name="cuisine_american">American</string>
+    <string name="cuisine_korean">Korean</string>
+    <string name="cuisine_vietnamese">Vietnamese</string>
+    <string name="cuisine_mediterranean">Mediterranean</string>
+    <string name="cuisine_caribbean">Caribbean</string>
+    <string name="cuisine_african">African</string>
+
+    <!-- CuisineSelectionActivity -->
+    <string name="cuisine_selection_toast_at_least_one">Please select at least one cuisine</string>
+    <string name="deselect_all">Deselect All</string>
+    <string name="cuisine_selection_toast_preferences_updated">Preferences updated!</string>
+    <string name="cuisine_selection_toast_update_failed">Failed to update: %1$s</string>
+
+    <!-- DietarySelectionActivity -->
+    <string name="diet_selection_toast_at_least_one">Please select at least one preference</string>
+
+    <!-- Diets -->
+    <string name="diet_vegetarian">Vegetarian</string>
+    <string name="diet_vegan">Vegan</string>
+    <string name="diet_gluten_free">Gluten-Free</string>
+    <string name="diet_keto">Keto</string>
+    <string name="diet_paleo">Paleo</string>
+    <string name="diet_pescetarian">Pescetarian</string>
+    <string name="diet_low_carb">Low-Carb</string>
+    <string name="diet_dairy_free">Dairy-Free</string>
+    <string name="diet_nut_allergy">Nut Allergy</string>
+    <string name="diet_low_fodmap">Low-FODMAP</string>
+    <string name="diet_halal">Halal</string>
+    <string name="diet_kosher">Kosher</string>
+
+    !-- DiscoverFragment -->
+    <string-array name="discover_sort_options">
+        <item>A-Z</item>
+        <item>Recommended</item>
+        <item>Popular</item>
+        <item>Cook Time</item>
+        <item>Z-A</item>
+    </string-array>
+
+    <!-- EditProfileActivity -->
+    <string name="edit_profile_permission_denied">Camera permission denied</string>
+    <string name="edit_profile_reset_link_sent">Password reset link sent to your email.</string>
+    <string name="edit_profile_reset_link_failed">Failed to send reset link: %1$s</string>
+    <string name="edit_profile_load_failed">Failed to load profile: %1$s</string>
+    <string name="edit_profile_upload_failed">Failed to upload image: %1$s</string>
+    <string name="edit_profile_update_success">Profile updated successfully!</string>
+    <string name="edit_profile_update_failed">Failed to update profile: %1$s</string>
+    <string name="validation_full_name_empty">Full name cannot be empty</string>
+
+    <!-- ForgotPasswordActivity -->
+    <string name="forgot_password_link_sent">Password reset link sent to your email.</string>
+    <string name="forgot_password_link_failed">Failed to send reset email: %1$s</string>
+
+    <!-- LoginActivity -->
+    <string name="login_firebase_auth_failed">Firebase Auth failed: %1$s</string>
+    <string name="login_google_sign_in_failed">Google Sign-In failed: %1$s</string>
+    <string name="login_auth_failed">Authentication failed: %1$s</string>
+    <string name="validation_user_input_empty">Email or Username cannot be empty</string>
+    <string name="validation_user_input_invalid_email">Invalid email format</string>
+
+    <!-- MainActivity -->
+    <string name="main_no_favorites_popup">You have no favorites yet!</string>
+    <string name="main_greeting_morning">☀️ Good Morning</string>
+    <string name="main_greeting_afternoon">🌤️ Good Afternoon</string>
+    <string name="main_greeting_evening">🌙 Good Evening</string>
+    <string name="main_greeting_default_user">USER</string>
+
+    <!-- Onboarding Tour -->
+    <string name="onboarding_home_title">Welcome to Harmony Kitchen!</string>
+    <string name="onboarding_home_text">This is your Home screen, where you\'ll find daily inspiration.</string>
+    <string name="onboarding_discover_title">Discover New Recipes</string>
+    <string name="onboarding_discover_text">Explore a world of public recipes shared by the community.</string>
+    <string name="onboarding_add_recipe_title">Add Your Creations</string>
+    <string name="onboarding_add_recipe_text">Tap the \'+\' button anytime to add your own recipes.</string>
+    <string name="onboarding_scan_title">Scan Ingredients</string>
+    <string name="onboarding_scan_text">Use your camera to find recipes based on what\'s in your kitchen.</string>
+    <string name="onboarding_cart_title">Shopping Lists</string>
+    <string name="onboarding_cart_text">Manage your grocery lists for different recipes here.</string>
+    <string name="onboarding_profile_title">Your Profile</string>
+    <string name="onboarding_profile_text">View your own creations, favorites, and manage app settings.</string>
+
+    <!-- Gamification -->
+    <string name="gamification_badge_unlocked">Badge Unlocked! 🎉</string>
+    <string name="gamification_badge_earned_message">You\'ve earned the \'%1$s\' badge!</string>
+
+    <!-- MyRecipesActivity -->
+    <string name="my_recipes_login_required">You must be logged in to see your recipes.</string>
+    <string name="my_recipes_empty_state">You haven\'t created any recipes yet. Tap the \'+\' button to add your first one!</string>
+
+    <!-- ProfileCompletionActivity -->
+    <string name="profile_completion_permission_camera_required">Camera permission is required to take a photo.</string>
+    <string name="profile_completion_set_photo_title">Set Profile Picture</string>
+    <string name="validation_fullname_empty">Full name cannot be empty</string>
+    <string name="validation_phone_invalid">Invalid phone number</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+    <string name="gender_other">Other</string>
+    <string-array name="gender_options">
+        <item>@string/gender_male</item>
+        <item>@string/gender_female</item>
+        <item>@string/gender_other</item>
+    </string-array>
+
+    <!-- RecipeMatchAdapter -->
+    <string name="recipe_match_all_ingredients">You have all ingredients! 🎉</string>
+    <plurals name="recipe_match_missing_ingredients">
+        <item quantity="one">You need 1 more ingredient</item>
+        <item quantity="other">You need %d more ingredients</item>
+    </plurals>
+
+    <!-- ScanCameraFragment -->
+    <string name="scan_camera_permission_needed">Camera permission is needed.</string>
+    <string name="scan_camera_ingredients_found">Found: %1$s</string>
+    <string name="scan_camera_no_ingredients_identified">Could not identify any ingredients.</string>
+    <string name="scan_camera_detection_failed">Could not detect ingredients.</string>
+
+    <!-- ScanFragment Tabs -->
+    <string name="scan_tab_item">Scan Item</string>
+    <string name="scan_tab_type_voice">Type &amp; Voice</string>
+    <string name="scan_tab_history">History</string>
+
+    <!-- ScanManualFragment -->
+    <string name="scan_manual_voice_prompt">Say your ingredients…</string>
+    <string name="scan_manual_add_ingredients_first">Please add some ingredients first</string>
+    <string name="scan_manual_voice_not_available">Voice recognition is not available on this device</string>
+
+    <!-- ScanHistoryFragment -->
+    <string name="scan_history_delete_title">Delete History Item</string>
+    <string name="scan_history_delete_message">Are you sure you want to delete this scan from your history?</string>
+
+    <!-- ShoppingListFragment -->
+    <string name="shopping_list_delete_dialog_title">Delete List 🗑️</string>
+    <string name="shopping_list_delete_dialog_message">Are you sure you want to delete this shopping list and all its items? 😥</string>
+    <string name="shopping_list_add_items_title">Add Shopping Items</string>
+    <string name="shopping_list_item_deleted_snackbar">🗑️ %1$s deleted</string>
+    <string name="undo">UNDO</string>
+    <!-- Using <plurals> for better handling of singular/plural cases across different languages -->
+    <plurals name="shopping_list_selection_count">
+        <item quantity="one">%1$d item selected</item>
+        <item quantity="other">%1$d items selected</item>
+    </plurals>
+    <plurals name="shopping_list_toast_items_added">
+        <item quantity="one">%1$d item added.</item>
+        <item quantity="other">%1$d items added.</item>
+    </plurals>
+
+    <!-- WelcomeActivity -->
+    <string name="welcome_firebase_auth_failed">Firebase Auth failed: %1$s</string>
+    <string name="welcome_google_sign_in_failed">Google Sign-In failed: %1$s</string>
+    <string name="surprise_me">Suprise Me</string>
+
 </resources>

@@ -39,8 +39,6 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var changePhotoButton: TextView
     private lateinit var changePasswordButton: TextView
 
-
-
     private var profileImageUri: Uri? = null
     private var tempImageUri: Uri? = null
     private var removeImageFlag = false
@@ -63,7 +61,7 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) openCamera() else Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show()
+        if (isGranted) openCamera() else Toast.makeText(this, getString(R.string.edit_profile_permission_denied), Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,9 +106,9 @@ class EditProfileActivity : AppCompatActivity() {
                     .addOnCompleteListener { task -> // Use addOnCompleteListener for robustness
                         showLoading(false) // Hide loading after attempt
                         if (task.isSuccessful) {
-                            Toast.makeText(this, "Password reset link sent to your email.", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this, getString(R.string.edit_profile_reset_link_sent), Toast.LENGTH_LONG).show()
                         } else {
-                            Toast.makeText(this, "Failed to send reset link: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, getString(R.string.edit_profile_reset_link_failed, task.exception?.message), Toast.LENGTH_SHORT).show()
                         }
                     }
             }
@@ -149,9 +147,9 @@ class EditProfileActivity : AppCompatActivity() {
                         Glide.with(this).load(imageUrl).into(profileImageView)
                     }
                 }
-            }.addOnFailureListener {
+            }.addOnFailureListener { e ->
                 showLoading(false)
-                Toast.makeText(this, "Failed to load profile: ${it.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.edit_profile_upload_failed, e.message), Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -170,7 +168,7 @@ class EditProfileActivity : AppCompatActivity() {
                 }
                 .addOnFailureListener { e ->
                     showLoading(false)
-                    Toast.makeText(this, "Failed to upload image: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.edit_profile_upload_failed, e.message), Toast.LENGTH_SHORT).show()
                 }
         } else {
             // Case 2: No new image was selected, just update text fields
@@ -192,19 +190,19 @@ class EditProfileActivity : AppCompatActivity() {
         FirebaseManager.firestore.collection("users").document(userId).update(updates)
             .addOnSuccessListener {
                 showLoading(false)
-                Toast.makeText(this, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.edit_profile_update_success), Toast.LENGTH_SHORT).show()
                 finish() // Use finish() to go back
             }
             .addOnFailureListener { e ->
                 showLoading(false)
-                Toast.makeText(this, "Failed to update profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.edit_profile_update_failed, e.message), Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun showImagePickerDialog() {
-        val options = arrayOf("Take Photo", "Choose from Gallery", "Remove Photo")
+        val options = resources.getStringArray(R.array.dialog_cover_photo_options)
         AlertDialog.Builder(this) // Use 'this' for context
-            .setTitle("Set Profile Picture")
+            .setTitle(getString(R.string.dialog_set_photo_title))
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> checkCameraPermissionAndOpen()
@@ -236,11 +234,11 @@ class EditProfileActivity : AppCompatActivity() {
         usernameEditText.error = null
 
         if (fullNameEditText.text.isNullOrBlank()) {
-            fullNameEditText.error = "Full name cannot be empty"
+            fullNameEditText.error = getString(R.string.validation_full_name_empty)
             return false
         }
         if (usernameEditText.text.isNullOrBlank()) {
-            usernameEditText.error = "Username cannot be empty"
+            usernameEditText.error = getString(R.string.validation_username_empty)
             return false
         }
         // Add phone number validation if needed

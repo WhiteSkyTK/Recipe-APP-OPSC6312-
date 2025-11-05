@@ -11,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Point at a list of ingredients"
+        android:text="@string/point_at_a_list_of_ingredients"
         android:textColor="@android:color/white"
         android:background="#80000000"
         android:padding="12dp"
@@ -23,7 +23,7 @@
         android:id="@+id/buttonCapture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Scan Text"
+        android:text="@string/scan_text"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="48dp"/>

@@ -12,7 +12,7 @@ import java.util.Locale
 
 class ScanHistoryAdapter(
     private var historyList: List<ScanHistoryItem>,
-    private val onClick: (ScanHistoryItem) -> Unit
+    private val onClick: (ScanHistoryItem) -> Unit // Make sure this is part of the constructor
 ) : RecyclerView.Adapter<ScanHistoryAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -31,14 +31,13 @@ class ScanHistoryAdapter(
         val item = historyList[position]
         holder.title.text = item.title
 
-        // Format the Date object into a readable string
         val formatter = SimpleDateFormat("MMM dd, yyyy 'at' hh:mm a", Locale.getDefault())
         holder.timestamp.text = formatter.format(item.timestamp)
 
         Glide.with(holder.itemView.context)
             .load(item.imageUrl)
-            .placeholder(R.drawable.placeholder_image) // A default placeholder
-            .error(R.drawable.placeholder_image)       // An image to show on error
+            .placeholder(R.drawable.ic_placeholder) // Use your placeholder drawable
+            .error(R.drawable.ic_placeholder_error)       // Use your error drawable
             .into(holder.image)
 
         holder.itemView.setOnClickListener { onClick(item) }
@@ -46,8 +45,9 @@ class ScanHistoryAdapter(
 
     override fun getItemCount() = historyList.size
 
-    fun updateHistory(newHistory: List<ScanHistoryItem>) {
+    fun updateData(newHistory: List<ScanHistoryItem>) {
         this.historyList = newHistory
         notifyDataSetChanged()
     }
 }
+

@@ -33,7 +33,7 @@ class PreferencesActivity : AppCompatActivity() {
             FirebaseFirestore.getInstance(),
             FirebaseStorage.getInstance()
         )
-        ShoppingViewModelFactory(repo)
+        ViewModelFactory(repo)
     }
     private val TAG = "PreferencesActivity"
 
@@ -107,24 +107,6 @@ class PreferencesActivity : AppCompatActivity() {
             intent.putExtra("IS_EDIT_MODE", true)
             startActivity(intent)
         }
-
-        val upscaleButton = Button(this)
-        upscaleButton.text = "Upscale All Recipe Images"
-        upscaleButton.setOnClickListener {
-            it.isEnabled = false // Disable the button to prevent multiple clicks
-            Toast.makeText(this, "Starting image upscaling... This may take a while.", Toast.LENGTH_LONG).show()
-
-            lifecycleScope.launch {
-                viewModel.repository.upscaleAllRecipeImages()
-                // When done, hide the button and show a confirmation
-                runOnUiThread {
-                    it.visibility = View.GONE
-                    Toast.makeText(this@PreferencesActivity, "Upscaling complete!", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-        // Use the new ID to find the container and add the button
-        findViewById<LinearLayout>(R.id.mainPreferencesContainer).addView(upscaleButton)
     }
 
     private fun loadCurrentSettings(radioGroup: RadioGroup, allCapsSwitch: MaterialSwitch, unitGroup: RadioGroup) {

@@ -32,7 +32,7 @@
             android:id="@+id/textViewViewAll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="View All"
+            android:text="@string/view_all"
             android:gravity="center"
             android:padding="16dp"
             android:textColor="?attr/colorPrimary"

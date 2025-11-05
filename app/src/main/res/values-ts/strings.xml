@@ -1,0 +1,664 @@
+<resources>
+    <string name="app_name">Harmony Kitchen</string>
+
+    <!-- General / Reusable -->
+    <string name="ok">KAHLE</string>
+    <string name="add">Engetela</string>
+    <string name="cancel">Cima</string>
+    <string name="delete">Sula</string>
+    <string name="save_changes">Hlayisa Ku Cinca</string>
+    <string name="coming_soon">Swa ha ta…</string>
+    <string name="permission_needed_title">Mpumelelo wa Lafiwa</string>
+    <string name="select_language">🌍 Hlawula Ririmi</string>
+
+    <!-- RecipeDetailActivity -->
+    <string name="recipe_detail_error_missing_id">ID ya resepi a yi kona</string>
+    <string name="recipe_detail_add_to_list_title">Engetela eka Vuxavisi</string>
+    <string name="recipe_detail_add_all_ingredients">Engetela swilala hinkwaswo</string>
+    <string name="recipe_detail_select_ingredients">Hlawula swilala leswi u lavaka ku swi engetela</string>
+    <string name="recipe_detail_toast_recipe_not_loaded">Resepi a yi si layicha.</string>
+    <string name="recipe_detail_publish_dialog_title">Hangalasa Resepi</string>
+    <string name="recipe_detail_publish_dialog_message">Xana u tiyisile leswaku u lava ku endla resepi leyi yi va ya mani na mani?</string>
+    <string name="recipe_detail_toast_published">Resepi yi hangalaswile!</string>
+    <string name="recipe_detail_toast_private">Resepi sweswi i ya xihundla.</string>
+    <string name="read_less">Hlaya swi ntsongo</string>
+    <string name="recipe_detail_publish_button">Hangalasa</string>
+    <string name="recipe_detail_toast_all_ingredients_added">Swilala swi suka eka %1$s swi engeteriwile eka nxaxamelo lowuntshwa</string>
+    <string name="recipe_detail_author_prefix">hi %1$s</string>
+    <plurals name="recipe_detail_toast_ingredients_added">
+        <item quantity="one">%1$d xilala xi engeteriwile eka nxaxamelo lowuntshwa</item>
+        <item quantity="other">%1$d swilala swi engeteriwile eka nxaxamelo lowuntshwa</item>
+    </plurals>
+
+    <!-- ShoppingListFragment -->
+    <string name="shopping_list_default_title">Nxaxamelo wa Vuxavisi 🍽️</string>
+    <string name="shopping_list_all_items">Swilo Hinkwaswo 🛒</string>
+    <string name="shopping_list_my_list">Nxaxamelo Wanga 📝</string>
+
+    <!-- AddRecipeFragment & ProfileCompletionActivity -->
+    <string name="permission_camera_required">Mpumelelo wa khamera wa lafiwa.😥</string>
+    <string name="dialog_set_photo_title">Veka Xifaniso xa Khavhara</string>
+    <string name="dialog_option_take_photo">Teka Xifaniso</string>
+    <string name="dialog_option_choose_gallery">Hlawula eka Gallery</string>
+    <string name="dialog_option_remove_photo">Susa Xifaniso😥</string>
+    <string name="permission_camera_rationale">Kufikelela khamera swa lafiwa ku teka xifaniso xa resepi ya wena.😥</string>
+    <string name="delete_recipe_dialog_title">Sula Resepi 🗑️</string>
+    <string name="delete_recipe_dialog_message">Xana u tiyisile leswaku u lava ku susa resepi leyi hilaha ku nga heriki? 😥</string>
+
+    <!-- Welcome & Login -->
+    <string name="google_sign_in_failed">Ku nghena hi Google swi tsandzekile: %1$s</string>
+    <string name="firebase_auth_failed">Netefatso ya Firebase yi tsandzekile: %1$s</string>
+    <string name="auth_failed">Netefatso yi tsandzekile: %1$s</string>
+
+    <!-- ProfileFragment -->
+    <string name="profile_logout_title">Humela</string>
+    <string name="profile_logout_message">Xana u tiyisile leswaku u lava ku humela na ku basisa data hinkwayo ya laha kaya?</string>
+    <string name="profile_logout_button">Humela</string>
+    <string name="profile_version">Vuhundzuluxeri %1$s</string>
+    <string name="profile_default_name">Vito ra Wena</string>
+
+    <!--About-->
+    <string name="about_harmony_kitchen">Hi ta Harmony Kitchen 🍲</string>
+    <string name="our_mission">🎯 Xikongomelo xa Hina</string>
+    <string name="harmony_kitchen_is_a_final_year_project_designed_to_bring_delicious_easy_to_make_recipes_to_your_fingertips_tailored_to_the_ingredients_you_have_and_the_flavors_you_love">Harmony Kitchen i phurojeke ya lembe ro hetelela leyi endleriweke ku tisa swakudya swa nandziha na swo olova ku swi endla, swi fambisana na swilala leswi u nga na swona na swin\'wiw\'wi leswi u swi rhandzaka.</string>
+    <string name="the_team_rst_innovations">👥 Ntlawa: RST Innovations</string>
+    <string name="this_app_was_proudly_developed_by_students_of_rosebank_college_n_tokollo_nonyane_n_sagwadi_mashimbye_n_rinae_magadagela">App leyi yi endliwile hi ku tinyungubyisa hi swichudeni swa Rosebank College:\n• Tokollo Nonyane\n• Sagwadi Mashimbye\n• Rinae Magadagela</string>
+    <string name="credits_amp_attributions"><![CDATA[©️ Swikweleti na Nkhensani]]></string>
+    <string name="ui_ux_design_figma_nphotos_unsplash_nicons_material_design_icons">UI/UX Design: Figma\nSwifaniso: Unsplash\nSwifaniso swa ntirho: Material Design Icons</string>
+    <string name="are_you_enjoying_the_app_so_far">Xana u tiphina hi app ku fikela sweswi? 😊</string>
+    <string name="VersionNumber">Vuhundzuluxeri 1.0.0</string>
+
+    <!--Camera Scanner-->
+    <string name="point_at_a_list_of_ingredients">Komba nxaxamelo wa swilala</string>
+    <string name="scan_text">Skena Matsalwa</string>
+
+    <!--Country Selector-->
+    <string name="back_button">Konopo yo tlhela</string>
+    <string name="which_country_are_you_from">U huma eka tiko rihi 🥰</string>
+    <string name="please_select_your_country_of_origin_for_a_better_recommendation">H kombela u hlawula tiko ra wena ra tswalo leswaku u kuma swiringanyeto swo antswa</string>
+    <string name="select_country">Hlawula Tiko</string>
+    <string name="continuebtn">Yana emahlweni</string>
+
+    <!--Create Account-->
+    <string name="todo">TODO</string>
+    <string name="create_an_account">Tumbuluxa Akhawunti 🤝</string>
+    <string name="enter_your_username_email_amp_password_if_you_forgot_it_then_you_have_to_do_forget_password"><![CDATA[Nghenisa vito ra mutirhisi, imeyili, & phaswedi. Loko u yi rivala, u fanele ku rivala phaswedi]]></string>
+    <string name="username">Vito ra mutirhisi</string>
+    <string name="email">Imeyili</string>
+    <string name="password">Phaswedi</string>
+    <string name="confirm_password">Tiyisisa Phaswedi</string>
+    <string name="sign_up">Tirhangise</string>
+
+    <!--Cuisine Selector-->
+    <string name="select_your_cuisines_preferences">Hlawula swakudya leswi u swi rhandzaka 🤔</string>
+    <string name="select_your_cuisines_preferences_for_better_recommendations_or_you_can_skip">Hlawula swakudya leswi u swi rhandzaka leswaku u kuma swiringanyeto swo antswa kumbe u nga hundza</string>
+    <string name="select_all">Hlawula Hinkwaswo</string>
+    <string name="skip">Hundza</string>
+
+    <!--Dietary Selector-->
+    <string name="any_dietary_preferences">Xana kuna swakudya swo karhi leswi u swi rhandzaka? 🥗</string>
+    <string name="select_your_dietary_preferences_for_better_recommendations_or_you_can_skip_it">Hlawula swakudya leswi u swi rhandzaka leswaku u kuma swiringanyeto swo antswa kumbe u nga swi hundza</string>
+
+    <!--Edit Profile-->
+    <string name="edit_profile">Lulamisa Phurofayili ✏️</string>
+    <string name="change_photo">Cinca Xifaniso</string>
+    <string name="full_name">Vito ro helela</string>
+    <string name="phone_number">Nomboro ya Riqingho</string>
+    <string name="change_password">Cinca Phaswedi</string>
+
+    <!--Forgot Password-->
+    <string name="forgot_password">U rivalerile Phaswedi 🔒</string>
+    <string name="enter_your_email_address_we_will_send_a_link_for_verification">Nghenisa adirese ya wena ya imeyili. Hi ta rhumela linki yo tiyisisa</string>
+    <string name="send_link">Rhumela Linki</string>
+
+    <!--Login-->
+    <string name="hey_there">Avuxeni 👋</string>
+    <string name="please_enter_your_username_email_and_password_to_sign_in">H kombela u nghenisa vito ra mutirhisi/imeyili na phaswedi ku nghena</string>
+    <string name="email_username">Imeyili / Vito ra mutirhisi</string>
+    <string name="log_in">Nghena</string>
+    <string name="or_continue_with">Kumbe u yana emahlweni hi</string>
+    <string name="forgot_passwordbtn">U rivalerile Phaswedi</string>
+
+    <!--Main-->
+    <string name="offline_mode">Muxaka wa Offline 🛡️</string>
+
+    <!--My recipe-->
+    <string name="my_creations">Vutumbuluxi bya Mina 🎨</string>
+
+    <!--OTP-->
+    <string name="otp_has_been_sent">OTP yi rhumeriwile 📲</string>
+    <string name="enter_your_otp_to_verify">Nghenisa OTP ya wena ku tiyisisa.</string>
+    <string name="reset_password">Seta nakambe Phaswedi</string>
+
+    <!--Preference-->
+    <string name="preferences">Swo Rhandza ⚙️</string>
+    <string name="personal">👤 Swa Munhu hi yexe</string>
+    <string name="country">Tiko</string>
+    <string name="cuisines">Swakudya</string>
+    <string name="dietary_preferences">Swo Rhandza swa Swakudya</string>
+    <string name="appearance">🎨 Ku languteka</string>
+    <string name="light_mode">Muxaka wo Vonikela</string>
+    <string name="dark_mode">Muxaka wa Munyama</string>
+    <string name="follow_system">Landzela Sisiteme</string>
+    <string name="unit_system">🔢 Sisiteme ya Yuniti</string>
+    <string name="metric_grams_ml">Metric (tigiramu, ml)</string>
+    <string name="imperial_ounces_cups">Imperial (ti-ounce, tikapu)</string>
+    <string name="display_name_in_all_caps">Kombisa vito hi MATSALWA LAMAKULU</string>
+
+    <!--Profile Completion-->
+    <string name="complete_your_profile">Hetisa Phurofayili ya wena 🤞</string>
+    <string name="don_t_worry_only_you_can_see_your_personal_data_no_one_else_will_be_able_to_see_it">U nga vileli, hi wena ntsena u nga kotaka ku vona data ya wena, a ku na munhu un\'wana loyi a nga ta yi vona.</string>
+    <string name="gender_optional">Rimbewu (hi ku tirhandzela)</string>
+    <string name="date_of_birth_optional">Siku ra ku velekiwa (hi ku tirhandzela)</string>
+
+    <!--Recipe Detail-->
+    <string name="read_more">Hlaya swo tala</string>
+    <string name="nutrition_facts">Tinhla ta Swakudya 🍎</string>
+    <string name="nutrition_facts_not_provided_for_this_recipe">Tinhla ta swakudya a ti nyikiwanga eka resepi leyi. 😔</string>
+    <string name="ingredients">Swilala 🍋</string>
+    <string name="Minus">-</string>
+    <string name="Size">6</string>
+    <string name="Addition">+</string>
+    <string name="method">Muxaka 🍳</string>
+    <string name="toggle_favorite">cinca leswi rhandzekaka</string>
+
+    <!--Rest Password-->
+    <string name="reset_your_password">Seta nakambe Phaswedi ya wena 🔑</string>
+    <string name="enter_your_new_password">Nghenisa phaswedi ya wena leyintshwa</string>
+
+    <!--Scan Result-->
+    <string name="back">Endzhaku</string>
+    <string name="recipe_matches">Tiresepi leti Fananaka 💡</string>
+
+    <!--Welcome-->
+    <string name="welcome_to_nharmony_kitchen">Nakurandza eka\nHarmony Kitchen</string>
+    <string name="welcome_emoji">👋</string>
+    <string name="your_daily_dose_of_delicious">Nkavelo wa wena wa siku na siku wa swa nandziha</string>
+    <string name="continue_with_google">Yana emahlweni hi Google</string>
+    <string name="get_started">Sungula</string>
+    <string name="i_already_have_an_account">Se ndzi na Akhawunti</string>
+
+    <!--Add Shopping item-->
+    <string name="enter_items_one_per_line">Nghenisa swilo, xin\'we hi layini…</string>
+
+    <!--Add Recipe-->
+    <string name="add_your_recipe">Engetela Resepi ya Wena 🍳</string>
+    <string name="recipe_name">Vito ra Resepi</string>
+    <string name="category">Ntlawa</string>
+    <string name="meal_type_e_g_breakfast_snack">Muxaka wa Swakudya (xik., Swakudya swa mixo, Seneke)</string>
+    <string name="description">Nhlamuselo</string>
+    <string name="add_ingredient">Engetela Xilala</string>
+    <string name="nutrition_facts_optional">Tinhla ta Swakudya (Hi ku tirhandzela)</string>
+    <string name="calories">Tikhalori</string>
+    <string name="fat_g">Mafurha (g)</string>
+    <string name="carbs_g">Tikhahobohayidireti (g)</string>
+    <string name="salts_g">Munyu (g)</string>
+    <string name="method_steps">Muxaka / Switepe</string>
+    <string name="add_step">Engetela Xitepe</string>
+    <string name="time_to_make_e_g_45_mins">Nkarhi wo Endla (xik., 45 min.)</string>
+    <string name="servings">Swiphemu</string>
+    <string name="delete_recipe">Sula Resepi</string>
+    <string name="save_recipe">Hlayisa Resepi</string>
+
+    <!--Category-->
+    <string name="all_categories">Mintlawa Hinkwayo 🏷️</string>
+
+    <!-- CategoryFragment -->
+    <string name="category_toast_selected">Ku hlawuriwile: %1$s</string>
+
+    <!--Discover-->
+    <string name="discover_recipes">Kuma Tiresepi 🌍</string>
+    <string name="search_recipes">Lava tiresepi…</string>
+
+    <!--Favorites-->
+    <string name="my_favorites">Swo Rhandziwa swa Mina ❤️</string>
+    <string name="you_haven_t_saved_any_favorites_yet_tap_the_on_a_recipe_to_add_it_here">A wu si hlayisa swilo leswi u swi rhandzaka. Tlanya ❤️ eka resepi ku yi engetela laha!</string>
+
+    <!--Home Fragment-->
+    <string name="featured">Swo Hlawuleka 😄</string>
+    <string name="categoryhome">Ntlawa 🧑‍🍳</string>
+    <string name="recommended_recipes">Tiresepi leti Ringanyetiwaka 📖</string>
+
+    <!--Notification-->
+    <string name="notifications">Switiviso 🔔</string>
+
+    <!--Offline -->
+    <string name="you_are_offline">U le Offline🥺</string>
+    <string name="check_your_connection_and_try_again">Kambela vuxokoxoko bya wena u ringeta nakambe.\n Swo rhandziwa swa wena swi hlayisiwile offline🥹</string>
+
+    <!--Profile-->
+    <string name="edit_profile_setting">Lulamisa Phurofayili</string>
+    <string name="my_recipes">Tiresepi ta Mina</string>
+    <string name="account">👤 Akhawunti</string>
+    <string name="preferences_setting">Swo Rhandza</string>
+    <string name="language">Ririmi</string>
+    <string name="notifications_setting">Switiviso</string>
+    <string name="support_amp_about"><![CDATA[🛠️ Nseketelo na Vuxokoxoko]]></string>
+    <string name="about_us">Hi ta Hina</string>
+    <string name="report_an_issue">Vika Xiphiqo</string>
+    <string name="log_out">Humela</string>
+
+    <!--Scan-->
+    <string name="what_s_in_your_kitchen">Ku na yini exikitsini xa wena? 🧑‍🍳</string>
+    <string name="type_an_ingredient">Thayipha xilala…</string>
+    <string name="find_recipes">Kuma Tiresepi</string>
+    <string name="your_scan_history">Matimu ya Wena ya ku Skena ✨</string>
+
+    <!--Shopping-->
+    <string name="shopping_list">Nxaxamelo wa Vuxavisi 🍽️</string>
+    <string name="delete_list">Sula Nxaxamelo</string>
+
+    <!--Chip-->
+    <string name="breakfast">Swakudya swa mixo</string>
+
+    <!--Ingredient-->
+    <string name="ingredient_name">Vito ra Xilala</string>
+    <string name="_100_g">100 g</string>
+    <string name="sample_ingredient">Xikombiso xa Xilala</string>
+    <string name="qty">Vunyingi</string>
+    <string name="unit">Yuniti</string>
+    <string name="remove_ingredient">Susa Xilala</string>
+    <string name="_1_halve_the_vanilla_pod_and_scrape_out_the_seeds">1. Tsema xiphemu xa vanilla hi le xikarhi u halata mbewu…</string>
+    <string name="_1">1.</string>
+    <string name="step_details">Vuxokoxoko bya xitepe…</string>
+    <string name="_278_4">278.4</string>
+    <string name="_5_min">5 Min</string>
+    <string name="blackberry_fro_yo_with_a_very_long_name">Blackberry fro-yo na vito ro leha swinene</string>
+    <string name="with_bay_sugar_and_some_other_ingredients">Na: chukela ra bay na swilala swin\'wana</string>
+    <string name="recipe_title">Nhlokomhaka ya Resepi</string>
+    <string name="you_need_2_more_ingredients">U lava swilala swin\'wana swi 2</string>
+    <string name="blueberry_muffins">Timafini ta Blueberry</string>
+    <string name="_40_min">40 Min</string>
+    <string name="view_all">Vona Hinkwaswo</string>
+
+    <!--Menu-->
+    <string name="home">Kaya</string>
+    <string name="discover">Kuma</string>
+    <string name="scan">Skena</string>
+    <string name="items">Swilo</string>
+    <string name="profile">Phurofayili</string>
+    <string name="add_to_shopping_list">Engetela eka Nxaxamelo wa Vuxavisi</string>
+    <string name="confirm">Tiyisisa</string>
+    <string name="publish_recipe">Hangalasa Resepi</string>
+    <string name="make_private">Endla swa Xihundla</string>
+    <string name="edit_recipe">Lulamisa Resepi</string>
+
+    <string name="no_new_notifications">A ku na switiviso leswintshwa</string>
+    <string name="no_notifications_yet">A ku si va na Switiviso</string>
+    <string name="my_badges_achievements"><![CDATA[Tibaji & ku Fikelela swa Mina 🏆]]></string>
+    <string name="my_badges_achievementsbtn"><![CDATA[Tibaji & ku Fikelela swa Mina]]></string>
+
+    <!-- Report-->
+    <string name="report_issue_email_address">whiteshytk@gmail.com</string>
+    <string name="report_issue_subject">Harmony Kitchen - Xiviko xa Xihoxo / Ntsengo</string>
+    <string name="report_issue_body">
+        \n\n--- H kombela u nga Lulamisi ehansi ka Layini leyi ---\n
+        Vuhundzuluxeri bya App: %1$s\n
+        Xitirhisiwa: %2$s\n
+        Vuhundzuluxeri bya Android: %3$s\n
+        ID ya Mutirhisi: %4$s\n
+        --- H kombela u Hlamusela Laha ---\n
+    </string>
+    <string name="report_issue_error">A ku kumekanga app ya imeyili.</string>
+
+    <!-- Greeting message-->
+    <string-array name="morning_greetings">
+        <item>☀️ Avuxeni!</item>
+        <item>Pfuka u vonakala! 🌅</item>
+        <item>Nkarhi wa swakudya swa mixo? 🍳</item>
+        <item>Ku swekiwa yini nimixo lowu? 🥞</item>
+        <item>Siku ro saseka ri sungula hi swakudya swo saseka!</item>
+        <item>Avuxeni, dyambu! ☀️</item>
+        <item>Siku rintshwa, swin\'wiw\'wi leswintshwa! 🍯</item>
+        <item>Kofi ro sungula, kutani u hlula siku! ☕</item>
+        <item>Mintlhaveko ya mixo ntsena! 🌸</item>
+        <item>Swakudya swa mixo swi lunghile! 🍞🥓</item>
+        <item>Pfuka u twa nun\'hwelo wa kofi! ☕🌄</item>
+        <item>Avuxeni, mulavisisi wa swakudya! 🥐</item>
+        <item>Tifuwele matimba ya siku! 🍌</item>
+        <item>Mixo yo vangama, mixo ya swakudya swa nandziha! 🌞</item>
+        <item>Mixo handle ka tipanekuku swa vavisa. 🥞</item>
+        <item>Sungula siku ra wena hi swakudya swa nandziha! 🍯🥖</item>
+        <item>Avuxeni, xinyenyana xa le mixweni! 🐦</item>
+        <item>Matandza, tosti, kofi… vuyelela! 🍳☕</item>
+        <item>Ku n\'wayitela na swakudya swa mixo hinkwako! 😄🥯</item>
+        <item>Pfuka, vonakala, u dya! 🍴</item>
+        <item>A hi kumeni vuswa lebyi! (Hi xiviri) 🍞</item>
+        <item>Vumbiwa bya namuntlha: 100% nantswo.🌧️ </item>
+        <item>Nwa, nwa, huray! I siku rintshwa! 🍊</item>
+    </string-array>
+    <string-array name="lunch_greetings">
+        <item>🥗 Nkarhi wa Swakudya swa Masiha!</item>
+        <item>U lunghekile ku dya swakudya swa masiha? 🥪</item>
+        <item>Tifuwele matimba ya ndzhenga! 💪</item>
+        <item>Ku na yini eka menyu ya swakudya swa masiha? 🍱</item>
+        <item>Nkarhi wo wisanyana hi swakudya swa nandziha.</item>
+        <item>Ku lava ku dya masiha? 🍛</item>
+        <item>Hlayisa matimba ya wena! 🌯</item>
+        <item>Nkarhi wa swakudya swa masiha! ⏰🍴</item>
+        <item>Ku wisanyana loku nandzihaka eka siku ro khomeka! 🥗</item>
+        <item>Fuwa matimba eka maendzo ya wena ya ndzhenga! 🥙</item>
+        <item>Tiphine hi swakudya! 😋</item>
+        <item>Tisandwich, tisaladi, kumbe supu? 🥗🥪🍜</item>
+        <item>Nkarhi wo tiyisa matimba! ⚡🥪</item>
+        <item>Swakudya swa masiha na ku n\'wayitela! 😊</item>
+        <item>Dya kahle, tirha kahle! 🍛💻</item>
+        <item>Wisa u tiphina hi swakudya swa wena! 🍲</item>
+        <item>Ntsako wa masiha eka moya wa murhandzi wa swakudya! 🥙</item>
+        <item>Tifuwa matimba ku fana na nhenha! 🏆🍱</item>
+        <item>Swakudya swa masiha a swi si tshama swi languteka kahle ku fana na leswi! 🍣</item>
+        <item>Ri hanyisaka, ri nandziha, ri enerisa! 🥗✨</item>
+        <item>U le xikarhi ka siku! U fanele hi leswi. 🎉</item>
+        <item>A hi vulavuleni hi swakudya swa masiha! 🌮</item>
+        <item>Ndzi tsakile ku ku vona! 🍲</item>
+    </string-array>
+    <string-array name="afternoon_greetings">
+        <item>☕ Seneke ra Ndzhenga?</item>
+        <item>Xo nandziha xo ku pfuna ku heta siku? 🍪</item>
+        <item>U twa ndlala? 🍎</item>
+        <item>Nkarhi wo nwa kofi! ☕</item>
+        <item>U lava ku tiphaphatha? ✨</item>
+        <item>Nkarhi wa ku hlasela hi seneke! 🍫</item>
+        <item>Ku navela ka ndzhenga? 🍩</item>
+        <item>Wisa nkarhinyana u tiphina hi ku luma! 🍇</item>
+        <item>Swo nandziha kumbe swa munyu? U tihlawulela! 🥨🍪</item>
+        <item>Ku wisanyana loku nandzihaka ku tiyisa matimba! ⚡</item>
+        <item>Fuwa matimba ya ndzhenga ya wena! 🥜</item>
+        <item>Dya seneke hi vutlhari, tshama u tsakile! 🥯</item>
+        <item>Tikuki kumbe mihandzu? 🍏🍪</item>
+        <item>Nkarhi wo tinyika ntsako! 🍫</item>
+        <item>Ntsako lowutsongo! 🥨</item>
+        <item>Hlayisa matimba ya wena! ⚡🍎</item>
+        <item>Xo nandziha xo vangamisa siku ra wena! 🌞🍫</item>
+        <item>Nkarhi wa seneke i nkarhi lowunene swinene! ⏰</item>
+        <item>Fuwa matimba, phyuphyisa, vuyelela! 🥜</item>
+        <item>Mintlhaveko ya ndzhenga na ku luma loku nandzihaka! 🍪</item>
+        <item>U nga vileli, tsaka! 🍩</item>
+        <item>U seneke rin\'we ntsena ku suka eka mboya lowunene. 😉</item>
+        <item>Xilo xitsongo xo ku yisa emahlweni. 🍓</item>
+    </string-array>
+    <string-array name="dinner_greetings">
+        <item>🌙 Swakudya swa Madyambu swi lunghile</item>
+        <item>Ku na yini eka swakudya swa madyambu namuntlha? 🍝</item>
+        <item>Ndzi tshemba u na ndlala! 🍲</item>
+        <item>Nkarhi wo wisanyana hi swakudya swo saseka. 🍷</item>
+        <item>A hi endleni xilo xo hlamarisa eka swakudya swa madyambu!</item>
+        <item>Ntsako wa madyambu wu rindzile! 🍛</item>
+        <item>Sweeka, dya, vuyelela! 🍽️</item>
+        <item>Mintlhaveko ya swakudya swa madyambu ntsena! 🌟</item>
+        <item>Swakudya swa madyambu swo kufumeta eka vusiku byo kufumeta. 🕯️</item>
+        <item>Hlengeletanani, swakudya swi lunghile! 🥘</item>
+        <item>Nkarhi wa swin\'wiw\'wi leswi rhulaka moya! 🍲</item>
+        <item>Madyambu yo nandziha ma le mahlweni! 😋</item>
+        <item>Swakudya swa madyambu na ku wisanyana! 🍷</item>
+        <item>Tiphine hi ku luma kun\'wana na kun\'wana! 🥗</item>
+        <item>Swakudya swa madyambu, mintlhaveko yo tsaka! 🌙</item>
+        <item>Hetisa siku hi nantswo! 🍝</item>
+        <item>Nkarhi wa swakudya swa madyambu swa ndyangu! 🥘👨‍👩‍👧‍👦</item>
+        <item>Sweeka masalamusi namuntlha! ✨🍛</item>
+        <item>Pulete yo tala ntsako! 🍽️</item>
+        <item>Hi tlangela madyambu yo nandziha! 🥂</item>
+        <item>A hi dyeni, a hi nweni, a hi tsakeni! 🥳</item>
+        <item>Swakudya swa madyambu swi nandziha swinene loko hi dya swin\'we. ❤️</item>
+        <item>Nkarhi wo dya! 🍗</item>
+    </string-array>
+    <string-array name="night_greetings">
+        <item>😋 Seneke ra Vusiku?</item>
+        <item>U navela xilo xo nandziha? 🍰</item>
+        <item>Ku luma ka le vusiku? 🍕</item>
+        <item>Xilo xo kufumeta eka madyambu? 🍿</item>
+        <item>Tiroho to nandziha ti endliwe hi chizi… na leswi! 🧀</item>
+        <item>Ku navela ka le vusiku? 🌙</item>
+        <item>Nkarhi wa seneke! ⏳🍫</item>
+        <item>Ku luma ka vusiku? 🍩</item>
+        <item>Ku dya ka n\'weti! 🌌</item>
+        <item>Xo nandziha xitsongo u nga si etlela? 🥛🍪</item>
+        <item>Vusiku byo rhula, ku luma loku nandzihaka. 🛌🍫</item>
+        <item>U xikhovha xa vusiku? Tiphine! 🦉🍫</item>
+        <item>Swo nandziha kumbe swa munyu, u faneriwe hi swona hinkwaswo! 🍿🍫</item>
+        <item>Hlayisa xigwitsirisi xi ri na vanghana! 🥒🥛</item>
+        <item>Ntsako wa seneke ehansi ka tinyeleti! ✨🍪</item>
+        <item>Ntsako wa vusiku wu rindzile! 🌙🍩</item>
+        <item>Ku luma ka nhenha ya vusiku! 🥨🌌</item>
+        <item>Luma, wisa, vuyelela! 🛌🍫</item>
+        <item>Ku navela ku amukeriwile! 🍫</item>
+        <item>Hetisa vusiku hi nantswo! 🌙🍪</item>
+        <item>Xikitsi xa vitana… 🤫</item>
+        <item>Ku luma kun\'we ntsena… ndza tshembisa! 😉</item>
+        <item>Xhhh… i nkarhi wa seneke. 🤫</item>
+    </string-array>
+
+    <!-- Add recipe-->
+    <string name="edit_recipe_title">Lulamisa Resepi ya Wena 🍳</string>
+    <string name="toast_recipe_saved">Resepi yi hlayisiwile! ❤️</string>
+    <string name="toast_recipe_deleted">Resepi yi suliwile! 🗑️</string>
+    <string name="toast_operation_failed">Ntirho wu tsandzekile: %1$s</string>
+    <string name="toast_could_not_load_recipe">A swi koteki ku layicha resepi ku yi lulamisa. 😭</string>
+    <string name="toast_login_required">U fanele ku nghena ku hlayisa resepi. 😭</string>
+    <string name="toast_failed">A swi koteki ku sungula khamera. 😭</string>
+    <string name="toast_profile_error">A swi koteki ku kuma phurofayili ya mutirhisi: %1$s</string>
+    <string name="toast_photo_error">Ku teka xifaniso swi tsandzekile: %1$s</string>
+    <string name="toast_object_error">A ku na swilo leswi tivekaka.🥺</string>
+    <string name="toast_classify_error">A swi koteki ku pimanisa xilo.🥺</string>
+    <string name="toast_recognition_error">Ku tiveka ka xilo swi tsandzekile.🥺</string>
+    <string name="validation_recipe_name_required">Vito ra resepi ra lafiwa.🥺</string>
+    <string name="validation_category_required">Ntlawa wa lafiwa. 🥺</string>
+    <string name="validation_meal_type_required">Muxaka wa Swakudya wa lafiwa. 🥺</string>
+    <string name="validation_time_required">Nkarhi wo endla wa lafiwa. 🥺</string>
+    <string name="validation_servings_required">Nhlayo ya swiphemu ya lafiwa. 🥺</string>
+    <string name="validation_ingredient_min_required">H kombela u engetela xilala xin\'we ntsena. 🥺</string>
+    <string name="validation_ingredient_name_required">Mavito hinkwawo ya swilala ya lafiwa. 🥺</string>
+    <string name="validation_ingredient_qty_required">Vunyingi bya swilala hinkwaswo bya lafiwa. 🥺</string>
+    <string name="validation_step_min_required">H kombela u engetela xitepe xin\'we ntsena. 🥺</string>
+    <string name="validation_step_desc_required">Tinhlamuselo hinkwato ta switepe ta lafiwa. 🥺</string>
+
+    <string name="notification_upload_success_title">Ku Layicha ku Humelerile! 🎉</string>
+    <string name="notification_upload_success_body">Resepi ya wena leyintshwa \'%1$s\' sweswi ya kumeka. 😉</string>
+
+    <string name="nutrition_fat">Mafurha</string>
+    <string name="nutrition_carbs">Tikhahobohayidireti</string>
+    <string name="nutrition_salts">Munyu</string>
+    <string name="unit_grams">%1$sg</string>
+
+    <string-array name="meal_types">
+        <item>Swakudya swa mixo</item>
+        <item>Swakudya swa Masiha</item>
+        <item>Swakudya swa Madyambu</item>
+        <item>Seneke</item>
+        <item>Swakudya swo Doxa</item>
+    </string-array>
+
+    <string-array name="dialog_cover_photo_options">
+        <item>@string/dialog_option_take_photo</item>
+        <item>@string/dialog_option_choose_gallery</item>
+        <item>@string/dialog_option_remove_photo</item>
+    </string-array>
+
+    <string name="category_all">Hinkwaswo</string>
+
+    <!-- CountrySelectionActivity -->
+    <string name="country_south_africa">Afrika Dzonga</string>
+    <string name="country_toast_load_failed">A swi koteki ku layicha matiko</string>
+    <string name="country_toast_load_error">Xihoxo: %1$s</string>
+    <string name="country_toast_selection_required">H kombela u hlawula tiko</string>
+    <string name="country_toast_update_success">Tiko ri pfuxetiwile!</string>
+    <string name="country_toast_update_failed">A swi koteki ku pfuxeta tiko: %1$s</string>
+
+    <!-- CreateAccountActivity -->
+    <string name="create_account_toast_signup_failed_no_id">Ku tirhangisa swi tsandzekile: A swi koteki ku kuma ID ya mutirhisi.</string>
+    <string name="create_account_toast_signup_failed_exception">Ku tirhangisa swi tsandzekile: %1$s</string>
+    <string name="create_account_toast_signup_success">Ku Tirhangisa ku Humelerile! 🎉</string>
+    <string name="create_account_toast_save_profile_failed">A swi koteki ku hlayisa phurofayili: %1$s</string>
+    <string name="validation_username_empty">Vito ra mutirhisi a ri fanelanga ri va ri hava nchumu</string>
+    <string name="validation_email_empty">Imeyili a yi fanelanga yi va yi hava nchumu</string>
+    <string name="validation_email_invalid">H kombela u nghenisa adirese ya imeyili leyi faneleke</string>
+    <string name="validation_password_empty">Phaswedi a yi fanelanga yi va yi hava nchumu</string>
+    <string name="validation_password_min_length">Phaswedi yi fanele yi va na %1$d wa swihlawulekisi ntsena</string>
+    <string name="validation_password_no_uppercase">Phaswedi yi fanele yi va na letere rin\'we leri kulu</string>
+    <string name="validation_password_no_lowercase">Phaswedi yi fanele yi va na letere rin\'we leri ntsongo</string>
+    <string name="validation_password_no_digit">Phaswedi yi fanele yi va na nomboro yin\'we</string>
+    <string name="validation_password_no_special">Phaswedi yi fanele yi va na xihlawulekisi xo hlawuleka (xik., @#$%)</string>
+    <string name="validation_password_confirm_empty">H kombela u tiyisisa phaswedi ya wena</string>
+    <string name="validation_passwords_no_match">Tiphaswedi a ti fani</string>
+
+    <!-- Cuisines -->
+    <string name="cuisine_italian">Tali</string>
+    <string name="cuisine_mexican">Mexikha</string>
+    <string name="cuisine_chinese">Chayina</string>
+    <string name="cuisine_japanese">Japani</string>
+    <string name="cuisine_indian">Indiya</string>
+    <string name="cuisine_thai">Thayilandi</string>
+    <string name="cuisine_french">Furenchi</string>
+    <string name="cuisine_spanish">Xipaniya</string>
+    <string name="cuisine_greek">Grika</string>
+    <string name="cuisine_american">Amerika</string>
+    <string name="cuisine_korean">Khoriya</string>
+    <string name="cuisine_vietnamese">Vhiyeti</string>
+    <string name="cuisine_mediterranean">Mediteraniya</string>
+    <string name="cuisine_caribbean">Karibhiya</string>
+    <string name="cuisine_african">Afrika</string>
+
+    <!-- CuisineSelectionActivity -->
+    <string name="cuisine_selection_toast_at_least_one">H kombela u hlawula swakudya swin\'we ntsena</string>
+    <string name="deselect_all">Hlawula Hinkwaswo</string>
+    <string name="cuisine_selection_toast_preferences_updated">Swo rhandza swi pfuxetiwile!</string>
+    <string name="cuisine_selection_toast_update_failed">A swi koteki ku pfuxeta: %1$s</string>
+
+    <!-- DietarySelectionActivity -->
+    <string name="diet_selection_toast_at_least_one">H kombela u hlawula swo rhandza swin\'we ntsena</string>
+
+    <!-- Diets -->
+    <string name="diet_vegetarian">Wa miroho</string>
+    <string name="diet_vegan">Vegan</string>
+    <string name="diet_gluten_free">Handle ka Gluten</string>
+    <string name="diet_keto">Keto</string>
+    <string name="diet_paleo">Paleo</string>
+    <string name="diet_pescetarian">Pescetarian</string>
+    <string name="diet_low_carb">Tikhahobohayidireti to Tlasoni</string>
+    <string name="diet_dairy_free">Handle ka Swakudya swa Masi</string>
+    <string name="diet_nut_allergy">Ku Vabyiwa hi Nuts</string>
+    <string name="diet_low_fodmap">Low-FODMAP</string>
+    <string name="diet_halal">Halal</string>
+    <string name="diet_kosher">Kosher</string>
+
+    <!-- DiscoverFragment -->
+    <string-array name="discover_sort_options">
+        <item>A-Z</item>
+        <item>Swo Ringanyetiwa</item>
+        <item>Swo Rhandziwa</item>
+        <item>Nkarhi wo Sweeka</item>
+        <item>Z-A</item>
+    </string-array>
+
+    <!-- EditProfileActivity -->
+    <string name="edit_profile_permission_denied">Mpumelelo wa khamera wu ariwile</string>
+    <string name="edit_profile_reset_link_sent">Linki ro seta nakambe phaswedi ri rhumeriwile eka imeyili ya wena.</string>
+    <string name="edit_profile_reset_link_failed">A swi koteki ku rhumela linki ro seta nakambe: %1$s</string>
+    <string name="edit_profile_load_failed">A swi koteki ku layicha phurofayili: %1$s</string>
+    <string name="edit_profile_upload_failed">A swi koteki ku layicha xifaniso: %1$s</string>
+    <string name="edit_profile_update_success">Phurofayili yi pfuxetiwile hi ku humelela!</string>
+    <string name="edit_profile_update_failed">A swi koteki ku pfuxeta phurofayili: %1$s</string>
+    <string name="validation_full_name_empty">Vito ro helela a ri fanelanga ri va ri hava nchumu</string>
+
+    <!-- ForgotPasswordActivity -->
+    <string name="forgot_password_link_sent">Linki ro seta nakambe phaswedi ri rhumeriwile eka imeyili ya wena.</string>
+    <string name="forgot_password_link_failed">A swi koteki ku rhumela imeyili yo seta nakambe: %1$s</string>
+
+    <!-- LoginActivity -->
+    <string name="login_firebase_auth_failed">Netefatso ya Firebase yi tsandzekile: %1$s</string>
+    <string name="login_google_sign_in_failed">Ku nghena hi Google swi tsandzekile: %1$s</string>
+    <string name="login_auth_failed">Netefatso yi tsandzekile: %1$s</string>
+    <string name="validation_user_input_empty">Imeyili kumbe Vito ra mutirhisi a ri fanelanga ri va ri hava nchumu</string>
+    <string name="validation_user_input_invalid_email">Fomati ya imeyili a yi lulamanga</string>
+
+    <!-- MainActivity -->
+    <string name="main_no_favorites_popup">A wu na swo rhandza!</string>
+    <string name="main_greeting_morning">☀️ Avuxeni</string>
+    <string name="main_greeting_afternoon">🌤️ Avuxeni</string>
+    <string name="main_greeting_evening">🌙 Avuxeni</string>
+    <string name="main_greeting_default_user">MUTIRHISI</string>
+
+    <!-- Onboarding Tour -->
+    <string name="onboarding_home_title">Nakurandza eka Harmony Kitchen!</string>
+    <string name="onboarding_home_text">Leyi i skrini ra wena ra Kaya, laha u nga ta kuma nkucetelo wa siku na siku.</string>
+    <string name="onboarding_discover_title">Kuma Tiresepi Tontshwa</string>
+    <string name="onboarding_discover_text">Lavisisa misava ya tiresepi ta mani na mani leti avelanaka hi vaaki.</string>
+    <string name="onboarding_add_recipe_title">Engetela Vutumbuluxi bya Wena</string>
+    <string name="onboarding_add_recipe_text">Tlanya konopo ya \'+\' nkarhi wun\'wana na wun\'wana ku engetela tiresepi ta wena.</string>
+    <string name="onboarding_scan_title">Skena Swilala</string>
+    <string name="onboarding_scan_text">Tirhisa khamera ya wena ku kuma tiresepi hi ku ya hi leswi nga exikitsini xa wena.</string>
+    <string name="onboarding_cart_title">Minxaxamelo ya Vuxavisi</string>
+    <string name="onboarding_cart_text">Lawula minxaxamelo ya wena ya swakudya swa tiresepi to hambanahambana laha.</string>
+    <string name="onboarding_profile_title">Phurofayili ya Wena</string>
+    <string name="onboarding_profile_text">Vona vutumbuluxi bya wena, swo rhandziwa, na ku lawula switirhisiwa swa app.</string>
+
+    <!-- Gamification -->
+    <string name="gamification_badge_unlocked">Baji yi pfuriwile! 🎉</string>
+    <string name="gamification_badge_earned_message">U kume baji ya \'%1$s\'!</string>
+
+    <!-- MyRecipesActivity -->
+    <string name="my_recipes_login_required">U fanele ku nghena ku vona tiresepi ta wena.</string>
+    <string name="my_recipes_empty_state">A wu si tumbuluxa tiresepi. Tlanya konopo ya \'+\' ku engetela ya wena yo sungula!</string>
+
+    <!-- ProfileCompletionActivity -->
+    <string name="profile_completion_permission_camera_required">Mpumelelo wa khamera wa lafiwa ku teka xifaniso.</string>
+    <string name="profile_completion_set_photo_title">Veka Xifaniso xa Phurofayili</string>
+    <string name="validation_fullname_empty">Vito ro helela a ri fanelanga ri va ri hava nchumu</string>
+    <string name="validation_phone_invalid">Nomboro ya riqingho a yi lulamanga</string>
+    <string name="gender_male">Xinuna</string>
+    <string name="gender_female">Xisati</string>
+    <string name="gender_other">Swi n\'wana</string>
+    <string-array name="gender_options">
+        <item>@string/gender_male</item>
+        <item>@string/gender_female</item>
+        <item>@string/gender_other</item>
+    </string-array>
+
+    <!-- RecipeMatchAdapter -->
+    <string name="recipe_match_all_ingredients">U na swilala hinkwaswo! 🎉</string>
+    <plurals name="recipe_match_missing_ingredients">
+        <item quantity="one">U lava xilala xin\'we ntsena</item>
+        <item quantity="other">U lava swilala swin\'wana swi %d</item>
+    </plurals>
+
+    <!-- ScanCameraFragment -->
+    <string name="scan_camera_permission_needed">Mpumelelo wa khamera wa lafiwa.</string>
+    <string name="scan_camera_ingredients_found">Ku kumiwile: %1$s</string>
+    <string name="scan_camera_no_ingredients_identified">A swi koteki ku tiva swilala.</string>
+    <string name="scan_camera_detection_failed">A swi koteki ku kuma swilala.</string>
+
+    <!-- ScanFragment Tabs -->
+    <string name="scan_tab_item">Skena Xilo</string>
+    <string name="scan_tab_type_voice">Thayipha &amp; Rito</string>
+    <string name="scan_tab_history">Matimu</string>
+
+    <!-- ScanManualFragment -->
+    <string name="scan_manual_voice_prompt">Vula swilala swa wena…</string>
+    <string name="scan_manual_add_ingredients_first">H kombela u engetela swilala ro sungula</string>
+    <string name="scan_manual_voice_not_available">Ku tiveka ka rito a ku kumeki eka xitirhisiwa lexi</string>
+
+    <!-- ScanHistoryFragment -->
+    <string name="scan_history_delete_title">Sula Xilo xa Matimu</string>
+    <string name="scan_history_delete_message">Xana u tiyisile leswaku u lava ku susa ku skena loku eka matimu ya wena?</string>
+
+    <!-- ShoppingListFragment -->
+    <string name="shopping_list_delete_dialog_title">Sula Nxaxamelo 🗑️</string>
+    <string name="shopping_list_delete_dialog_message">Xana u tiyisile leswaku u lava ku susa nxaxamelo lowu wa vuxavisi na swilo swa wona hinkwaswo? 😥</string>
+    <string name="shopping_list_add_items_title">Engetela Swilo swa Vuxavisi</string>
+    <string name="shopping_list_item_deleted_snackbar">🗑️ %1$s yi suliwile</string>
+    <string name="undo">TLHERISELA</string>
+    <plurals name="shopping_list_selection_count">
+        <item quantity="one">%1$d xilo xi hlawuriwile</item>
+        <item quantity="other">%1$d swilo swi hlawuriwile</item>
+    </plurals>
+    <plurals name="shopping_list_toast_items_added">
+        <item quantity="one">%1$d xilo xi engeteriwile.</item>
+        <item quantity="other">%1$d swilo swi engeteriwile.</item>
+    </plurals>
+
+    <!-- WelcomeActivity -->
+    <string name="welcome_firebase_auth_failed">Netefatso ya Firebase yi tsandzekile: %1$s</string>
+    <string name="welcome_google_sign_in_failed">Ku nghena hi Google swi tsandzekile: %1$s</string>
+    <string name="surprise_me">Suprise Me</string>
+
+</resources>

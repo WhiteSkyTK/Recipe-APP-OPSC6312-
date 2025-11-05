@@ -27,14 +27,14 @@ class RecipeMatchAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val match = matches[position]
+        val context = holder.itemView.context
         holder.title.text = match.recipe.title
-        Glide.with(holder.itemView.context).load(match.recipe.imageUrl).into(holder.image)
+        Glide.with(context).load(match.recipe.imageUrl).into(holder.image)
 
         val missingCount = match.missingIngredients.size
         holder.missing.text = when {
-            missingCount == 0 -> "You have all ingredients! 🎉"
-            missingCount == 1 -> "You need 1 more ingredient"
-            else -> "You need $missingCount more ingredients"
+            missingCount == 0 -> context.getString(R.string.recipe_match_all_ingredients)
+            else -> context.resources.getQuantityString(R.plurals.recipe_match_missing_ingredients, missingCount, missingCount)
         }
 
         holder.itemView.setOnClickListener { onClick(match) }

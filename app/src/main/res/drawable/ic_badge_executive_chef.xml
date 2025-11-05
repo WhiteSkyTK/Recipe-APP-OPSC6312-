@@ -1,0 +1,13 @@
+<!-- A chef's hat with a star, for the 'Executive Chef' badge -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="?attr/colorPrimary"
+        android:pathData="M12,2C8.13,2 5,5.13 5,9c0,1.54 0.5,2.94 1.35,4.1L5,22h14l-1.35,-8.9C18.5,11.94 19,10.54 19,9c0,-3.87 -3.13,-7 -7,-7z"/>
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M12,12.5l-1.22,2.48 -2.74,0.4 1.98,1.93 -0.47,2.73L12,18.25l2.45,1.29 -0.47,-2.73 1.98,-1.93 -2.74,-0.4z"/>
+</vector>

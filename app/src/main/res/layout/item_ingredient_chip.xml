@@ -7,4 +7,4 @@
     android:layout_height="wrap_content"
     app:closeIconVisible="true"
     app:chipBackgroundColor="@color/chip_color_selector"
-    android:text="Sample Ingredient" />
+    android:text="@string/sample_ingredient" />

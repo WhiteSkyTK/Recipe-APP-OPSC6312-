@@ -26,13 +26,13 @@
             android:src="@drawable/ic_arrow_back"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
-            android:contentDescription="Back button" /> <!-- Added contentDescription -->
+            android:contentDescription="@string/back_button" /> <!-- Added contentDescription -->
 
         <TextView
             android:id="@+id/textViewScreenTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="My Creations 🎨"
+            android:text="@string/my_creations"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorPrimary"
