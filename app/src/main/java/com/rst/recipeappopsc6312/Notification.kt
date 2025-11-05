@@ -11,5 +11,5 @@ data class Notification(
     val message: String = "",
     val iconName: String = "",
     @ServerTimestamp val timestamp: Date? = null,
-    val isRead: Boolean = false
+    var isRead: Boolean = false
 )

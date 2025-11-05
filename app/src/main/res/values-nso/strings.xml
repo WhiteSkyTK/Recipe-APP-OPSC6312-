@@ -67,7 +67,7 @@
     <string name="credits_amp_attributions"><![CDATA[©️ Ditebogo le Theto]]></string>
     <string name="ui_ux_design_figma_nphotos_unsplash_nicons_material_design_icons">UI/UX Design: Figma\nDinepe: Unsplash\nDiaykhone: Material Design Icons</string>
     <string name="are_you_enjoying_the_app_so_far">Naa o thabela app ye go fihla ga bjale? 😊</string>
-    <string name="VersionNumber">Phetolelo 1.0.0</string>
+    <string name="VersionNumber">Version 1.0.0</string>
 
     <!--Camera Scanner-->
     <string name="point_at_a_list_of_ingredients">Šupa lenanego la ditswako</string>

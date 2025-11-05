@@ -1,8 +1,11 @@
 package com.rst.recipeappopsc6312
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -29,11 +32,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.util.Calendar
 import android.os.Handler
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -63,6 +69,17 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var connectivityObserver: NetworkConnectivityObserver
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Log.d(TAG, "Notification permission granted.")
+        } else {
+            Log.w(TAG, "Notification permission denied.")
+            // You could show a gentle message explaining why notifications are useful
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -75,6 +92,8 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0) // We handle bottom padding with the nav bar
             insets
         }
+
+        askNotificationPermission()
 
         // Find all the views
         greetingTextView = findViewById(R.id.textViewGreeting)
@@ -509,6 +528,21 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             loadFragment(editFragment, -2) // Use the AddRecipe ID
+        }
+    }
+
+    private fun askNotificationPermission() {
+        // This is only necessary for API 33+ (Android 13+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                // Permission is already granted
+                Log.d(TAG, "Notification permission already granted.")
+            } else {
+                // Directly ask for the permission
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
     }
 }
