@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.rst.recipeappopsc6312" />
-                  <option name="mobileSdkAppId" value="1:866842800924:android:fa6407430309c7ea6fc0d9" />
-                  <option name="projectId" value="harmony-kitchen-rst" />
-                  <option name="projectNumber" value="866842800924" />
+                  <option name="appId" value="PLACEHOLDER" />
+                  <option name="mobileSdkAppId" value="" />
+                  <option name="projectId" value="" />
+                  <option name="projectNumber" value="" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

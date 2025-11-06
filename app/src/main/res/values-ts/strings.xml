@@ -2,32 +2,32 @@
     <string name="app_name">Harmony Kitchen</string>
 
     <!-- General / Reusable -->
-    <string name="ok">KAHLE</string>
-    <string name="add">Engetela</string>
-    <string name="cancel">Cima</string>
+    <string name="ok">Lulamile</string>
+    <string name="add">Katsa</string>
+    <string name="cancel">Khansela</string>
     <string name="delete">Sula</string>
     <string name="save_changes">Hlayisa Ku Cinca</string>
-    <string name="coming_soon">Swa ha ta…</string>
-    <string name="permission_needed_title">Mpumelelo wa Lafiwa</string>
+    <string name="coming_soon">Swata Sweswi…</string>
+    <string name="permission_needed_title">Mpfumelelo wa Laveka</string>
     <string name="select_language">🌍 Hlawula Ririmi</string>
 
     <!-- RecipeDetailActivity -->
-    <string name="recipe_detail_error_missing_id">ID ya resepi a yi kona</string>
-    <string name="recipe_detail_add_to_list_title">Engetela eka Vuxavisi</string>
-    <string name="recipe_detail_add_all_ingredients">Engetela swilala hinkwaswo</string>
-    <string name="recipe_detail_select_ingredients">Hlawula swilala leswi u lavaka ku swi engetela</string>
-    <string name="recipe_detail_toast_recipe_not_loaded">Resepi a yi si layicha.</string>
-    <string name="recipe_detail_publish_dialog_title">Hangalasa Resepi</string>
-    <string name="recipe_detail_publish_dialog_message">Xana u tiyisile leswaku u lava ku endla resepi leyi yi va ya mani na mani?</string>
-    <string name="recipe_detail_toast_published">Resepi yi hangalaswile!</string>
-    <string name="recipe_detail_toast_private">Resepi sweswi i ya xihundla.</string>
+    <string name="recipe_detail_error_missing_id">ID ya risipi yi lahlekile </string>
+    <string name="recipe_detail_add_to_list_title">Katsa eka Vuxavisi</string>
+    <string name="recipe_detail_add_all_ingredients">Katsa swilala hinkwaswo</string>
+    <string name="recipe_detail_select_ingredients">Hlawula swilala leswi u lavaka ku swi Katsa</string>
+    <string name="recipe_detail_toast_recipe_not_loaded">Risipi a yi se layicha.</string>
+    <string name="recipe_detail_publish_dialog_title">Hangalasa Risipi</string>
+    <string name="recipe_detail_publish_dialog_message">Xana u ntiyisile leswaku u lava ku endla risipi leyi yi va ya mani na mani?</string>
+    <string name="recipe_detail_toast_published">Risipi yi hangalasile!</string>
+    <string name="recipe_detail_toast_private">Risipi sweswi i ya xihundla.</string>
     <string name="read_less">Hlaya swi ntsongo</string>
     <string name="recipe_detail_publish_button">Hangalasa</string>
-    <string name="recipe_detail_toast_all_ingredients_added">Swilala swi suka eka %1$s swi engeteriwile eka nxaxamelo lowuntshwa</string>
-    <string name="recipe_detail_author_prefix">hi %1$s</string>
+    <string name="recipe_detail_toast_all_ingredients_added">Swilala hinkwaswo swi katsiwile</string>
+    <string name="recipe_detail_author_prefix">Mutsari</string>
     <plurals name="recipe_detail_toast_ingredients_added">
-        <item quantity="one">%1$d xilala xi engeteriwile eka nxaxamelo lowuntshwa</item>
-        <item quantity="other">%1$d swilala swi engeteriwile eka nxaxamelo lowuntshwa</item>
+        <item quantity="one">%1$d swilala swi katsiwile eka nxaxamelo lowuntshwa</item>
+        <item quantity="other">%1$d swilala swi katsiwile eka nxaxamelo lowuntshwa</item>
     </plurals>
 
     <!-- ShoppingListFragment -->
@@ -36,23 +36,23 @@
     <string name="shopping_list_my_list">Nxaxamelo Wanga 📝</string>
 
     <!-- AddRecipeFragment & ProfileCompletionActivity -->
-    <string name="permission_camera_required">Mpumelelo wa khamera wa lafiwa.😥</string>
+    <string name="permission_camera_required">Mpumelelo wa khamera wa laveka.😥</string>
     <string name="dialog_set_photo_title">Veka Xifaniso xa Khavhara</string>
     <string name="dialog_option_take_photo">Teka Xifaniso</string>
     <string name="dialog_option_choose_gallery">Hlawula eka Gallery</string>
     <string name="dialog_option_remove_photo">Susa Xifaniso😥</string>
-    <string name="permission_camera_rationale">Kufikelela khamera swa lafiwa ku teka xifaniso xa resepi ya wena.😥</string>
-    <string name="delete_recipe_dialog_title">Sula Resepi 🗑️</string>
-    <string name="delete_recipe_dialog_message">Xana u tiyisile leswaku u lava ku susa resepi leyi hilaha ku nga heriki? 😥</string>
+    <string name="permission_camera_rationale">Kufikelela khamera swa lava ku teka xifaniso xa risipi ya wena.😥</string>
+    <string name="delete_recipe_dialog_title">Sula Risipi 🗑️</string>
+    <string name="delete_recipe_dialog_message">Xana u ntiyisile leswaku u lava ku susa risipi leyi hilaha ku nga heriki? 😥</string>
 
     <!-- Welcome & Login -->
     <string name="google_sign_in_failed">Ku nghena hi Google swi tsandzekile: %1$s</string>
-    <string name="firebase_auth_failed">Netefatso ya Firebase yi tsandzekile: %1$s</string>
-    <string name="auth_failed">Netefatso yi tsandzekile: %1$s</string>
+    <string name="firebase_auth_failed">Ntiyisiseko ya Firebase yi tsandzekile: %1$s</string>
+    <string name="auth_failed">Ntiyisiseko yi tsandzekile: %1$s</string>
 
     <!-- ProfileFragment -->
-    <string name="profile_logout_title">Humela</string>
-    <string name="profile_logout_message">Xana u tiyisile leswaku u lava ku humela na ku basisa data hinkwayo ya laha kaya?</string>
+    <string name="profile_logout_title">Huma</string>
+    <string name="profile_logout_message">Xana u ntiyisile leswaku u lava ku huma na ku basisa data hinkwayo na?</string>
     <string name="profile_logout_button">Humela</string>
     <string name="profile_version">Vuhundzuluxeri %1$s</string>
     <string name="profile_default_name">Vito ra Wena</string>
@@ -65,7 +65,7 @@
     <string name="this_app_was_proudly_developed_by_students_of_rosebank_college_n_tokollo_nonyane_n_sagwadi_mashimbye_n_rinae_magadagela">App leyi yi endliwile hi ku tinyungubyisa hi swichudeni swa Rosebank College:\n• Tokollo Nonyane\n• Sagwadi Mashimbye\n• Rinae Magadagela</string>
     <string name="credits_amp_attributions"><![CDATA[©️ Swikweleti na Nkhensani]]></string>
     <string name="ui_ux_design_figma_nphotos_unsplash_nicons_material_design_icons">UI/UX Design: Figma\nSwifaniso: Unsplash\nSwifaniso swa ntirho: Material Design Icons</string>
-    <string name="are_you_enjoying_the_app_so_far">Xana u tiphina hi app ku fikela sweswi? 😊</string>
+    <string name="are_you_enjoying_the_app_so_far">Xana u lekuti phineni hi app ku fikela sweswi? 😊</string>
     <string name="VersionNumber">Vuhundzuluxeri 1.0.0</string>
 
     <!--Camera Scanner-->
@@ -73,16 +73,16 @@
     <string name="scan_text">Skena Matsalwa</string>
 
     <!--Country Selector-->
-    <string name="back_button">Konopo yo tlhela</string>
+    <string name="back_button">Konopo yo tlhela ndzhaku</string>
     <string name="which_country_are_you_from">U huma eka tiko rihi 🥰</string>
-    <string name="please_select_your_country_of_origin_for_a_better_recommendation">H kombela u hlawula tiko ra wena ra tswalo leswaku u kuma swiringanyeto swo antswa</string>
+    <string name="please_select_your_country_of_origin_for_a_better_recommendation">kombela u hlawula tiko ra wena ra ntswalo leswaku u kuma swiringanyeto swo antswa</string>
     <string name="select_country">Hlawula Tiko</string>
     <string name="continuebtn">Yana emahlweni</string>
 
     <!--Create Account-->
     <string name="todo">TODO</string>
     <string name="create_an_account">Tumbuluxa Akhawunti 🤝</string>
-    <string name="enter_your_username_email_amp_password_if_you_forgot_it_then_you_have_to_do_forget_password"><![CDATA[Nghenisa vito ra mutirhisi, imeyili, & phaswedi. Loko u yi rivala, u fanele ku rivala phaswedi]]></string>
+    <string name="enter_your_username_email_amp_password_if_you_forgot_it_then_you_have_to_do_forget_password"><![CDATA[Nghenisa vito ra wena, imeyili, & phasiwede. Loko u yi rivala, u fanele ku endla phasiwede yinwani]]></string>
     <string name="username">Vito ra mutirhisi</string>
     <string name="email">Imeyili</string>
     <string name="password">Phaswedi</string>
@@ -113,10 +113,10 @@
 
     <!--Login-->
     <string name="hey_there">Avuxeni 👋</string>
-    <string name="please_enter_your_username_email_and_password_to_sign_in">H kombela u nghenisa vito ra mutirhisi/imeyili na phaswedi ku nghena</string>
+    <string name="please_enter_your_username_email_and_password_to_sign_in">Hi kombela u nghenisa vito ra mutirhisi/imeyili na phaswedi ku nghena</string>
     <string name="email_username">Imeyili / Vito ra mutirhisi</string>
     <string name="log_in">Nghena</string>
-    <string name="or_continue_with">Kumbe u yana emahlweni hi</string>
+    <string name="or_continue_with">Kumbe u ya emahlweni hi</string>
     <string name="forgot_passwordbtn">U rivalerile Phaswedi</string>
 
     <!--Main-->
@@ -154,11 +154,11 @@
     <!--Recipe Detail-->
     <string name="read_more">Hlaya swo tala</string>
     <string name="nutrition_facts">Tinhla ta Swakudya 🍎</string>
-    <string name="nutrition_facts_not_provided_for_this_recipe">Tinhla ta swakudya a ti nyikiwanga eka resepi leyi. 😔</string>
+    <string name="nutrition_facts_not_provided_for_this_recipe">Tinhla ta swakudya a ti nyikiwanga eka risipi leyi. 😔</string>
     <string name="ingredients">Swilala 🍋</string>
-    <string name="Minus">-</string>
-    <string name="Size">6</string>
-    <string name="Addition">+</string>
+    <string name="Minus">kumayinasa</string>
+    <string name="Size">sayizi</string>
+    <string name="Addition">kungetela</string>
     <string name="method">Muxaka 🍳</string>
     <string name="toggle_favorite">cinca leswi rhandzekaka</string>
 
@@ -168,10 +168,10 @@
 
     <!--Scan Result-->
     <string name="back">Endzhaku</string>
-    <string name="recipe_matches">Tiresepi leti Fananaka 💡</string>
+    <string name="recipe_matches">Tirisipi leti Fananaka 💡</string>
 
     <!--Welcome-->
-    <string name="welcome_to_nharmony_kitchen">Nakurandza eka\nHarmony Kitchen</string>
+    <string name="welcome_to_nharmony_kitchen">haku amukela eka Harmony Kitchen</string>
     <string name="welcome_emoji">👋</string>
     <string name="your_daily_dose_of_delicious">Nkavelo wa wena wa siku na siku wa swa nandziha</string>
     <string name="continue_with_google">Yana emahlweni hi Google</string>
@@ -182,8 +182,8 @@
     <string name="enter_items_one_per_line">Nghenisa swilo, xin\'we hi layini…</string>
 
     <!--Add Recipe-->
-    <string name="add_your_recipe">Engetela Resepi ya Wena 🍳</string>
-    <string name="recipe_name">Vito ra Resepi</string>
+    <string name="add_your_recipe">katsa Risipi ya Wena 🍳</string>
+    <string name="recipe_name">Vito ra Risipi</string>
     <string name="category">Ntlawa</string>
     <string name="meal_type_e_g_breakfast_snack">Muxaka wa Swakudya (xik., Swakudya swa mixo, Seneke)</string>
     <string name="description">Nhlamuselo</string>
@@ -659,6 +659,6 @@
     <!-- WelcomeActivity -->
     <string name="welcome_firebase_auth_failed">Netefatso ya Firebase yi tsandzekile: %1$s</string>
     <string name="welcome_google_sign_in_failed">Ku nghena hi Google swi tsandzekile: %1$s</string>
-    <string name="surprise_me">Suprise Me</string>
+    <string name="surprise_me">Ndzi hlamarisi</string>
 
 </resources>
