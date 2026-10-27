@@ -66,6 +66,15 @@ Harmony Kitchen is packed with features designed to make meal planning and cooki
 
 ---
 
+## 📱 iOS App
+
+A native SwiftUI version of the app lives in [`ios/`](ios/). It uses the same Firebase project and data,
+so accounts, recipes, favourites and shopping lists are shared between Android and iPhone.
+See [ios/README.md](ios/README.md) to build it (needs a Mac with Xcode), and
+[ios/FIXES.md](ios/FIXES.md) for the bugs and performance problems fixed in both apps.
+
+---
+
 ## 🛠️ How to Install and Test
 
 To get the project running, follow these simple steps:
@@ -82,10 +91,13 @@ To get the project running, follow these simple steps:
 3.  **API Key Setup:**
     * Get an API key from [Spoonacular](https://spoonacular.com/food-api).
     * In the root directory of the project, create a file named `local.properties`.
-    * Add your API key(s) to this file. This file is ignored by Git to keep your keys secure.
+    * Add your API key(s) to this file, without quotes. This file is ignored by Git to keep your keys secure.
+      Keep every secret here, never in `gradle.properties` (that file is committed).
     ```properties
-    spoonacular.api.key.1="YOUR_API_KEY_HERE"
-    # Add other keys if you have them
+    spoonacular.api.key=YOUR_SPOONACULAR_KEY
+    # Optional extra keys, used if the first one runs out of quota:
+    spoonacular.api.key1=ANOTHER_SPOONACULAR_KEY
+    tasty.api.key=YOUR_RAPIDAPI_KEY
     ```
 4.  **Build and Run:**
     * Open the project in Android Studio.

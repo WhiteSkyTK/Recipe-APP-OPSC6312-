@@ -1,0 +1,17 @@
+{
+  "_comment": "Strings that exist only in the iOS app. Merged into Localizable.xcstrings by convert-android-strings.mjs. Add translations under nso/ts/ve when available.",
+  "ios_setup_title": { "en": "Firebase setup needed" },
+  "ios_setup_message": { "en": "Add GoogleService-Info.plist from the Firebase console to HarmonyKitchen/Resources and build again. See README.md." },
+  "ios_no_recipes_title": { "en": "No recipes yet" },
+  "ios_pull_to_refresh": { "en": "Pull down to refresh." },
+  "ios_sort_by": { "en": "Sort by" },
+  "ios_no_recommendations": { "en": "No recipes match your preferences in this category yet." },
+  "ios_public": { "en": "Public" },
+  "ios_private": { "en": "Private" },
+  "ios_no_matches_title": { "en": "No matching recipes" },
+  "ios_no_matches_message": { "en": "Try adding more ingredients, or different ones." },
+  "ios_list_empty_title": { "en": "Nothing here yet" },
+  "ios_list_empty_message": { "en": "Tap + to add items, or add ingredients from a recipe." },
+  "ios_done": { "en": "Done" },
+  "ios_select": { "en": "Select" }
+}

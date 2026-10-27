@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// Suggested rules for the shared Harmony Kitchen database (used by both the Android and iOS apps).
+// Review them against your current rules in the Firebase console before deploying:
+//   firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isImported(recipeId) {
+      // Recipes cached from Spoonacular ("sp_123") and Tasty ("tasty_456").
+      return recipeId.matches('^(sp|tasty)_.*');
+    }
+
+    match /recipes/{recipeId} {
+      // Public recipes for everyone signed in; private ones only for their author.
+      allow read: if signedIn()
+        && (resource.data.public == true || resource.data.userId == request.auth.uid);
+
+      // Users create their own recipes; any signed-in user may cache an API recipe.
+      allow create: if signedIn()
+        && (request.resource.data.userId == request.auth.uid || isImported(recipeId));
+
+      // Authors edit and delete their own recipes; cached API recipes can be refreshed.
+      allow update: if signedIn()
+        && (resource.data.userId == request.auth.uid || (isImported(recipeId) && resource.data.userId == ''));
+      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Profile, favourites, shopping lists, notifications, progress and activity log:
+    // private to the user.
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+
+      match /{document=**} {
+        allow read, write: if signedIn() && request.auth.uid == uid;
+      }
+    }
+  }
+}
