@@ -32,14 +32,7 @@ class MyRecipesActivity : AppCompatActivity() {
     private lateinit var emptyStateTextView: TextView
 
     private val viewModel: ShoppingViewModel by viewModels {
-        val db = AppDatabase.getDatabase(application)
-        val repo = ShoppingRepository(
-            db.shoppingDao(),
-            db.recipeDao(),
-            db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance())
-        ViewModelFactory(repo)
+        ViewModelFactory(sharedRepository())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

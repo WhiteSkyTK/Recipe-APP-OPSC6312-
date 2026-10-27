@@ -27,16 +27,7 @@ class ShoppingListFragment : Fragment() {
     // --- ViewModel and Adapter ---
     // This assumes you have a ViewModelFactory set up, which I'll explain below.
     private val viewModel: ShoppingListViewModel by viewModels {
-        val database = AppDatabase.getDatabase(requireContext())
-        // Provide the missing FirebaseStorage instance as the fourth argument
-        val repository = ShoppingRepository(
-            database.shoppingDao(),
-            database.recipeDao(),
-            database.scanHistoryDao(),
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance() // <-- This was the missing part
-        )
-        ViewModelFactory(repository)
+        ViewModelFactory(requireContext().sharedRepository())
     }
     private lateinit var shoppingListAdapter: ShoppingListAdapter
     private lateinit var deleteListButton: ImageButton

@@ -25,10 +25,10 @@ class AddRecipeViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(r
         loadCategories()
     }
 
-    fun saveRecipe(recipe: Recipe, imageUri: Uri?) {
+    fun saveRecipe(recipe: Recipe, imageUri: Uri?, isNew: Boolean) {
         viewModelScope.launch {
             try {
-                repository.saveNewRecipe(recipe, imageUri)
+                repository.saveNewRecipe(recipe, imageUri, isNew)
                 _saveStatus.postValue(SaveResult(success = true))
             } catch (e: Exception) {
                 _saveStatus.postValue(SaveResult(success = false, error = e.message))

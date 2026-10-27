@@ -26,12 +26,7 @@ class WelcomeActivity : AppCompatActivity() {
 
     // We add a ViewModel to access the repository for creating the user profile
     private val viewModel: ShoppingViewModel by viewModels {
-        val db = AppDatabase.getDatabase(application)
-        val repo = ShoppingRepository(
-            db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
-        )
-        ViewModelFactory(repo)
+        ViewModelFactory(sharedRepository())
     }
 
     // This is the modern way to handle the result of the Google Sign-In intent

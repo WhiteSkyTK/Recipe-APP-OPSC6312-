@@ -49,7 +49,8 @@ class ProfileCompletionActivity : AppCompatActivity() {
     // ActivityResultLauncher for picking an image from the gallery
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-            profileImageUri = tempImageUri
+            // Use the real file (not the FileProvider content:// URI) so CreateAccountActivity can upload it.
+            profileImageUri = Uri.fromFile(File(filesDir, "temp_image.jpg"))
             profileImageView.setImageURI(profileImageUri)
         }
     }

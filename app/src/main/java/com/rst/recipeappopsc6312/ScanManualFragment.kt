@@ -21,9 +21,7 @@ import java.util.Locale
 class ScanManualFragment : Fragment() {
 
     private val viewModel: ScanViewModel by activityViewModels {
-        val db = AppDatabase.getDatabase(requireContext())
-        val repo = ShoppingRepository(db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(), com.google.firebase.firestore.FirebaseFirestore.getInstance(), com.google.firebase.storage.FirebaseStorage.getInstance())
-        ViewModelFactory(repo)
+        ViewModelFactory(requireContext().sharedRepository())
     }
 
     private val voiceLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->

@@ -74,9 +74,7 @@ class MainViewModel(repository: ShoppingRepository) : BaseRecipeViewModel(reposi
     }
 
     init {
-        viewModelScope.launch {
-            repository.seedFirebaseDatabase()
-        }
+        // seedFirebaseDatabase() used to run here on every launch (630+ API calls); removed.
         startListeningForNotifications()
     }
 }

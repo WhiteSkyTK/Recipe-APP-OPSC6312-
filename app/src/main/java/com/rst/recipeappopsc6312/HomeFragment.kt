@@ -25,24 +25,10 @@ import java.util.Calendar
 class HomeFragment : Fragment() {
 
     private val shoppingViewModel: ShoppingViewModel by viewModels {
-        val database = AppDatabase.getDatabase(requireContext())
-        // Provide the missing FirebaseStorage instance as the fourth argument
-        val repository = ShoppingRepository(
-            database.shoppingDao(),
-            database.recipeDao(),
-            database.scanHistoryDao(),
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance()
-        )
-        ViewModelFactory(repository)
+        ViewModelFactory(requireContext().sharedRepository())
     }
     private val mainViewModel: MainViewModel by activityViewModels {
-        val database = AppDatabase.getDatabase(requireContext())
-        val repository = ShoppingRepository(
-            database.shoppingDao(), database.recipeDao(), database.scanHistoryDao(),
-            FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
-        )
-        ViewModelFactory(repository)
+        ViewModelFactory(requireContext().sharedRepository())
     }
     private lateinit var featuredAdapter: FeaturedRecipeAdapter
     private lateinit var timeOfDayAdapter: HomeRecipeAdapter

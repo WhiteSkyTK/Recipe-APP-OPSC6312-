@@ -16,16 +16,7 @@ import com.google.firebase.storage.FirebaseStorage
 class ScanResultsActivity : AppCompatActivity() {
 
     private val viewModel: ScanViewModel by viewModels {
-        val db = AppDatabase.getDatabase(application)
-        // ++ UPDATE this to match the new constructor
-        val repo = ShoppingRepository(
-            db.shoppingDao(),
-            db.recipeDao(),
-            db.scanHistoryDao(), // Pass the new DAO
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance()
-        )
-        ViewModelFactory(repo)
+        ViewModelFactory(sharedRepository())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

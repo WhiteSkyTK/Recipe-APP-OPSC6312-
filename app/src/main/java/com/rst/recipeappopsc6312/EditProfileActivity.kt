@@ -154,6 +154,7 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun saveChanges() {
+        if (!validateInput()) return
         val userId = FirebaseManager.auth.currentUser?.uid ?: return
         showLoading(true)
 

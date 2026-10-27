@@ -57,14 +57,7 @@ class MainActivity : AppCompatActivity() {
     private val LAST_BOTTOM_NAV_FRAGMENT_KEY = "LAST_BOTTOM_NAV_FRAGMENT_KEY"
 
     private val mainViewModel: MainViewModel by viewModels {
-        val db = AppDatabase.getDatabase(application)
-        val repo = ShoppingRepository(
-            db.shoppingDao(),
-            db.recipeDao(),
-            db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance())
-        ViewModelFactory(repo)
+        ViewModelFactory(sharedRepository())
     }
 
     private lateinit var connectivityObserver: NetworkConnectivityObserver

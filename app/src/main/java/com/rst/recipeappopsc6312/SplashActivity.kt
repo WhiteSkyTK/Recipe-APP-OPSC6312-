@@ -21,15 +21,7 @@ class SplashActivity : AppCompatActivity() {
 
     // Get an instance of our new SplashViewModel
     private val viewModel: SplashViewModel by viewModels {
-        val db = AppDatabase.getDatabase(application)
-        val repo = ShoppingRepository(
-            db.shoppingDao(),
-            db.recipeDao(),
-            db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance()
-        )
-        ViewModelFactory(repo)
+        ViewModelFactory(sharedRepository())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

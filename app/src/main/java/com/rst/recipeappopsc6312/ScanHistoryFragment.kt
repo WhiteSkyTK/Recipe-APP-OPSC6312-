@@ -13,9 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 class ScanHistoryFragment : Fragment() {
 
     private val viewModel: ScanViewModel by activityViewModels {
-        val db = AppDatabase.getDatabase(requireContext())
-        val repo = ShoppingRepository(db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(), com.google.firebase.firestore.FirebaseFirestore.getInstance(), com.google.firebase.storage.FirebaseStorage.getInstance())
-        ViewModelFactory(repo)
+        ViewModelFactory(requireContext().sharedRepository())
     }
     private lateinit var historyAdapter: ScanHistoryAdapter
 

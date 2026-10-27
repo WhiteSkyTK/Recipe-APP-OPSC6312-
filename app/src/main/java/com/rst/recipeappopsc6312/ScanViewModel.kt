@@ -14,6 +14,14 @@ import kotlinx.coroutines.launch
 
 class ScanViewModel(private val repository: ShoppingRepository) : ViewModel() {
 
+    private companion object {
+        val COARSE_LABELS = setOf("Food", "Fashion good", "Home good", "Place", "Plant")
+        val IGNORED_WORDS = setOf(
+            "total", "subtotal", "price", "change", "cash", "card", "vat", "tax", "qty", "item", "items",
+            "and", "the", "for", "with", "fresh", "large", "small", "pack", "each", "free", "special"
+        )
+    }
+
     private val _ingredientsList = MutableLiveData<MutableList<String>>(mutableListOf())
     val ingredientsList: LiveData<MutableList<String>> = _ingredientsList
 
@@ -95,9 +103,11 @@ class ScanViewModel(private val repository: ShoppingRepository) : ViewModel() {
 
         objectDetector.process(image)
             .addOnSuccessListener { detectedObjects ->
+                // ML Kit's built-in classifier only knows five coarse categories ("Food",
+                // "Home good", ...), which were being added as ingredients.
                 val labels = detectedObjects.mapNotNull { obj ->
                     obj.labels.firstOrNull()?.text?.replaceFirstChar { it.uppercase() }
-                }.distinct()
+                }.filter { it !in COARSE_LABELS }.distinct()
                 onSuccess(labels)
             }
             .addOnFailureListener(onFailure)
@@ -114,13 +124,14 @@ class ScanViewModel(private val repository: ShoppingRepository) : ViewModel() {
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
         recognizer.process(image)
             .addOnSuccessListener { visionText ->
+                // Keep word-like text only: receipts are full of prices, codes and totals.
                 val words = visionText.textBlocks.flatMap { block ->
                     block.lines.flatMap { line ->
-                        line.elements.map { element ->
-                            element.text.trim().replaceFirstChar { it.uppercase() }
-                        }
+                        line.elements.map { element -> element.text.trim().trim { !it.isLetter() } }
                     }
-                }.distinct()
+                }.filter { word ->
+                    word.length >= 3 && word.all { it.isLetter() } && word.lowercase() !in IGNORED_WORDS
+                }.map { word -> word.lowercase().replaceFirstChar { it.uppercase() } }.distinct()
                 onSuccess(words)
             }
             .addOnFailureListener(onFailure)

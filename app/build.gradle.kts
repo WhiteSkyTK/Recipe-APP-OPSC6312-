@@ -46,8 +46,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Read secrets from the loaded local.properties
-        buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY")}\"")
         buildConfigField("String", "SPOONACULAR_API_KEY", "\"${localProperties.getProperty("spoonacular.api.key")}\"")
         buildConfigField("String", "SPOONACULAR_API_KEY_1", "\"${localProperties.getProperty("spoonacular.api.key1")}\"")
         buildConfigField("String", "SPOONACULAR_API_KEY_2", "\"${localProperties.getProperty("spoonacular.api.key2")}\"")
@@ -57,7 +55,6 @@ android {
         buildConfigField("String", "SPOONACULAR_API_KEY_6", "\"${localProperties.getProperty("spoonacular.api.key6")}\"")
         buildConfigField("String", "TASTY_API_KEY", "\"${localProperties.getProperty("tasty.api.key")}\"")
         buildConfigField("String", "TASTY_API_KEY1", "\"${localProperties.getProperty("tasty.api.key1")}\"")
-        buildConfigField("String", "CLOUDINARY_URL", "\"${localProperties.getProperty("cloudinary.url")}\"")
     }
     buildTypes {
         getByName("release") {
@@ -146,5 +143,4 @@ dependencies {
     implementation ("androidx.camera:camera-lifecycle:1.5.0")
     implementation ("androidx.camera:camera-view:1.5.0")
     implementation("com.google.mlkit:object-detection:17.0.2")
-    implementation("com.cloudinary:cloudinary-android:3.1.2")
 }

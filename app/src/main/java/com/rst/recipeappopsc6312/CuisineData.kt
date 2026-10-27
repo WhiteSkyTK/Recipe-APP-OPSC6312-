@@ -24,8 +24,19 @@ object CuisineData {
 }
 
 object CuisineHelper {
-    // New function to get String names
+    // English names: they are stored on the user profile and compared with recipe data.
     fun getAllCuisineNames(context: android.content.Context): List<String> {
-        return CuisineData.getAllCuisines().map { context.getString(it.name) }
+        return CuisineData.getAllCuisines().map { context.englishString(it.name) }
     }
+}
+
+/**
+ * The English text of a string resource, whatever language the app is shown in.
+ * Diet and cuisine preferences used to be saved in the display language, so in Sepedi,
+ * Xitsonga or Tshivenda the filters (which compare against "Vegan", "Gluten-Free", ...) never matched.
+ */
+fun android.content.Context.englishString(resId: Int): String {
+    val config = android.content.res.Configuration(resources.configuration)
+    config.setLocale(java.util.Locale.ENGLISH)
+    return createConfigurationContext(config).getString(resId)
 }

@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.materialswitch.MaterialSwitch
 import de.hdodenhof.circleimageview.BuildConfig
 import de.hdodenhof.circleimageview.CircleImageView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -175,10 +176,13 @@ class ProfileFragment : Fragment() {
         favoritesPrefs.edit().clear().apply()
         Log.d(TAG, "All SharedPreferences cleared.")
 
-        // 3. Clear the Room database in a background thread
-        lifecycleScope.launch(Dispatchers.IO) {
+        // 3. Clear cached data and the Room database. Uses the application context and its own
+        // scope: the fragment is destroyed right after this, which cancelled the old job.
+        val appContext = requireContext().applicationContext
+        appContext.sharedRepository().clearCaches()
+        CoroutineScope(Dispatchers.IO).launch {
             try {
-                AppDatabase.getDatabase(requireContext()).clearAllTables()
+                AppDatabase.getDatabase(appContext).clearAllTables()
                 Log.d(TAG, "Room database cleared successfully.")
             } catch (e: Exception) {
                 Log.e(TAG, "Error clearing Room database.", e)

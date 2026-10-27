@@ -3,10 +3,6 @@ package com.rst.recipeappopsc6312
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
-import com.cloudinary.Transformation
-import com.cloudinary.android.MediaManager
-import com.cloudinary.android.callback.ErrorInfo
-import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
@@ -15,6 +11,7 @@ import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -32,7 +29,7 @@ class ShoppingRepository(
     val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage
 ) {
-    private val foodEmojis = listOf("🥞", "🍕", "🍔", "🍣", "🌮", "🥗", "🍜", "🍰", "🍩", "🥐", "🍝", "カレー", "🍲")
+    private val foodEmojis = listOf("🥞", "🍕", "🍔", "🍣", "🌮", "🥗", "🍜", "🍰", "🍩", "🥐", "🍝", "🍛", "🍲")
     private val apiService = RetrofitClient.instance
     private val tastyApiService = RetrofitClient.tastyInstance
 
@@ -79,136 +76,43 @@ class ShoppingRepository(
         listOf(featuredJob, recommendedJob, categoriesJob, breakfastJob, lunchJob, snackJob, dinnerJob).forEach { it.await() }
     }
 
-    suspend fun getFirebaseRecipeCount(): Int {
-        val TAG = "FirebaseRecipeCount" // Define a tag for your logs for easy filtering
-        return try {
-            Log.d(TAG, "Attempting to fetch recipe count from Firestore...")
-            val documents = firestore.collection("recipes").get().await()
-            val count = documents.size()
-            Log.d(TAG, "Successfully fetched recipe count: $count") // Log the count
-            count // Return the count
-        } catch (e: Exception) {
-            Log.e(TAG, "Error fetching recipe count from Firestore", e) // Log the error and the exception
-            0 // Return 0 in case of error
-        }
-    }
+    // Database seeding used to run on every app launch: it downloaded the whole recipes
+    // collection just to count it and could then make 630 Spoonacular calls (9 keys x 70 tags).
+    // It has been removed; the APIs are now only used when a search finds nothing in Firestore.
 
-    suspend fun seedFirebaseDatabase() {
-        // First, check if we even need to seed. If you have enough recipes, we can stop.
+    // Blank or missing keys arrive from BuildConfig as "" or "null".
+    private val spoonacularApiKeys = listOf(
+        BuildConfig.SPOONACULAR_API_KEY,
+        BuildConfig.SPOONACULAR_API_KEY_1,
+        BuildConfig.SPOONACULAR_API_KEY_2,
+        BuildConfig.SPOONACULAR_API_KEY_3,
+        BuildConfig.SPOONACULAR_API_KEY_4,
+        BuildConfig.SPOONACULAR_API_KEY_5,
+        BuildConfig.SPOONACULAR_API_KEY_6
+    ).filter { it.isNotBlank() && it != "null" }.distinct()
 
-        val currentRecipeCount = getFirebaseRecipeCount()
-        if (currentRecipeCount >= 200) {
-            Log.d("API_SEED", "Firestore has $currentRecipeCount recipes. No seeding needed.")
-            return
-        }
-
-        Log.d("API_SEED", "Starting database seed with multiple API keys...")
-
-        // 1. List all your API keys securely
-        val spoonacularApiKeys  = listOf(
-            BuildConfig.SPOONACULAR_API_KEY,
-            BuildConfig.SPOONACULAR_API_KEY_1, // Assuming you've named them like this
-            BuildConfig.SPOONACULAR_API_KEY_2,
-            BuildConfig.SPOONACULAR_API_KEY_3,
-            BuildConfig.SPOONACULAR_API_KEY_4,
-            BuildConfig.SPOONACULAR_API_KEY_5,
-            BuildConfig.SPOONACULAR_API_KEY_6,
-            BuildConfig.TASTY_API_KEY,
-            BuildConfig.TASTY_API_KEY1
-        )
-
-        // 2. Define the types of recipes you want
-        val spoonacularTags = listOf(
-            // Meals
-            "african", "breakfast", "brunch", "lunch", "dinner", "snack", "dessert", "supper",
-
-            // Courses
-            "appetizer", "starter", "main course", "side dish", "soup", "salad",
-            "bread", "sandwich", "wraps", "pizza", "pasta", "casserole",
-
-            // Diet & lifestyle
-            "vegetarian", "vegan", "keto", "paleo", "low-carb", "gluten free",
-            "dairy free", "high protein", "low fat",
-
-            // Cuisines
-            "italian", "mexican", "indian", "thai", "chinese", "japanese",
-            "mediterranean", "french", "greek", "spanish", "american",
-            "african", "middle eastern", "caribbean",
-
-            // Occasion & seasonal
-            "holiday", "christmas", "thanksgiving", "easter", "halloween",
-            "summer", "winter", "spring", "fall",
-
-            // Proteins
-            "chicken", "beef", "pork", "lamb", "seafood", "fish", "shrimp",
-            "tofu", "eggs",
-
-            // Others
-            "comfort food", "healthy", "quick", "slow cooker", "instant pot",
-            "bbq", "grilling", "stir fry", "baking"
-        )
-
-
-        // 3. Loop through each key and each tag to get a wide variety
-        for (key in spoonacularApiKeys  ) {
-            for (tag in spoonacularTags ) {
-                try {
-                    val response = apiService.getRandomRecipes(key, 10 , tag)
-                    val newRecipes = response.recipes.map { it.toAppRecipe() }
-
-                    // 4. Save each new recipe to Firestore
-                    newRecipes.forEach { recipe ->
-                        // This 'set' operation will add the recipe or overwrite it if it already exists,
-                        // which naturally handles duplicates.
-                        firestore.collection("recipes").document(recipe.id).set(recipe)
-                    }
-                    Log.d("API_SEED", "Successfully fetched ${newRecipes.size} recipes for tag '$tag' with key ending in ${key.takeLast(4)}")
-                } catch (e: Exception) {
-                    Log.e("API_SEED", "Failed to fetch for tag '$tag' with key ending in ${key.takeLast(4)}. Error: ${e.message}")
-                    // Continue to the next key/tag even if one fails
-                }
+    /** Tries up to three Spoonacular keys, moving on when one is rejected or out of quota. */
+    private suspend fun <T> withSpoonacularKey(call: suspend (String) -> T): T? {
+        for (key in spoonacularApiKeys.shuffled().take(3)) {
+            try {
+                return call(key)
+            } catch (e: Exception) {
+                Log.w("API_FETCH", "Spoonacular call failed with key ending ${key.takeLast(4)}: ${e.message}")
             }
         }
-
-        val tastyQueries = listOf(
-            // Proteins
-            "african" ,"chicken", "beef", "pork", "lamb", "fish", "shrimp", "tofu", "egg",
-
-            // Meals
-            "breakfast", "brunch", "lunch", "dinner", "snack", "dessert",
-
-            // Popular dishes
-            "pasta", "pizza", "burger", "sandwich", "tacos", "salad", "soup",
-            "curry", "stir fry", "fried rice",
-
-            // Quick & easy
-            "30 minute meals", "quick dessert", "meal prep", "one pot", "easy dinner",
-
-            // Cuisines
-            "italian", "mexican", "indian", "thai", "chinese", "japanese",
-            "greek", "french", "american", "mediterranean",
-
-            // Diet & lifestyle
-            "vegetarian", "vegan", "keto", "gluten free", "healthy", "high protein",
-
-            // Occasions
-            "holiday", "christmas", "thanksgiving", "party food", "bbq", "summer"
-        )
-
-        try {
-            for (query in tastyQueries) {
-                val response = tastyApiService.listRecipes(from = 0, size = 20, query = query)
-                val newRecipes = response.results.map { it.toAppRecipe() }
-                newRecipes.forEach { firestore.collection("recipes").document(it.id).set(it) }
-                Log.d("API_SEED", "Tasty: Fetched ${newRecipes.size} for query '$query'")
-            }
-        } catch (e: Exception) {
-            Log.e("API_SEED", "Tasty API failed during seeding. Error: ${e.message}")
-        }
-
-        Log.d("API_SEED", "Database seeding process complete.")
+        return null
     }
 
+    fun clearCaches() {
+        cachedFeatured = null
+        cachedRecommended = null
+        cachedCategories = null
+        cachedBreakfast = null
+        cachedLunch = null
+        cachedSnack = null
+        cachedDinner = null
+        resetPagination()
+    }
 
     suspend fun getPublicRecipes(forceRefresh: Boolean = false, limit: Long = 100): List<Recipe> {
         try {
@@ -224,9 +128,10 @@ class ShoppingRepository(
                 return cachedRecipes
             }
 
-            // Fallback to fetch from API if cache is empty
-            val fetchedRecipes = fetchNewRecipesFromApis()
-            val newRecipes = upscaleAndCacheRecipes(fetchedRecipes)
+            // Only when the collection is empty (e.g. a brand-new Firebase project).
+            // fetchNewRecipesFromApis() already stores what it fetches; the old code then
+            // uploaded every image to Cloudinary a second time.
+            val newRecipes = fetchNewRecipesFromApis()
             return (newRecipes + cachedRecipes).distinctBy { it.id }.shuffled()
 
         } catch (e: FirebaseFirestoreException) {
@@ -237,55 +142,53 @@ class ShoppingRepository(
         }
     }
 
+    /**
+     * Fetches a starter set from Spoonacular and Tasty and stores it in Firestore.
+     * One tag per request: Spoonacular's include-tags requires *all* listed tags, so the old
+     * comma-joined list of seven tags usually returned nothing (the same for Tasty's search).
+     */
     private suspend fun fetchNewRecipesFromApis(): List<Recipe> {
-        Log.d("API_FETCH", "Cache is low or refresh forced. Fetching from both APIs.")
-        var spoonacularRecipes = emptyList<Recipe>()
-        var tastyRecipes = emptyList<Recipe>()
-
-        // 1. Gather user preferences to guide the API calls
         val userId = FirebaseManager.auth.currentUser?.uid
-        var userCuisines = emptyList<String>()
-        if (userId != null) {
-            val userProfileDoc = firestore.collection("users").document(userId).get().await()
-            userCuisines = userProfileDoc.get("selected_cuisines") as? List<String> ?: emptyList()
+        val userCuisines = if (userId == null) emptyList() else try {
+            @Suppress("UNCHECKED_CAST")
+            firestore.collection("users").document(userId).get().await().get("selected_cuisines") as? List<String> ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
         }
+        val tags = (listOf("african") + userCuisines.map { it.lowercase() } + listOf("dinner", "breakfast")).distinct().take(3)
 
-        // 2. Define the full list of possible tags/queries
-        val tastyQueries = listOf("chicken", "beef", "pork", "lamb", "fish", "shrimp", "tofu", "egg", "breakfast", "brunch", "lunch", "dinner", "snack", "dessert", "pasta", "pizza", "burger", "sandwich", "tacos", "salad", "soup", "curry", "stir fry", "fried rice", "30 minute meals", "quick dessert", "meal prep", "one pot", "easy dinner", "italian", "mexican", "indian", "thai", "chinese", "japanese", "greek", "french", "american", "mediterranean", "vegetarian", "vegan", "keto", "gluten free", "healthy", "high protein", "holiday", "christmas", "thanksgiving", "party food", "bbq", "summer")
-        val spoonacularTags = listOf("breakfast", "brunch", "lunch", "dinner", "snack", "dessert", "supper", "appetizer", "starter", "main course", "side dish", "soup", "salad", "bread", "sandwich", "wraps", "pizza", "pasta", "casserole", "vegetarian", "vegan", "keto", "paleo", "low-carb", "gluten free", "dairy free", "high protein", "low fat", "italian", "mexican", "indian", "thai", "chinese", "japanese", "mediterranean", "french", "greek", "spanish", "american", "middle eastern", "caribbean", "holiday", "christmas", "thanksgiving", "easter", "halloween", "summer", "winter", "spring", "fall", "chicken", "beef", "pork", "lamb", "seafood", "fish", "shrimp", "tofu", "eggs", "comfort food", "healthy", "quick", "slow cooker", "instant pot", "bbq", "grilling", "stir fry", "baking")
-
-        // 3. Build the final, prioritized list of search terms
-        val finalSpoonacularTags = (listOf("african") + userCuisines + spoonacularTags.shuffled().take(5)).distinct()
-        val finalTastyQueries = (listOf("african") + userCuisines + tastyQueries.shuffled().take(5)).distinct()
-
-        // 4. Call both APIs in parallel for maximum efficiency
-        coroutineScope {
-            launch {
-                try {
-                    val apiKeys = listOf(
-                        BuildConfig.SPOONACULAR_API_KEY_1,
-                        BuildConfig.SPOONACULAR_API_KEY_2,
-                        BuildConfig.SPOONACULAR_API_KEY_3,
-                        BuildConfig.SPOONACULAR_API_KEY_4,
-                        BuildConfig.SPOONACULAR_API_KEY_5,
-                        BuildConfig.SPOONACULAR_API_KEY_6,
-                        BuildConfig.TASTY_API_KEY,
-                        BuildConfig.TASTY_API_KEY1
-                    )
-                    val response = apiService.getRandomRecipes(apiKeys.random(), 25, finalSpoonacularTags.joinToString(","))
-                    spoonacularRecipes = response.recipes.map { it.toAppRecipe() }
-                } catch (e: Exception) { Log.e("API_FETCH", "Spoonacular refresh failed: ${e.message}") }
-            }
-            launch {
-                try {
-                    val response = tastyApiService.listRecipes(0, 25, finalTastyQueries.joinToString(" "))
-                    tastyRecipes = response.results.map { it.toAppRecipe() }
-                } catch (e: Exception) { Log.e("API_FETCH", "Tasty refresh failed: ${e.message}") }
-            }
+        val fetched = coroutineScope {
+            tags.map { tag ->
+                async {
+                    val spoonacular = withSpoonacularKey { key ->
+                        apiService.getRandomRecipes(key, 10, tag).recipes.mapNotNull { runCatching { it.toAppRecipe() }.getOrNull() }
+                    } ?: emptyList()
+                    val tasty = try {
+                        tastyApiService.listRecipes(0, 10, tag).results.mapNotNull { runCatching { it.toAppRecipe() }.getOrNull() }
+                    } catch (e: Exception) {
+                        Log.e("API_FETCH", "Tasty refresh failed: ${e.message}")
+                        emptyList()
+                    }
+                    spoonacular + tasty
+                }
+            }.awaitAll().flatten()
         }
+        // Tasty "compilations" have no ingredients or steps; do not store them as recipes.
+        val unique = fetched.distinctBy { it.id }.filter { it.ingredients.isNotEmpty() || it.method.isNotEmpty() }
+        cacheRecipes(unique)
+        return unique
+    }
 
-        val combinedNewRecipes = (spoonacularRecipes + tastyRecipes).distinctBy { it.id }
-        return upscaleAndCacheRecipes(combinedNewRecipes)
+    /** Saves API results to Firestore in one batch so other users find them without an API call. */
+    private suspend fun cacheRecipes(recipes: List<Recipe>) {
+        if (recipes.isEmpty()) return
+        try {
+            val batch = firestore.batch()
+            recipes.take(450).forEach { batch.set(firestore.collection("recipes").document(it.id), it) }
+            batch.commit().await()
+        } catch (e: Exception) {
+            Log.e("API_FETCH", "Caching API recipes failed: ${e.message}")
+        }
     }
 
     // --- Gamification Triggers ---
@@ -305,28 +208,8 @@ class ShoppingRepository(
         val progressDoc = progressRef.get().await()
         val progress = progressDoc.toObject(UserProgress::class.java) ?: UserProgress(userId = userId)
 
-        val today = Calendar.getInstance()
-        val lastLogin = Calendar.getInstance()
-        if (progress.lastLogin != null) {
-            lastLogin.time = progress.lastLogin!!
-        } else {
-            // If they've never logged in, this is their first day
-            lastLogin.add(Calendar.DAY_OF_YEAR, -1)
-        }
-
-        val isConsecutiveDay = today.get(Calendar.DAY_OF_YEAR) == lastLogin.get(Calendar.DAY_OF_YEAR) + 1 &&
-                today.get(Calendar.YEAR) == lastLogin.get(Calendar.YEAR)
-
-        val isSameDay = today.get(Calendar.DAY_OF_YEAR) == lastLogin.get(Calendar.DAY_OF_YEAR) &&
-                today.get(Calendar.YEAR) == lastLogin.get(Calendar.YEAR)
-
-        val newStreak = if (isSameDay) {
-            progress.loginStreak // Don't increment if they already logged in today
-        } else if (isConsecutiveDay) {
-            progress.loginStreak + 1
-        } else {
-            1 // Reset streak
-        }
+        // Counted in calendar days; comparing day-of-year numbers reset the streak every 1 January.
+        val newStreak = LoginStreak.next(progress.loginStreak, progress.lastLogin)
 
         val updatedProgress = mapOf(
             "loginStreak" to newStreak,
@@ -350,21 +233,6 @@ class ShoppingRepository(
         val increment = if (isFavoriting) 1L else -1L
         progressRef.set(mapOf("recipesFavorited" to com.google.firebase.firestore.FieldValue.increment(increment)), com.google.firebase.firestore.SetOptions.merge()).await()
         gamificationEngine.checkAndAwardBadges(userId)
-    }
-
-    private suspend fun upscaleAndCacheRecipes(recipes: List<Recipe>): List<Recipe> {
-        if (recipes.isEmpty()) return emptyList()
-        Log.d("Cloudinary", "Upscaling ${recipes.size} new images...")
-        return coroutineScope {
-            recipes.map { recipe ->
-                async {
-                    val upscaledUrl = upscaleImageWithCloudinary(recipe.imageUrl, recipe.id)
-                    val finalRecipe = recipe.copy(imageUrl = upscaledUrl ?: recipe.imageUrl)
-                    firestore.collection("recipes").document(finalRecipe.id).set(finalRecipe).await()
-                    finalRecipe
-                }
-            }.map { it.await() }
-        }
     }
 
     fun resetPagination() {
@@ -393,66 +261,35 @@ class ShoppingRepository(
         val searchQueries = recentActivity.filter { it.type == "SEARCH_QUERY" }.map { it.value.lowercase() }
 
 
-        // === Step 2: Build an efficient Firestore query with HARD filters (Diet) ===
-        var query: com.google.firebase.firestore.Query = firestore.collection("recipes")
+        // === Step 2: Gather candidates ===
+        // Recipes written by users have no diet flags, so a flag-only query would hide all of
+        // them from anyone with a diet. Take general public recipes plus flag-matched ones and
+        // let DietFilter decide.
+        var baseQuery: com.google.firebase.firestore.Query = firestore.collection("recipes")
             .whereEqualTo("public", true)
-
         if (category != null && category != "All") {
-            query = query.whereEqualTo("category", category)
+            baseQuery = baseQuery.whereEqualTo("category", category)
         }
-
-        // Apply strict dietary filters
-        if (userDiets.contains("Vegan")) query = query.whereEqualTo("vegan", true)
-        if (userDiets.contains("Vegetarian")) query = query.whereEqualTo("vegetarian", true)
-        if (userDiets.contains("Gluten-Free")) query = query.whereEqualTo("glutenFree", true)
-        if (userDiets.contains("Dairy-Free")) query = query.whereEqualTo("dairyFree", true)
-        if (userDiets.contains("Keto")) query = query.whereEqualTo("keto", true)
-        if (userDiets.contains("Paleo")) query = query.whereEqualTo("paleo", true)
-        if (userDiets.contains("Low-FODMAP")) query = query.whereEqualTo("lowFodmap", true)
-
+        val flagFields = mapOf(
+            "Vegan" to "vegan", "Vegetarian" to "vegetarian", "Gluten-Free" to "glutenFree",
+            "Dairy-Free" to "dairyFree", "Keto" to "keto", "Paleo" to "paleo", "Low-FODMAP" to "lowFodmap"
+        )
         val candidateRecipes = try {
-            query.limit(100).get().await().toObjects(Recipe::class.java) // Fetch a pool of 100 candidates
+            val general = baseQuery.limit(150).get().await().toObjects(Recipe::class.java)
+            val fields = userDiets.mapNotNull { flagFields[it] }
+            val flagged = if (fields.isEmpty()) emptyList() else {
+                var flagQuery = baseQuery
+                fields.forEach { flagQuery = flagQuery.whereEqualTo(it, true) }
+                flagQuery.limit(100).get().await().toObjects(Recipe::class.java)
+            }
+            (general + flagged).distinctBy { it.id }
         } catch (e: Exception) {
             Log.e("Firestore", "Error getting recommended candidates", e)
             return getPopularRecipes(category) // Fallback on error
         }
 
-        // === Step 3: Apply our new, smarter SOFT filters in Kotlin ===
-        val filteredRecipes = candidateRecipes.filter { recipe ->
-            val ingredientsLower = recipe.ingredients.map { it.name.lowercase() }.toSet()
-            val titleLower = recipe.title.lowercase()
-
-            // Helper to check if any keyword from a given list is present.
-            fun matchesAny(text: String, keywords: Set<String>) = keywords.any { text.contains(it) }
-            fun ingredientsMatchAny(keywords: Set<String>) = ingredientsLower.any { matchesAny(it, keywords) }
-            fun titleMatchesAny(keywords: Set<String>) = matchesAny(titleLower, keywords)
-
-            // A recipe is valid if it passes ALL the user's selected diet filters.
-            userDiets.all { diet ->
-                when (diet) {
-                    "Vegan" -> {
-                        val blocklist = DietaryKeywords.meatKeywords + DietaryKeywords.seafoodKeywords + DietaryKeywords.dairyKeywords + DietaryKeywords.eggKeywords
-                        !ingredientsMatchAny(blocklist) && !titleMatchesAny(blocklist)
-                    }
-                    "Vegetarian" -> {
-                        val blocklist = DietaryKeywords.meatKeywords + DietaryKeywords.seafoodKeywords
-                        !ingredientsMatchAny(blocklist) && !titleMatchesAny(blocklist)
-                    }
-                    "Pescetarian" -> !ingredientsMatchAny(DietaryKeywords.meatKeywords)
-                    "Nut Allergy" -> !ingredientsMatchAny(DietaryKeywords.nutKeywords) && !titleMatchesAny(DietaryKeywords.nutKeywords)
-                    "Halal" -> !ingredientsMatchAny(DietaryKeywords.haramKeywords) && !titleMatchesAny(DietaryKeywords.haramKeywords)
-                    "Kosher" -> {
-                        val hasNonKosher = ingredientsMatchAny(DietaryKeywords.nonKosherKeywords)
-                        val hasMeat = ingredientsMatchAny(DietaryKeywords.meatKeywords)
-                        val hasDairy = ingredientsMatchAny(DietaryKeywords.dairyKeywords)
-                        !hasNonKosher && !(hasMeat && hasDairy)
-                    }
-                    "Low-Carb" -> !ingredientsMatchAny(DietaryKeywords.highCarbKeywords)
-                    // Other simple diets are already handled by the Firestore query, so they pass automatically.
-                    else -> true
-                }
-            }
-        }
+        // === Step 3: Keep only recipes that fit every selected diet ===
+        val filteredRecipes = DietFilter.filter(candidateRecipes, userDiets)
 
         // === Step 4: Score the remaining recipes based on SOFT preferences ===
         val scoredRecipes = filteredRecipes.associateWith { recipe ->
@@ -511,7 +348,7 @@ class ShoppingRepository(
         return try {
             var query: com.google.firebase.firestore.Query = firestore.collection("recipes")
                 .whereEqualTo("public", true)
-                .whereEqualTo("isPopular", true)
+                .whereEqualTo("popular", true) // Kotlin's isPopular is stored as "popular"
 
             // Apply the category filter if one is provided
             if (category != null && category != "All") {
@@ -532,36 +369,13 @@ class ShoppingRepository(
         }
     }
 
-    private fun applySoftDietFilters(recipes: List<Recipe>, userDiets: List<String>): List<Recipe> {
-        if (userDiets.isEmpty()) return recipes
-
-        return recipes.filter { recipe ->
-            userDiets.all { diet ->
-                val ingredientsLower = recipe.ingredients.map { it.name.lowercase() }.toSet()
-                val titleLower = recipe.title.lowercase()
-
-                fun ingredientsMatchAny(keywords: Set<String>) = ingredientsLower.any { ing -> keywords.any { kw -> ing.contains(kw) } }
-                fun titleMatchesAny(keywords: Set<String>) = keywords.any { titleLower.contains(it) }
-
-                when (diet) {
-                    "Pescetarian" -> !ingredientsMatchAny(DietaryKeywords.meatKeywords)
-                    "Nut Allergy" -> !ingredientsMatchAny(DietaryKeywords.nutKeywords) && !titleMatchesAny(DietaryKeywords.nutKeywords)
-                    "Halal" -> !ingredientsMatchAny(DietaryKeywords.haramKeywords) && !titleMatchesAny(DietaryKeywords.haramKeywords)
-                    "Kosher" -> {
-                        val hasNonKosher = ingredientsMatchAny(DietaryKeywords.nonKosherKeywords)
-                        val hasMeat = ingredientsMatchAny(DietaryKeywords.meatKeywords)
-                        val hasDairy = ingredientsMatchAny(DietaryKeywords.dairyKeywords)
-                        !hasNonKosher && !(hasMeat && hasDairy)
-                    }
-                    else -> true // Already handled by the hard filter
-                }
-            }
-        }
-    }
+    private fun applySoftDietFilters(recipes: List<Recipe>, userDiets: List<String>): List<Recipe> =
+        DietFilter.filter(recipes, userDiets)
 
     suspend fun searchRecipes(queryText: String, userDiets: List<String>): List<Recipe> {
-        // 1. Fetch all public recipes from the cache
-        val allCachedRecipes = getPublicRecipes(forceRefresh = false)
+        logActivity("SEARCH_QUERY", queryText.trim().lowercase())
+        // 1. Fetch public recipes from the cache
+        val allCachedRecipes = getPublicRecipes(forceRefresh = false, limit = 300)
 
         // 2. Filter the cached recipes by the search query
         var localResults = allCachedRecipes.filter {
@@ -579,33 +393,35 @@ class ShoppingRepository(
         }
     }
 
+    /**
+     * Asks Spoonacular and Tasty when nothing in Firestore matches, then stores the results.
+     * complexSearch only returns IDs and titles, so full recipes come from informationBulk.
+     * (Decoding complexSearch results as full recipes made every Spoonacular search fail.)
+     */
     suspend fun searchRecipesFromApis(query: String): List<Recipe> {
         Log.d("API_SEARCH", "No results in cache for '$query'. Searching APIs...")
-        var spoonacularRecipes = emptyList<Recipe>()
-        var tastyRecipes = emptyList<Recipe>()
-
-        coroutineScope {
-            launch {
-                try {
-                    val apiKeys = listOf(
-                        BuildConfig.SPOONACULAR_API_KEY_1, BuildConfig.SPOONACULAR_API_KEY_2,
-                        BuildConfig.SPOONACULAR_API_KEY_3, BuildConfig.SPOONACULAR_API_KEY_4,
-                        BuildConfig.SPOONACULAR_API_KEY_5, BuildConfig.SPOONACULAR_API_KEY_6,
-                        BuildConfig.TASTY_API_KEY, BuildConfig.TASTY_API_KEY1).random()
-                    val response = apiService.searchRecipes(apiKeys, query, 10)
-                    spoonacularRecipes = response.results.map { it.toAppRecipe() }
-                } catch (e: Exception) { Log.e("API_SEARCH", "Spoonacular search failed.") }
+        val results = coroutineScope {
+            val spoonacular = async {
+                withSpoonacularKey { key ->
+                    val ids = apiService.searchRecipes(key, query, 10).results.map { it.id }
+                    if (ids.isEmpty()) emptyList()
+                    else apiService.getRecipeInformationBulk(key, ids.joinToString(","))
+                        .mapNotNull { runCatching { it.toAppRecipe() }.getOrNull() }
+                } ?: emptyList()
             }
-            launch {
+            val tasty = async {
                 try {
-                    val response = tastyApiService.listRecipes(0, 10, query)
-                    tastyRecipes = response.results.map { it.toAppRecipe() }
-                } catch (e: Exception) { Log.e("API_SEARCH", "Tasty search failed.") }
+                    tastyApiService.listRecipes(0, 10, query).results.mapNotNull { runCatching { it.toAppRecipe() }.getOrNull() }
+                } catch (e: Exception) {
+                    Log.e("API_SEARCH", "Tasty search failed: ${e.message}")
+                    emptyList()
+                }
             }
+            spoonacular.await() + tasty.await()
         }
-
-        val newRecipes = (spoonacularRecipes + tastyRecipes).distinctBy { it.id }
-        return upscaleAndCacheRecipes(newRecipes)
+        val newRecipes = results.distinctBy { it.id }.filter { it.ingredients.isNotEmpty() || it.method.isNotEmpty() }
+        cacheRecipes(newRecipes)
+        return newRecipes
     }
 
     suspend fun addItems(items: List<ShoppingItem>, listId: String, userId: String) {
@@ -661,6 +477,15 @@ class ShoppingRepository(
             // Use a fixed emoji for "My List" for consistency
             val defaultList = ShoppingList(listId, name, userId, "📝")
             shoppingDao.insertShoppingList(defaultList)
+        }
+        // Write the list document as well; only its items used to be stored in Firestore, so
+        // syncShoppingDataFromFirebase never found "My List" on a new device.
+        try {
+            firestore.collection("users").document(userId)
+                .collection("shopping_lists").document(listId)
+                .set(ShoppingList(listId, name, userId, "📝"), com.google.firebase.firestore.SetOptions.merge())
+        } catch (e: Exception) {
+            Log.w("ShoppingRepo", "Could not save $name to Firestore: ${e.message}")
         }
     }
 
@@ -743,10 +568,12 @@ class ShoppingRepository(
         }
     }
 
-    suspend fun saveNewRecipe(recipe: Recipe, imageUri: Uri?) {
+    suspend fun saveNewRecipe(recipe: Recipe, imageUri: Uri?, isNew: Boolean = true) {
         var recipeToSave = recipe
         recipeDao.insertRecipe(recipeToSave)
-        if (imageUri != null) {
+        // Only local images (content:// or file://) are uploaded. An existing https:// photo is
+        // kept as is; passing it to putFile made every edit of a recipe with a photo fail.
+        if (imageUri != null && imageUri.scheme != "http" && imageUri.scheme != "https") {
             val userId = FirebaseManager.auth.currentUser?.uid ?: "unknown_user"
             val storageRef = storage.reference.child("recipe_images/$userId/${recipe.id}.jpg")
             val downloadUrl = storageRef.putFile(imageUri).await().storage.downloadUrl.await()
@@ -755,8 +582,8 @@ class ShoppingRepository(
         }
         firestore.collection("recipes").document(recipeToSave.id).set(recipeToSave).await()
 
-        // ++ TRIGGER for creating a recipe ++
-        logRecipeCreated(recipeToSave.userId)
+        // Only new recipes count towards badges (edits used to count as new recipes).
+        if (isNew) logRecipeCreated(recipeToSave.userId)
     }
 
     suspend fun getNotifications(): List<Notification> {
@@ -780,7 +607,7 @@ class ShoppingRepository(
             // STEP 1: PRIMARY PLAN - Try to fetch popular recipes.
             val popularDocs = firestore.collection("recipes")
                 .whereEqualTo("public", true)
-                .whereEqualTo("isPopular", true)
+                .whereEqualTo("popular", true) // Kotlin's isPopular is stored as "popular"
                 .limit(10).get().await()
             val popularRecipes = popularDocs.toObjects(Recipe::class.java)
 
@@ -873,6 +700,7 @@ class ShoppingRepository(
             // ++ THIS IS THE FIX: We fetch the documents, then manually extract only the 'category' field. ++
             val documents = firestore.collection("recipes")
                 .whereEqualTo("public", true)
+                .limit(300) // Used to download every public recipe just to list categories.
                 .get().await()
 
             val categories = documents.documents // Iterate through the document snapshots
@@ -955,7 +783,7 @@ class ShoppingRepository(
 
             val batch = firestore.batch()
             for (doc in unreadNotifications.documents) {
-                batch.update(doc.reference, "isRead", true)
+                batch.update(doc.reference, mapOf("isRead" to true, "read" to true))
             }
             batch.commit().await()
             Log.d("Notifications", "Marked ${unreadNotifications.size()} notifications as read for user $userId.")
@@ -995,32 +823,12 @@ class ShoppingRepository(
             .collection("activity_log").add(activity)
     }
 
-    suspend fun findRecipesByIngredients(userIngredients: List<String>): List<RecipeMatch> {
-        // Convert user's ingredients to a lowercase set for efficient lookups
-        val userIngredientSet = userIngredients.map { it.lowercase() }.toSet()
-
-        // 1. Fetch all public recipes from your Firestore cache
-        val allPublicRecipes = getPublicRecipes()
-
-        // 2. For each recipe, calculate the missing ingredients
-        val matches = allPublicRecipes.mapNotNull { recipe ->
-            val requiredIngredients = recipe.ingredients.map { it.name.lowercase() }.toSet()
-
-            // Find which ingredients are in the recipe but not in the user's list
-            val missing = requiredIngredients.filter { !userIngredientSet.contains(it) }
-
-            // We can set a threshold, e.g., don't show recipes with more than 5 missing ingredients
-            if (missing.size <= 5) {
-                RecipeMatch(recipe = recipe, missingIngredients = missing)
-            } else {
-                null // This recipe has too many missing ingredients, so we discard it
-            }
-        }
-
-        // 3. Sort the results: first by the number of missing ingredients (fewest first),
-        //    then alphabetically by title.
-        return matches.sortedWith(compareBy({ it.missingIngredients.size }, { it.recipe.title }))
-    }
+    /**
+     * Recipes the user can (nearly) make. Matching is by word, so "chicken" covers
+     * "chicken breast"; recipes the user has none of the ingredients for are left out.
+     */
+    suspend fun findRecipesByIngredients(userIngredients: List<String>): List<RecipeMatch> =
+        IngredientMatcher.matches(userIngredients, getPublicRecipes(limit = 300))
 
     // ++ ADD THESE SCAN HISTORY FUNCTIONS ++
     fun getScanHistory(): LiveData<List<ScanHistoryItem>> = scanHistoryDao.getScanHistory()
@@ -1032,14 +840,13 @@ class ShoppingRepository(
         return try {
             var query: com.google.firebase.firestore.Query = firestore.collection("recipes").whereEqualTo("public", true)
 
-            // Step 1: Apply HARD filters from user's diet preferences
-            if (userDiets.isNotEmpty()) {
-                query = query.whereArrayContainsAny("dietTags", userDiets)
-            }
+            // Diets are applied after loading by DietFilter (step 4). The old
+            // whereArrayContainsAny("dietTags") matched recipes with *any* of the user's diets and
+            // returned nothing for Halal, Kosher, Nut Allergy, Pescetarian or Low-Carb.
 
             // Step 2: Apply Sorting
             when (sortOption) {
-                "Popular" -> query = query.orderBy("isPopular", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                "Popular" -> query = query.orderBy("popular", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 "Cook Time" -> query = query.orderBy("timeInMins", com.google.firebase.firestore.Query.Direction.ASCENDING)
                 "A-Z" -> query = query.orderBy("title", com.google.firebase.firestore.Query.Direction.ASCENDING)
                 "Z-A" -> query = query.orderBy("title", com.google.firebase.firestore.Query.Direction.DESCENDING)
@@ -1082,54 +889,11 @@ class ShoppingRepository(
             "full_name" to user.displayName,
             "email" to user.email,
             "username" to (user.email?.split("@")?.get(0) ?: "user_${user.uid.take(6)}"),
-            "selected_country" to "South Africa",
+            "country" to "South Africa",
             "selected_cuisines" to cuisineNames, // Use the pre-converted list
             "selected_diets" to emptyList<String>()
         )
         firestore.collection("users").document(user.uid).set(userProfile).await()
-    }
-
-    private suspend fun upscaleImageWithCloudinary(sourceUrl: String, publicId: String): String? {
-        if (sourceUrl.isBlank()) return null
-
-        return try {
-            // 1. Download the image data from the API URL in the background
-            val imageBytes = withContext(Dispatchers.IO) {
-                URL(sourceUrl).readBytes()
-            }
-
-            val deferred = CompletableDeferred<String?>()
-            MediaManager.get().upload(imageBytes)
-                .option("public_id", publicId)
-                .option("overwrite", true)
-                .callback(object : UploadCallback {
-                    override fun onStart(requestId: String) {}
-                    override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
-                    override fun onSuccess(requestId: String, resultData: Map<*, *>?) {
-                        // Use the simple string method to create the transformation
-                        val upscaleTransformation =
-                            Transformation<Transformation<*>>() // Use documented Kotlin signature
-                                .effect("e_upscale")
-                        val newUrl = MediaManager.get().url()
-                            .transformation(upscaleTransformation)
-                            .generate(publicId)
-                        deferred.complete(newUrl)
-                    }
-
-                    override fun onError(requestId: String, error: ErrorInfo) {
-                        Log.e("Cloudinary", "Upload error: ${error.description}")
-                        deferred.complete(null)
-                    }
-
-                    override fun onReschedule(requestId: String, error: ErrorInfo) {}
-                }).dispatch()
-
-            deferred.await()
-
-        } catch (e: Exception) {
-            Log.e("Cloudinary", "Failed to download image from URL: $sourceUrl", e)
-            null // Return null if the download fails
-        }
     }
 
     /**

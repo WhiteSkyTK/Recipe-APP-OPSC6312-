@@ -49,15 +49,7 @@ class AddRecipeFragment : Fragment() {
     private var editRecipeId: String? = null
 
     private val viewModel: AddRecipeViewModel by viewModels {
-        val db = AppDatabase.getDatabase(requireContext())
-        val repository = ShoppingRepository(
-            db.shoppingDao(),
-            db.recipeDao(),
-            db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance() // Pass storage instance
-        )
-        ViewModelFactory(repository)
+        ViewModelFactory(requireContext().sharedRepository())
     }
 
     // ++ NEW LAUNCHER for taking a picture
@@ -344,7 +336,7 @@ class AddRecipeFragment : Fragment() {
                 val authorUsername = document.getString("username") ?: "Unknown Author"
                 val recipe = collectRecipeDataFromView(requireView(), authorUsername)
 
-                viewModel.saveRecipe(recipe, coverImageUri)
+                viewModel.saveRecipe(recipe, coverImageUri, isNew = editRecipeId == null)
             }
             .addOnFailureListener { e ->
                 showLoading(false)
@@ -457,21 +449,27 @@ class AddRecipeFragment : Fragment() {
         if (carbs.isNotBlank()) nutritionList.add(NutritionFact(getString(R.string.nutrition_carbs), getString(R.string.unit_grams, carbs)))
         if (salts.isNotBlank()) nutritionList.add(NutritionFact(getString(R.string.nutrition_salts), getString(R.string.unit_grams, salts)))
 
-        return Recipe(
-            id = recipeId,
-            userId = userId,
+        // When editing, start from the original so its visibility, owner and flags are kept.
+        // (Rebuilding it from scratch made every edited recipe private again.)
+        val base = recipeToEdit ?: Recipe(id = recipeId, userId = userId, author = authorUsername, isPublic = false)
+        // An unchanged photo keeps its URL; a newly picked local photo is uploaded on save.
+        val currentUri = coverImageUri
+        val existingImageUrl = if (currentUri != null && (currentUri.scheme == "http" || currentUri.scheme == "https")) {
+            currentUri.toString()
+        } else {
+            ""
+        }
+        return base.copy(
             title = recipeName,
-            author = authorUsername,
             description = description,
             timeInMins = time,
             servings = servings,
-            isPublic = false,
             ingredients = ingredientsList,
             method = stepsList,
             category = category,
             mealType = mealType,
             nutrition = nutritionList,
-            imageUrl = "" // Will be replaced after upload
+            imageUrl = existingImageUrl
         )
     }
 
