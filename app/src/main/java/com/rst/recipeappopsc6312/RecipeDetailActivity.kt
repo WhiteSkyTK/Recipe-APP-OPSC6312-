@@ -47,28 +47,11 @@ class RecipeDetailActivity : AppCompatActivity() {
 
 
     private val shoppingListViewModel: ShoppingListViewModel by viewModels {
-        val database = AppDatabase.getDatabase(application)
-        // Provide the missing FirebaseStorage instance as the fourth argument
-        val repository = ShoppingRepository(
-            database.shoppingDao(),
-            database.recipeDao(),
-            database.scanHistoryDao(),
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance() // <-- This was the missing part
-        )
-        ViewModelFactory(repository)
+        ViewModelFactory(sharedRepository())
     }
 
     private val recipeDetailViewModel: RecipeDetailViewModel by viewModels {
-        val database = AppDatabase.getDatabase(application)
-        val repository = ShoppingRepository(
-            database.shoppingDao(),
-            database.recipeDao(),
-            database.scanHistoryDao(),
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance()
-        )
-        ViewModelFactory(repository)
+        ViewModelFactory(sharedRepository())
     }
 
 
@@ -124,7 +107,10 @@ class RecipeDetailActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
+        // Stored in the property (it used to be a local that shadowed it, so the property stayed
+        // null and onStop never logged how long the recipe was viewed).
         val recipeId = intent.getStringExtra("RECIPE_ID")
+        this.recipeId = recipeId
         if (recipeId == null) {
             Toast.makeText(this, getString(R.string.recipe_detail_error_missing_id), Toast.LENGTH_SHORT).show()
             finish()
@@ -414,12 +400,16 @@ class RecipeDetailActivity : AppCompatActivity() {
 
     private fun updateServingsAndValues(recipeForServings: Recipe) {
         servingsValueTextView.text = currentServings.toString()
-        val ratio = currentServings.toDouble() / originalServings.toDouble()
+        // Recipes with unknown servings (0) used to produce Infinity/NaN quantities.
+        val ratio = if (originalServings > 0) currentServings.toDouble() / originalServings.toDouble() else 1.0
 
         val newIngredients = recipeForServings.ingredients.map { originalIngredient ->
             // ++ THIS IS NOW SAFE AND RELIABLE ++
             // Because the mapper cleaned the data, this will always work.
-            val originalQty = originalIngredient.quantity.toDoubleOrNull() ?: 0.0
+            // parseQuantity understands "1/2", "1 1/2" and "1½"; toDoubleOrNull turned them into 0.
+            val parsedQty = UnitConverter.parseQuantity(originalIngredient.quantity)
+            if (parsedQty.isNaN() || parsedQty <= 0.0) return@map originalIngredient
+            val originalQty = parsedQty
 
             val newQty = originalQty * ratio
 

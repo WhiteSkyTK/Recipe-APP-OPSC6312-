@@ -25,15 +25,7 @@ import kotlinx.coroutines.launch
 
 class PreferencesActivity : AppCompatActivity() {
     private val viewModel: ShoppingViewModel by viewModels {
-        val db = AppDatabase.getDatabase(application)
-        val repo = ShoppingRepository(
-            db.shoppingDao(),
-            db.recipeDao(),
-            db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(),
-            FirebaseStorage.getInstance()
-        )
-        ViewModelFactory(repo)
+        ViewModelFactory(sharedRepository())
     }
     private val TAG = "PreferencesActivity"
 

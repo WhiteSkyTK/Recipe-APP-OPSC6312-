@@ -80,7 +80,7 @@ class DietarySelectionActivity : AppCompatActivity() {
                 Toast.makeText(this, getString(R.string.diet_selection_toast_at_least_one), Toast.LENGTH_SHORT).show()
             } else {
                 // Correctly map the resource IDs to actual strings
-                val selectedDietNames = selectedDiets.map { getString(it.name) }
+                val selectedDietNames = selectedDiets.map { englishString(it.name) }
                 if (isEditMode) {
                     updateUserDiets(selectedDietNames)
                 } else {

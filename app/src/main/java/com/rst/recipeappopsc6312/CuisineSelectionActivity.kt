@@ -79,7 +79,7 @@ class CuisineSelectionActivity : AppCompatActivity() {
             if (selectedCuisines.isEmpty()) {
                 Toast.makeText(this, getString(R.string.cuisine_selection_toast_at_least_one), Toast.LENGTH_SHORT).show()
             } else {
-                val selectedCuisineNames = selectedCuisines.map { getString(it.name) }
+                val selectedCuisineNames = selectedCuisines.map { englishString(it.name) }
                 if (isEditMode) {
                     updateUserCuisines(selectedCuisineNames)
                 } else {

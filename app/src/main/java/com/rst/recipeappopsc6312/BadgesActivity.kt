@@ -18,12 +18,7 @@ import com.google.firebase.storage.FirebaseStorage
 class BadgesActivity : AppCompatActivity() {
 
     private val viewModel: BadgesViewModel by viewModels {
-        val db = AppDatabase.getDatabase(application)
-        val repo = ShoppingRepository(
-            db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
-        )
-        ViewModelFactory(repo)
+        ViewModelFactory(sharedRepository())
     }
 
     private lateinit var badgesAdapter: BadgesAdapter

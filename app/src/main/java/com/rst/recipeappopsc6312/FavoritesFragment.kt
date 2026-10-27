@@ -19,12 +19,7 @@ class FavoritesFragment : Fragment() {
     private lateinit var noFavoritesTextView: TextView
 
     private val viewModel: FavoritesViewModel by viewModels {
-        val db = AppDatabase.getDatabase(requireContext())
-        val repo = ShoppingRepository(
-            db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
-        )
-        ViewModelFactory(repo)
+        ViewModelFactory(requireContext().sharedRepository())
     }
 
     override fun onCreateView(

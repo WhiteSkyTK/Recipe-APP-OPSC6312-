@@ -6,13 +6,17 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
+    // Full request/response logging only in debug builds; it printed API keys in release builds too.
+    private fun loggingInterceptor() = HttpLoggingInterceptor().apply {
+        level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC else HttpLoggingInterceptor.Level.NONE
+    }
+
     private const val SPOONACULAR_BASE_URL = "https://api.spoonacular.com/"
     private const val TASTY_BASE_URL = "https://tasty.p.rapidapi.com/"
 
     // ++ This is now correctly named 'instance' and uses ApiService ++
     val instance: ApiService by lazy {
-        val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
-        val client = OkHttpClient.Builder().addInterceptor(logging).build()
+        val client = OkHttpClient.Builder().addInterceptor(loggingInterceptor()).build()
 
         Retrofit.Builder()
             .baseUrl(SPOONACULAR_BASE_URL)
@@ -23,9 +27,8 @@ object RetrofitClient {
     }
 
     val tastyInstance: TastyApiService by lazy {
-        val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
         val client = OkHttpClient.Builder()
-            .addInterceptor(logging)
+            .addInterceptor(loggingInterceptor())
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
                     .addHeader("x-rapidapi-host", "tasty.p.rapidapi.com")

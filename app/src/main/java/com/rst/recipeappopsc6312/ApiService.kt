@@ -9,14 +9,21 @@ interface ApiService {
     suspend fun getRandomRecipes(
         @Query("apiKey") apiKey: String,
         @Query("number") number: Int,
-        @Query("tags") tags: String?
+        // Recipes must have *all* of these tags, so pass one tag per request.
+        @Query("include-tags") tags: String?
     ): SpoonacularApiResponse
 
-    // ++ ADD THIS NEW FUNCTION for searching recipes ++
+    // Returns IDs and titles only; load the full recipes with getRecipeInformationBulk.
     @GET("recipes/complexSearch")
     suspend fun searchRecipes(
         @Query("apiKey") apiKey: String,
         @Query("query") query: String,
         @Query("number") number: Int
-    ): SpoonacularSearchResponse // Note: This uses a new response class
+    ): SpoonacularSearchResponse
+
+    @GET("recipes/informationBulk")
+    suspend fun getRecipeInformationBulk(
+        @Query("apiKey") apiKey: String,
+        @Query("ids") ids: String
+    ): List<SpoonacularRecipe>
 }

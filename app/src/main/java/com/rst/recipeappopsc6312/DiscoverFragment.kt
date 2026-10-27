@@ -29,14 +29,14 @@ import kotlinx.coroutines.launch
 
 class DiscoverFragment : Fragment() {
 
+    // Same order as R.array.discover_sort_options. The repository compares these English keys;
+    // passing the translated label broke sorting in Sepedi, Xitsonga and Tshivenda.
+    private val sortKeys = listOf("A-Z", "Recommended", "Popular", "Cook Time", "Z-A")
+    private fun selectedSortKey() = sortKeys.getOrElse(sortSpinner.selectedItemPosition) { "A-Z" }
+
     // Use the DiscoverViewModel for this screen's specific logic
     private val viewModel: DiscoverViewModel by viewModels {
-        val db = AppDatabase.getDatabase(requireContext())
-        val repo = ShoppingRepository(
-            db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
-        )
-        ViewModelFactory(repo)
+        ViewModelFactory(requireContext().sharedRepository())
     }
 
     // Get the shared MainViewModel from the MainActivity to know the network status
@@ -80,7 +80,7 @@ class DiscoverFragment : Fragment() {
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (newText.isNullOrBlank()) {
-                    viewModel.setSortOption(sortSpinner.selectedItem.toString())
+                    viewModel.setSortOption(selectedSortKey())
                 }
                 return false
             }
@@ -88,7 +88,7 @@ class DiscoverFragment : Fragment() {
 
         swipeRefreshLayout.setOnRefreshListener {
             // When user pulls to refresh, reset and reload the current sorted list
-            viewModel.setSortOption(sortSpinner.selectedItem.toString())
+            viewModel.setSortOption(selectedSortKey())
         }
 
         return view
@@ -107,7 +107,7 @@ class DiscoverFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
-                viewModel.setSortOption(sortOptions[position])
+                viewModel.setSortOption(sortKeys.getOrElse(position) { "A-Z" })
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}

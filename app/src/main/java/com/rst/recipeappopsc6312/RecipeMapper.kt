@@ -60,14 +60,15 @@ fun TastyRecipe.toAppRecipe(): Recipe {
     val ingredients = this.sections?.flatMap { section ->
         section.components.mapNotNull { component ->
             val measurement = component.measurements.firstOrNull()
-            val originalQuantityString = measurement?.quantity
-            val parsableQuantity = convertFractionStringToDoubleString(originalQuantityString)
-            val quantityValue = parsableQuantity?.toDoubleOrNull()
+            // UnitConverter.parseQuantity reads "1½" as 1.5; the old parser turned it into "10.5".
+            val quantityValue = measurement?.quantity
+                ?.let { UnitConverter.parseQuantity(it) }
+                ?.takeIf { !it.isNaN() }
 
             if (quantityValue != null && quantityValue > 0) {
                 Ingredient(
                     name = component.ingredient.name.replaceFirstChar { it.uppercase() },
-                    quantity = parsableQuantity!!,
+                    quantity = formatQuantity(quantityValue),
                     unit = measurement?.unit?.display_singular ?: ""
                 )
             } else { null }
@@ -122,35 +123,7 @@ fun TastyRecipe.toAppRecipe(): Recipe {
     )
 }
 
-private fun convertFractionStringToDoubleString(input: String?): String? {
-    if (input == null) return null
-    val fractionMap = mapOf(
-        "½" to 0.5, "1/2" to 0.5, "⅓" to 0.333, "1/3" to 0.333,
-        "⅔" to 0.667, "2/3" to 0.667, "¼" to 0.25, "1/4" to 0.25,
-        "¾" to 0.75, "3/4" to 0.75, "⅛" to 0.125, "1/8" to 0.125,
-        "⅜" to 0.375, "3/8" to 0.375, "⅝" to 0.625, "5/8" to 0.625,
-        "⅞" to 0.875, "7/8" to 0.875
-    )
-    var normalized = input.trim()
-    val mixedRegex = Regex("""(\d+)\s+(\d+)/(\d+)""")
-    val mixedMatch = mixedRegex.find(normalized)
-    if (mixedMatch != null) {
-        val whole = mixedMatch.groupValues[1].toDouble()
-        val num = mixedMatch.groupValues[2].toDouble()
-        val den = mixedMatch.groupValues[3].toDouble()
-        return (whole + num / den).toString()
-    }
-    for ((fraction, value) in fractionMap) {
-        if (normalized.contains(fraction)) {
-            normalized = normalized.replace(fraction, value.toString())
-        }
-    }
-    val fractionRegex = Regex("""(\d+)/(\d+)""")
-    val match = fractionRegex.find(normalized)
-    if (match != null) {
-        val numerator = match.groupValues[1].toDouble()
-        val denominator = match.groupValues[2].toDouble()
-        normalized = normalized.replace(match.value, (numerator / denominator).toString())
-    }
-    return normalized
-}
+/** 1.5 -> "1.5", 2.0 -> "2", 0.3333 -> "0.333". */
+private fun formatQuantity(value: Double): String =
+    if (value % 1.0 == 0.0) value.toLong().toString()
+    else String.format(java.util.Locale.US, "%.3f", value).trimEnd('0').trimEnd('.')

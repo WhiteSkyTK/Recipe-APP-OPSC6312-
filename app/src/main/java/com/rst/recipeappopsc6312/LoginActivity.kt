@@ -41,12 +41,7 @@ class LoginActivity : AppCompatActivity() {
 
     // We need a ViewModel to access the repository for creating the user profile
     private val viewModel: ShoppingViewModel by viewModels {
-        val db = AppDatabase.getDatabase(application)
-        val repo = ShoppingRepository(
-            db.shoppingDao(), db.recipeDao(), db.scanHistoryDao(),
-            FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()
-        )
-        ViewModelFactory(repo)
+        ViewModelFactory(sharedRepository())
     }
 
     private val TAG = "LoginActivity"
@@ -174,7 +169,8 @@ class LoginActivity : AppCompatActivity() {
             isValid = false
         }
         // Basic email validation if it looks like an email, otherwise assume username
-        else if (userInput.contains("@") && !Patterns.EMAIL_ADDRESS.matcher(userInput).matches()) {
+        // Firebase only signs in with an email address; usernames always failed.
+        else if (!Patterns.EMAIL_ADDRESS.matcher(userInput).matches()) {
             userLayout.error = getString(R.string.validation_user_input_invalid_email)
             isValid = false
         }

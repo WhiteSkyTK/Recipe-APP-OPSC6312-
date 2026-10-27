@@ -1,6 +1,7 @@
 package com.rst.recipeappopsc6312
 
 import com.google.firebase.firestore.DocumentId
+import com.google.firebase.firestore.PropertyName
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 
@@ -11,5 +12,8 @@ data class Notification(
     val message: String = "",
     val iconName: String = "",
     @ServerTimestamp val timestamp: Date? = null,
+    // Stored as "isRead". Without these annotations Firestore maps a Kotlin "isRead" property to
+    // "read", so every notification looked unread and the red dot never cleared.
+    @get:PropertyName("isRead") @set:PropertyName("isRead")
     var isRead: Boolean = false
 )

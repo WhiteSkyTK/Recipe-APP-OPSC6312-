@@ -1,0 +1,15 @@
+// Shared build settings. Put your own values in Config/Secrets.xcconfig (git-ignored),
+// starting from Config/Secrets.example.xcconfig. Values there override the defaults below.
+
+APP_BUNDLE_ID = com.rst.recipeappopsc6312
+DEVELOPMENT_TEAM =
+
+// REVERSED_CLIENT_ID from GoogleService-Info.plist; needed for "Continue with Google".
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.866842800924-c832olhtvgceiufn9ls2eopnc5caqbi6
+
+// Optional recipe APIs, used only when Firestore has no match for a search.
+// Comma-separated list of Spoonacular keys; the app fails over to the next key when one hits its quota.
+SPOONACULAR_API_KEYS =
+RAPIDAPI_KEY =
+
+#include? "Secrets.xcconfig"

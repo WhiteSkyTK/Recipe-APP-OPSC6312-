@@ -23,7 +23,10 @@ class ShoppingListViewModel(private val repository: ShoppingRepository) : ViewMo
         repository.getAllShoppingListsForUser(id)
     }
 
-    val allShoppingLists: LiveData<List<ShoppingList>> = databaseShoppingLists
+    // "My List" has its own fixed entry in the picker, so leave it out here (it was shown twice).
+    val allShoppingLists: LiveData<List<ShoppingList>> = databaseShoppingLists.map { lists ->
+        lists.filter { it.listId != MY_LIST_ID }
+    }
     private val _selectedListId = MutableLiveData<String>()
 
     init {
@@ -42,7 +45,7 @@ class ShoppingListViewModel(private val repository: ShoppingRepository) : ViewMo
 
     val currentShoppingItems: LiveData<List<ShoppingItem>> = _selectedListId.switchMap { listId ->
         when (listId) {
-            ALL_ITEMS_ID -> repository.getAllItemsForUser(userId.value!!)
+            ALL_ITEMS_ID -> userId.value?.let { repository.getAllItemsForUser(it) } ?: MutableLiveData(emptyList())
             MY_LIST_ID -> repository.getItemsForList(MY_LIST_ID)
             else -> repository.getItemsForList(listId)
         }
@@ -102,7 +105,7 @@ class ShoppingListViewModel(private val repository: ShoppingRepository) : ViewMo
             1 -> _selectedListId.value = MY_LIST_ID
             else -> {
                 val recipeListIndex = position - 2
-                val selectedList = databaseShoppingLists.value?.get(recipeListIndex)
+                val selectedList = allShoppingLists.value?.getOrNull(recipeListIndex)
                 _selectedListId.value = selectedList?.listId
             }
         }

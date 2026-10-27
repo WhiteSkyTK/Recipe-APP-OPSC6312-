@@ -1,0 +1,51 @@
+# Builds the iOS app (ios/) and runs its unit tests on a GitHub-hosted Mac.
+# Runs whenever something under ios/ changes, on any branch, and can be started by hand
+# from the Actions tab. Compile errors show up as annotations on the run.
+name: iOS
+
+on:
+  push:
+    paths: ["ios/**", ".github/workflows/ios.yml"]
+  pull_request:
+    paths: ["ios/**", ".github/workflows/ios.yml"]
+  workflow_dispatch:
+
+env:
+  IOS_DIR: ios
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: ${{ env.IOS_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static checks (strings, images, braces)
+        run: node scripts/check-project.mjs
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Cache Swift packages
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: spm-${{ hashFiles(format('{0}/project.yml', env.IOS_DIR)) }}
+
+      - name: Build and test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project HarmonyKitchen.xcodeproj \
+            -scheme HarmonyKitchen \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify --renderer github-actions
